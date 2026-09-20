@@ -225,7 +225,8 @@ Implemented full login form and user authentication (INFRA-15). Covers OWASP DA2
 
 ### Clarification for WinForms Migration
 - **Startup Flow**: Do NOT use WPF concepts like `ShutdownMode="OnExplicitShutdown"`. Instead, use `LoginView.ShowDialog()` before `Application.Run(mainWindow)` in `Program.vb` to block and wait for authentication. If `ShowDialog` returns `DialogResult.OK`, run the main window; otherwise `Application.Exit()`.
-- **Database Initializer**: `DatabaseInitializer.vb` must use `MySqlConnection` from `MySqlConnector` and create the `UserAccounts` table using MariaDB syntax. 
+- **Database Initializer**: `DatabaseInitializer.vb` must use `MySqlConnection` from `MySqlConnector` and create the `UserAccounts` table using MariaDB syntax. The table MUST be named exactly `UserAccounts`, not `_users`.
+- **PasswordHashHelper**: The `PasswordHashHelper` module MUST be placed in its own dedicated file `Services/PasswordHashHelper.vb`, not merged inside `AuthenticationService.vb`.
 - **File Encoding**: Be careful not to alter or corrupt the Byte Order Mark (BOM) in existing files like `MainWindow.Designer.vb` when editing them.
 
 ## Feature: INFRA-16
