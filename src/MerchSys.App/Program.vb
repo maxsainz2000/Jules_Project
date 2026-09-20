@@ -1,6 +1,7 @@
 Imports System.Windows.Forms
 Imports Microsoft.Extensions.DependencyInjection
 Imports Microsoft.Extensions.Hosting
+Imports MerchSys.App.Configuration
 
 Friend Module Program
 
@@ -11,6 +12,9 @@ Friend Module Program
         Application.SetCompatibleTextRenderingDefault(False)
 
         Dim host As IHost = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args).
+            ConfigureAppConfiguration(Sub(context, builder)
+                                          builder.AddProductionOverlay()
+                                      End Sub).
             ConfigureServices(Sub(context, services)
                                   services.AddTransient(Of MainWindow)()
                               End Sub).
