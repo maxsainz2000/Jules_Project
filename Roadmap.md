@@ -11,7 +11,7 @@
 - [x] INFRA-08
 - [x] INFRA-09
 - [x] INFRA-10
-- [ ] INFRA-11
+- [x] INFRA-11
 - [x] INFRA-12
 - [x] INFRA-13
 - [ ] INFRA-14
