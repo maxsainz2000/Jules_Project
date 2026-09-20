@@ -4,7 +4,7 @@
 - [x] INFRA-01
 - [x] INFRA-02
 - [x] INFRA-03
-- [ ] INFRA-04
+- [x] INFRA-04
 - [ ] INFRA-05
 - [ ] INFRA-06
 - [ ] INFRA-07
