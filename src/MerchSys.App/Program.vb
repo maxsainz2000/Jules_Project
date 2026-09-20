@@ -32,6 +32,9 @@ Friend Module Program
 
                                   services.AddScoped(Of MainWindow)()
                                   services.AddScoped(Of MainWindowPresenter)()
+
+                                  services.AddScoped(Of IOwnerDashboardView, OwnerDashboardView)()
+                                  services.AddScoped(Of OwnerDashboardPresenter)()
                               End Sub).
             Build()
 
