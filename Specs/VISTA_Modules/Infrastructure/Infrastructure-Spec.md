@@ -221,7 +221,12 @@ Implemented full login form and user authentication (INFRA-15). Covers OWASP DA2
 - **Application.Designer code**: added `ShutdownMode="OnExplicitShutdown"` so hiding `LoginView` (on successful login) does not trigger app shutdown
 - **Application.Designer code.vb**: new login flow: `ShowLoginView()` → `HandleLoginSucceeded` (hides `LoginView`, resolves singleton `MainWindow`, calls `RefreshNavigation()`, shows `MainWindow`) → `HandleLogoutRequested` (hides `MainWindow`, calls `ShowLoginView()` again); `HandleLoginViewClosed` shuts down if login view is dismissed without completing auth; `LoginSessionService` + `IAuthenticationService` registered in DI; `DefaultSessionService` kept for `#If DEBUG` + `VISTA_BYPASS_LOGIN=1` env-var override
 - **Presenters/MainWindowPresenter.vb**: constructor now injects `LoginSessionService` directly; `NavigationGroups` initialised as `ObservableCollection` from `BuildNavigationGroups()` list; `BuildNavigationGroups()` return type changed to `List(Of NavigationGroup)`; added `RefreshNavigation()` (clears and rebuilds nav items — enables role switch after logout/re-login); added `LogoutCommand` (RelayCommand) and `LogoutRequested` event
-- **MainWindow.Designer code**: added "Log Out" button pinned to the bottom of the sidebar (above the status bar), bound to `LogoutCommand`, styled in red (`#E74C3C`) via the existing `NavItemButton` style
+- **MainWindow.Designer.vb**: added "Log Out" button pinned to the bottom of the sidebar, styling matching other buttons.
+
+### Clarification for WinForms Migration
+- **Startup Flow**: Do NOT use WPF concepts like `ShutdownMode="OnExplicitShutdown"`. Instead, use `LoginView.ShowDialog()` before `Application.Run(mainWindow)` in `Program.vb` to block and wait for authentication. If `ShowDialog` returns `DialogResult.OK`, run the main window; otherwise `Application.Exit()`.
+- **Database Initializer**: `DatabaseInitializer.vb` must use `MySqlConnection` from `MySqlConnector` and create the `UserAccounts` table using MariaDB syntax. 
+- **File Encoding**: Be careful not to alter or corrupt the Byte Order Mark (BOM) in existing files like `MainWindow.Designer.vb` when editing them.
 
 ## Feature: INFRA-16
 
