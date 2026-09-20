@@ -5,15 +5,15 @@
 - [x] INFRA-02
 - [x] INFRA-03
 - [x] INFRA-04
-- [ ] INFRA-05
-- [ ] INFRA-06
+- [x] INFRA-05
+- [x] INFRA-06
 - [ ] INFRA-07
 - [ ] INFRA-08
-- [ ] INFRA-09
-- [ ] INFRA-10
+- [x] INFRA-09
+- [x] INFRA-10
 - [ ] INFRA-11
-- [ ] INFRA-12
-- [ ] INFRA-13
+- [x] INFRA-12
+- [x] INFRA-13
 - [ ] INFRA-14
 - [ ] INFRA-15
 - [ ] INFRA-16
