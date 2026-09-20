@@ -8,7 +8,7 @@
 - [x] INFRA-05
 - [x] INFRA-06
 - [x] INFRA-07
-- [ ] INFRA-08
+- [x] INFRA-08
 - [x] INFRA-09
 - [x] INFRA-10
 - [ ] INFRA-11
