@@ -305,9 +305,8 @@ Implemented database-level role-based write rejection (OWASP DA5 Improper Author
 - Modified `MerchSys.App/Data/DatabaseConfig.vb` to configure the four module DbContexts (`PurchasingDbContext`, `InventoryDbContext`, `POSDbContext`, and `AccountingDbContext`) to resolve and execute `RoleGuardInterceptor`.
 - Modified `MerchSys.App/Application.Designer code.vb` to register `IWriteContextScope` (as Singleton), `RoleGuardInterceptor` (as Scoped), and update `IAuthenticationService` factory registration to inject the session and write context dependencies.
 3. **Background Systems and Handlers (Bypasses)**
-- Modified `MerchSys.App/Services/SyncOrchestrator.vb` to inject `IWriteContextScope` and wrap its background database flush operations inside a `WriteContextKind.System` scope.
-- Wrapped the `Handle` method bodies of all 4 Inventory handlers and 7 Accounting handlers in `Using _writeContext.Enter(WriteContextKind.System)` to allow asynchronous background writes.
 - Modified `MerchSys.App/Services/IAuthenticationService.vb` (impl `AuthenticationService`) to inject `ISessionService` and `IWriteContextScope`, wrap lockout count writes in `System` scopes, and wrap password changes in `AuthSelfService` scopes. Added a service-level role guard to reject Owner attempts to modify other users' credentials.
+- **NOTE**: `SyncOrchestrator` was decommissioned in a subsequent architecture pivot. The Inventory and Accounting event handlers have not yet been migrated to the WinForms solution from the legacy WPF codebase. **Therefore, you MUST skip applying the `WriteContextKind.System` scope to the Orchestrator and Handlers.** Only apply the scopes to the `AuthenticationService`.
 4. **Backlog & Operator Cleanups**
 - Created the complete Write-Path Audit deliverable at `Plans/VISTA_Modules/Infrastructure/20-da5-write-path-audit.md`.
 - Modified `Plans/Future/deferred-features-backlog.md` to remove item #7 and record completion.
