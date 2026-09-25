@@ -1292,3 +1292,13 @@ last-synced: 2026-06-01
 **Why deferred:** The business operates from a single, dedicated local POS workstation with intermittent connectivity. A mobile/web deployment would introduce ongoing hosting fees and internet dependency that are currently outside Villon Farm Supply's operational budget.
 
 
+## Feature: INFRA-19-FIX
+
+### Overview
+Addresses technical debt from INFRA-19's WinForms session inactivity timeout implementation. Found by DeepInvestigator.
+
+### Requirements
+1. **MVP Pattern Fix:** Refactor `SessionTimeoutWarningPresenter` so it handles the View's events (`StaySignedInRequested`, `SignOutRequested`) and delegates to the shell/coordinator rather than `Program.vb` directly subscribing to the View. Follow strict MVP.
+2. **Modality Fix:** Update `ISessionTimeoutWarningView` to support a modeless `.Show(owner)` instead of a blocking `.ShowDialog()`, allowing it to properly center relative to the main window (`CenterParent`) since the current forced cast breaks alignment.
+3. **Resource Cleanup:** Implement `IDisposable` on `WinFormsIdleMonitor` so that the `System.Windows.Forms.Timer` is properly disposed.
+4. **Input Throttling:** Inside `WinFormsIdleMonitor.PreFilterMessage`, throttle `WM_MOUSEMOVE` processing so it does not update `DateTime.UtcNow` unconditionally on every single pixel of movement (e.g. only reset if a second has elapsed) to avoid high CPU usage.
