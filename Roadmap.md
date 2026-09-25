@@ -22,9 +22,9 @@
 - [x] INFRA-19
 - [x] INFRA-19-FIX
 - [x] INFRA-20
-- [ ] INFRA-21
-- [ ] INFRA-22
-- [ ] INFRA-23
+- [-] INFRA-21
+- [-] INFRA-22
+- [-] INFRA-23
 - [ ] INFRA-24
 - [ ] INFRA-25
 - [ ] INFRA-26
