@@ -67,7 +67,13 @@ Friend Module Program
         Dim configService = host.Services.GetRequiredService(Of IConfiguration)()
         Dim connString = configService.GetSection("Sync")("MariaDbConnection")
         If Not String.IsNullOrWhiteSpace(connString) Then
-            DatabaseInitializer.Initialize(connString)
+            Try
+                Dim logger = host.Services.GetService(Of Microsoft.Extensions.Logging.ILogger(Of MariaDbSchemaInitializer))()
+                MariaDbSchemaInitializer.Initialize(connString, logger)
+            Catch ex As Exception
+                MessageBox.Show("Failed to initialize central database schema:" & Environment.NewLine & ex.Message, "Startup Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                Environment.Exit(1)
+            End Try
         End If
 
         _idleMonitor = host.Services.GetRequiredService(Of IIdleMonitor)()

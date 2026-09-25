@@ -1,0 +1,1 @@
+-- Seed reference data is intentionally empty for this simplified reproduction
