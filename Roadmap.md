@@ -19,7 +19,7 @@
 - [x] INFRA-16
 - [-] INFRA-17
 - [-] INFRA-18
-- [ ] INFRA-19
+- [x] INFRA-19
 - [ ] INFRA-20
 - [ ] INFRA-21
 - [ ] INFRA-22
