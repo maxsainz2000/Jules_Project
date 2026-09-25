@@ -1,0 +1,2 @@
+-- 0002_seed_reference_data.sql
+-- Idempotent reference data seed scripts
