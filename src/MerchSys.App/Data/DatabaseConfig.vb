@@ -12,10 +12,22 @@ Namespace Data
 
         <Extension()>
         Public Sub AddModuleDbContexts(services As IServiceCollection, connectionString As String)
-            services.AddDbContext(Of PurchasingDbContext)(Sub(opts) opts.UseMySQL(connectionString))
-            services.AddDbContext(Of InventoryDbContext)(Sub(opts) opts.UseMySQL(connectionString))
-            services.AddDbContext(Of POSDbContext)(Sub(opts) opts.UseMySQL(connectionString))
-            services.AddDbContext(Of AccountingDbContext)(Sub(opts) opts.UseMySQL(connectionString))
+            services.AddDbContext(Of PurchasingDbContext)(Sub(sp, opts)
+                                                              Dim interceptor = sp.GetRequiredService(Of MerchSys.SharedKernel.Data.RoleGuardInterceptor)()
+                                                              opts.UseMySQL(connectionString).AddInterceptors(interceptor)
+                                                          End Sub)
+            services.AddDbContext(Of InventoryDbContext)(Sub(sp, opts)
+                                                             Dim interceptor = sp.GetRequiredService(Of MerchSys.SharedKernel.Data.RoleGuardInterceptor)()
+                                                             opts.UseMySQL(connectionString).AddInterceptors(interceptor)
+                                                         End Sub)
+            services.AddDbContext(Of POSDbContext)(Sub(sp, opts)
+                                                       Dim interceptor = sp.GetRequiredService(Of MerchSys.SharedKernel.Data.RoleGuardInterceptor)()
+                                                       opts.UseMySQL(connectionString).AddInterceptors(interceptor)
+                                                   End Sub)
+            services.AddDbContext(Of AccountingDbContext)(Sub(sp, opts)
+                                                              Dim interceptor = sp.GetRequiredService(Of MerchSys.SharedKernel.Data.RoleGuardInterceptor)()
+                                                              opts.UseMySQL(connectionString).AddInterceptors(interceptor)
+                                                          End Sub)
         End Sub
 
     End Module

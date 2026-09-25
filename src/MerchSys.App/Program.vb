@@ -44,6 +44,10 @@ Friend Module Program
 
                                   services.AddSingleton(Of LoginSessionService)()
                                   services.AddSingleton(Of ISessionService)(Function(sp) sp.GetRequiredService(Of LoginSessionService)())
+
+                                  services.AddSingleton(Of IWriteContextScope, MerchSys.SharedKernel.Data.WriteContextScope)()
+                                  services.AddScoped(Of MerchSys.SharedKernel.Data.RoleGuardInterceptor)()
+
                                   services.AddTransient(Of IAuthenticationService, AuthenticationService)()
 
                                   ' Use Scoped so that within a scope, ILoginView and LoginPresenter share the same view instance
