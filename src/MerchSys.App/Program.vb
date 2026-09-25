@@ -42,6 +42,10 @@ Friend Module Program
                                   services.AddScoped(Of ISessionTimeoutWarningView, SessionTimeoutWarningView)()
                                   services.AddScoped(Of SessionTimeoutWarningPresenter)()
 
+
+                                  services.AddSingleton(Of MerchSys.SharedKernel.Interfaces.IWriteContextScope, MerchSys.SharedKernel.Data.WriteContextScope)()
+                                  services.AddSingleton(Of MerchSys.SharedKernel.Data.RoleGuardInterceptor)()
+
                                   services.AddSingleton(Of LoginSessionService)()
                                   services.AddSingleton(Of ISessionService)(Function(sp) sp.GetRequiredService(Of LoginSessionService)())
                                   services.AddTransient(Of IAuthenticationService, AuthenticationService)()
