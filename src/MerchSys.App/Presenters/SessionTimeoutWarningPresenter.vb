@@ -5,6 +5,9 @@ Namespace Presenters
     Public Class SessionTimeoutWarningPresenter
         Private ReadOnly _view As ISessionTimeoutWarningView
 
+        Public Event StaySignedInRequested As EventHandler
+        Public Event SignOutRequested As EventHandler
+
         Public Sub New(view As ISessionTimeoutWarningView)
             _view = view
             AddHandler _view.StaySignedInRequested, AddressOf OnStaySignedInRequested
@@ -16,12 +19,16 @@ Namespace Presenters
             _view.SetCountdown(String.Format("{0}:{1:D2}", ts.Minutes, ts.Seconds))
         End Sub
 
+        Public Sub Show(owner As System.Windows.Forms.IWin32Window)
+            _view.Show(owner)
+        End Sub
+
         Private Sub OnStaySignedInRequested(sender As Object, e As EventArgs)
-            ' Handled by the shell/coordinator
+            RaiseEvent StaySignedInRequested(Me, EventArgs.Empty)
         End Sub
 
         Private Sub OnSignOutRequested(sender As Object, e As EventArgs)
-            ' Handled by the shell/coordinator
+            RaiseEvent SignOutRequested(Me, EventArgs.Empty)
         End Sub
 
     End Class

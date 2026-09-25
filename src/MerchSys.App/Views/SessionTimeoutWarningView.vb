@@ -34,6 +34,10 @@ Namespace Views
             Return MyBase.ShowDialog()
         End Function
 
+        Public Shadows Sub Show(owner As IWin32Window) Implements ISessionTimeoutWarningView.Show
+            MyBase.Show(owner)
+        End Sub
+
         Public Sub MarkDecisionMade()
             _decisionMade = True
         End Sub

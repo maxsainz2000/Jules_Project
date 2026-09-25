@@ -6,6 +6,7 @@ Namespace Services
     Public Class WinFormsIdleMonitor
         Implements IIdleMonitor
         Implements IMessageFilter
+            Implements IDisposable
 
         Private ReadOnly _options As IdleMonitorOptions
         Private ReadOnly _timer As Timer
@@ -14,6 +15,8 @@ Namespace Services
 
         Public Event IdleWarning As EventHandler(Of IdleMonitorWarningEventArgs) Implements IIdleMonitor.IdleWarning
         Public Event SessionExpired As EventHandler Implements IIdleMonitor.SessionExpired
+
+        Private disposedValue As Boolean
 
         Public Sub New(options As IOptions(Of IdleMonitorOptions))
             _options = options.Value
@@ -65,12 +68,35 @@ Namespace Services
 
             If m.Msg = WM_MOUSEMOVE OrElse m.Msg = WM_LBUTTONDOWN OrElse m.Msg = WM_RBUTTONDOWN OrElse m.Msg = WM_MBUTTONDOWN OrElse m.Msg = WM_KEYDOWN OrElse m.Msg = WM_KEYUP Then
                 If Not _isWarningActive Then
-                    Reset()
+                    If m.Msg = WM_MOUSEMOVE Then
+                        If (DateTime.UtcNow - _lastInputTime).TotalSeconds >= 1 Then
+                            Reset()
+                        End If
+                    Else
+                        Reset()
+                    End If
                 End If
             End If
 
             Return False
         End Function
+
+        Protected Overridable Sub Dispose(disposing As Boolean)
+            If Not disposedValue Then
+                If disposing Then
+                    [Stop]()
+                    If _timer IsNot Nothing Then
+                        _timer.Dispose()
+                    End If
+                End If
+                disposedValue = True
+            End If
+        End Sub
+
+        Public Sub Dispose() Implements IDisposable.Dispose
+            Dispose(disposing:=True)
+            GC.SuppressFinalize(Me)
+        End Sub
     End Class
 
 #If DEBUG Then

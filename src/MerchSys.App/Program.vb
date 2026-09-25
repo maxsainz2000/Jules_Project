@@ -143,12 +143,12 @@ Friend Module Program
             _warningDialog = _warningScope.ServiceProvider.GetRequiredService(Of ISessionTimeoutWarningView)()
             _warningPresenter = _warningScope.ServiceProvider.GetRequiredService(Of SessionTimeoutWarningPresenter)()
 
-            AddHandler _warningDialog.StaySignedInRequested, AddressOf OnStaySignedIn
-            AddHandler _warningDialog.SignOutRequested, AddressOf OnSignOut
+            AddHandler _warningPresenter.StaySignedInRequested, AddressOf OnStaySignedIn
+            AddHandler _warningPresenter.SignOutRequested, AddressOf OnSignOut
 
             ' Delegate to presenter
             _warningPresenter.Tick(e.RemainingSeconds)
-            DirectCast(_warningDialog, Form).Show()
+            _warningPresenter.Show(_mainWindowForm)
         Else
             _warningPresenter.Tick(e.RemainingSeconds)
         End If
@@ -171,10 +171,12 @@ Friend Module Program
 
     Private Sub CleanupWarningDialog()
         If _warningScope IsNot Nothing Then
-            If _warningDialog IsNot Nothing Then
-                RemoveHandler _warningDialog.StaySignedInRequested, AddressOf OnStaySignedIn
-                RemoveHandler _warningDialog.SignOutRequested, AddressOf OnSignOut
+            If _warningPresenter IsNot Nothing Then
+                RemoveHandler _warningPresenter.StaySignedInRequested, AddressOf OnStaySignedIn
+                RemoveHandler _warningPresenter.SignOutRequested, AddressOf OnSignOut
+            End If
 
+            If _warningDialog IsNot Nothing Then
                 Dim frm = TryCast(_warningDialog, Form)
                 If frm IsNot Nothing AndAlso Not frm.IsDisposed AndAlso frm.Visible Then
                     frm.Hide()
