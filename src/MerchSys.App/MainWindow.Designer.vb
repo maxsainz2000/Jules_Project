@@ -81,11 +81,21 @@
         Me.pnlSidebar.BackColor = System.Drawing.Color.FromArgb(CType(CType(45, Byte), Integer), CType(CType(45, Byte), Integer), CType(CType(48, Byte), Integer))
         Me.pnlSidebar.Controls.Add(Me.btnDashboard)
         Me.pnlSidebar.Controls.Add(Me.btnLogout)
+        Me.ConnectionStatusSlot = New System.Windows.Forms.Panel()
+        Me.pnlSidebar.Controls.Add(Me.ConnectionStatusSlot)
         Me.pnlSidebar.Dock = System.Windows.Forms.DockStyle.Left
         Me.pnlSidebar.Location = New System.Drawing.Point(0, 0)
         Me.pnlSidebar.Name = "pnlSidebar"
         Me.pnlSidebar.Size = New System.Drawing.Size(200, 450)
         Me.pnlSidebar.TabIndex = 0
+        '
+        'ConnectionStatusSlot
+        '
+        Me.ConnectionStatusSlot.Dock = System.Windows.Forms.DockStyle.Bottom
+        Me.ConnectionStatusSlot.Location = New System.Drawing.Point(0, 426)
+        Me.ConnectionStatusSlot.Name = "ConnectionStatusSlot"
+        Me.ConnectionStatusSlot.Size = New System.Drawing.Size(200, 24)
+        Me.ConnectionStatusSlot.TabIndex = 2
         '
         'btnLogout
         '
@@ -93,7 +103,7 @@
         Me.btnLogout.FlatAppearance.BorderSize = 0
         Me.btnLogout.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.btnLogout.ForeColor = System.Drawing.Color.White
-        Me.btnLogout.Location = New System.Drawing.Point(0, 400)
+        Me.btnLogout.Location = New System.Drawing.Point(0, 376)
         Me.btnLogout.Name = "btnLogout"
         Me.btnLogout.Size = New System.Drawing.Size(200, 50)
         Me.btnLogout.TabIndex = 0
@@ -123,5 +133,6 @@
     Friend WithEvents pnlContent As System.Windows.Forms.Panel
     Friend WithEvents pnlSidebar As System.Windows.Forms.Panel
     Friend WithEvents btnLogout As System.Windows.Forms.Button
+    Friend WithEvents ConnectionStatusSlot As System.Windows.Forms.Panel
 
 End Class

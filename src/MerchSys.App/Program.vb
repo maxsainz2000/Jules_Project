@@ -8,6 +8,7 @@ Imports MerchSys.App.Views
 Imports MerchSys.App.Presenters
 Imports MerchSys.App.Data
 Imports MerchSys.SharedKernel.Interfaces
+Imports MerchSys.App.Startup
 
 Friend Module Program
 
@@ -59,6 +60,8 @@ Friend Module Program
 
                                   services.AddScoped(Of IOwnerDashboardView, OwnerDashboardView)()
                                   services.AddScoped(Of OwnerDashboardPresenter)()
+
+                                  services.AddConnectionHealthMonitor()
                               End Sub).
             Build()
 
@@ -76,6 +79,10 @@ Friend Module Program
             End Try
         End If
 
+        Dim healthMonitor = _serviceProvider.GetRequiredService(Of IConnectionHealthMonitor)()
+        ConnectionHealthMonitorLocator.Current = healthMonitor
+        healthMonitor.Start()
+
         _idleMonitor = host.Services.GetRequiredService(Of IIdleMonitor)()
         AddHandler _idleMonitor.IdleWarning, AddressOf HandleIdleWarning
         AddHandler _idleMonitor.SessionExpired, AddressOf HandleSessionExpired
@@ -84,6 +91,10 @@ Friend Module Program
 
         If _idleMonitor IsNot Nothing Then
             _idleMonitor.Stop()
+        End If
+
+        If ConnectionHealthMonitorLocator.Current IsNot Nothing Then
+            ConnectionHealthMonitorLocator.Current.Stop()
         End If
     End Sub
 

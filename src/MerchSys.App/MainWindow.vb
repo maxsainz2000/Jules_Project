@@ -1,6 +1,15 @@
+Imports MerchSys.App.Views
+Imports MerchSys.App.Presenters
+
 Public Class MainWindow
     Public Event LogoutRequested As EventHandler
     Public Event DashboardRequested As EventHandler
+
+    Public Sub New(connectionStatusPresenter As ConnectionStatusPresenter)
+        InitializeComponent()
+        ConnectionStatusSlot.Controls.Add(connectionStatusPresenter.View)
+        connectionStatusPresenter.View.Dock = DockStyle.Fill
+    End Sub
 
     <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
     Public Property UserIdentityText As String
