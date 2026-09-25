@@ -27,8 +27,8 @@
 - [-] INFRA-23
 - [x] INFRA-24
 - [x] INFRA-25
-- [ ] INFRA-26
-- [ ] INFRA-27
+- [x] INFRA-26
+- [x] INFRA-27
 - [ ] INFRA-28
 - [ ] INFRA-29
 - [ ] INFRA-30

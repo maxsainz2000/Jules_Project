@@ -103,6 +103,9 @@ Namespace Services
                         Return New AuthenticationResult With {.Success = False, .ErrorMessage = "Invalid username or password."}
                     End If
                 End Using
+            Catch ex As MySqlException
+                _logger.LogError(ex, "Database connection error during authentication")
+                Return New AuthenticationResult With {.Success = False, .ErrorMessage = "Unable to reach central server. Please check your network connection."}
             Catch ex As Exception
                 _logger.LogError(ex, "Error during authentication")
                 Return New AuthenticationResult With {.Success = False, .ErrorMessage = "An error occurred during authentication."}
