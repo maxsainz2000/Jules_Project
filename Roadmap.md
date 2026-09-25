@@ -31,7 +31,7 @@
 - [x] INFRA-27
 - [x] INFRA-28
 - [x] INFRA-29
-- [ ] INFRA-30
+- [x] INFRA-30
 - [ ] INFRA-31
 - [ ] INFRA-32
 - [ ] INFRA-33
