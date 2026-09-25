@@ -7,6 +7,7 @@ Imports MerchSys.App.Services
 Imports MerchSys.App.Views
 Imports MerchSys.App.Presenters
 Imports MerchSys.App.Data
+Imports Microsoft.Extensions.Logging
 Imports MerchSys.SharedKernel.Interfaces
 
 Friend Module Program
@@ -67,7 +68,8 @@ Friend Module Program
         Dim configService = host.Services.GetRequiredService(Of IConfiguration)()
         Dim connString = configService.GetSection("Sync")("MariaDbConnection")
         If Not String.IsNullOrWhiteSpace(connString) Then
-            DatabaseInitializer.Initialize(connString)
+            Dim logger = host.Services.GetService(Of ILogger(Of MariaDbSchemaInitializer))()
+            MariaDbSchemaInitializer.Initialize(connString, logger)
         End If
 
         _idleMonitor = host.Services.GetRequiredService(Of IIdleMonitor)()
