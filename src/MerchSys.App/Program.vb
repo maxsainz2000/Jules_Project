@@ -6,6 +6,8 @@ Imports MerchSys.App.Configuration
 Imports MerchSys.App.Services
 Imports MerchSys.App.Views
 Imports MerchSys.App.Presenters
+Imports MerchSys.App.Presenters.Shell
+Imports MerchSys.App.Views.Shell
 Imports MerchSys.App.Data
 Imports MerchSys.SharedKernel.Interfaces
 Imports MerchSys.App.Startup
@@ -54,6 +56,11 @@ Friend Module Program
                                   ' Use Scoped so that within a scope, ILoginView and LoginPresenter share the same view instance
                                   services.AddScoped(Of ILoginView, LoginView)()
                                   services.AddScoped(Of LoginPresenter)()
+                                  
+                                  ' Shell infrastructure
+                                  services.AddScoped(Of ActivityRailPresenter)()
+                                  services.AddScoped(Of ActivityRail)()
+                                  services.AddScoped(Of ModuleDetailPanel)()
 
                                   services.AddScoped(Of MainWindow)()
                                   services.AddScoped(Of MainWindowPresenter)()
@@ -126,6 +133,11 @@ Friend Module Program
                     Dim mainWindow = mainScope.ServiceProvider.GetRequiredService(Of MainWindow)()
                     _mainWindowForm = mainWindow
                     Dim mainPresenter = mainScope.ServiceProvider.GetRequiredService(Of MainWindowPresenter)()
+                    
+                    ' Wire up the presenters
+                    Dim moduleDetailPanel = mainScope.ServiceProvider.GetRequiredService(Of ModuleDetailPanel)()
+                    moduleDetailPanel.SetPresenter(mainPresenter)
+                    
                     Application.Run(mainWindow)
                 End Using
 
