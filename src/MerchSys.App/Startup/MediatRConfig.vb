@@ -14,7 +14,7 @@ Namespace Startup
         Public Sub AddMediatRServices(services As IServiceCollection)
             services.AddMediatR(Sub(cfg)
                                     cfg.RegisterServicesFromAssemblies(
-                                        GetType(MerchSys.App.MainWindow).Assembly,
+                                        GetType(MerchSys.App.Views.MainWindow).Assembly,
                                         GetType(IEventBus).Assembly,
                                         GetType(PurchasingDbContext).Assembly,
                                         GetType(InventoryDbContext).Assembly,

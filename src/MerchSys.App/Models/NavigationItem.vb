@@ -2,8 +2,10 @@ Imports System.Windows.Forms
 
 Namespace Models
     Public Class NavigationItem
-        Public Property DisplayName As String
-        Public Property TargetViewType As Type
+        Public Property Name As String
+        Public Property ViewType As Type
+        Public Property IsActive As Boolean
+        Public Property NavigationGroup As String
     End Class
 
     Public Class NavigationGroup
