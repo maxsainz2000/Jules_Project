@@ -20,6 +20,10 @@ Namespace Startup
             ' MVP Registration for Stock Dashboard
             services.AddTransient(Of IStockDashboardView, StockDashboardView)()
             services.AddTransient(Of StockDashboardPresenter)()
+
+            ' MVP Registration for Product Management
+            services.AddTransient(Of IProductManagementView, ProductManagementView)()
+            services.AddTransient(Of ProductManagementPresenter)()
         End Sub
 
     End Module
