@@ -8,6 +8,7 @@ Namespace Startup
         <System.Runtime.CompilerServices.Extension>
         Public Sub AddInventoryServices(services As IServiceCollection)
             services.AddScoped(Of IStockService, StockService)()
+            services.AddScoped(Of IExpiryTrackingService, ExpiryTrackingService)()
         End Sub
 
     End Module
