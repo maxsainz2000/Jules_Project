@@ -2,6 +2,7 @@ Imports System.Windows.Forms
 Imports MerchSys.App.Presenters
 Imports MerchSys.App.Presenters.Shell
 Imports MerchSys.App.Models
+Imports Microsoft.Extensions.DependencyInjection
 
 Namespace Views.Shell
     Public Class ModuleDetailPanel
@@ -9,8 +10,11 @@ Namespace Views.Shell
 
         Private _presenter As MainWindowPresenter
 
-        Public Sub New(connectionStatusPresenter As ConnectionStatusPresenter)
+        Private ReadOnly _serviceProvider As System.IServiceProvider
+
+        Public Sub New(connectionStatusPresenter As ConnectionStatusPresenter, serviceProvider As System.IServiceProvider)
             InitializeComponent()
+            _serviceProvider = serviceProvider
             Dock = DockStyle.Left
             Width = 220
             BackColor = System.Drawing.Color.FromArgb(45, 45, 48)
@@ -45,15 +49,15 @@ Namespace Views.Shell
             Dim newPanel As UserControl = Nothing
             Select Case moduleId
                 Case AppModule.Purchasing
-                    newPanel = New Modules.PurchasingPanel()
+                    newPanel = _serviceProvider.GetRequiredService(Of Modules.PurchasingPanel)()
                 Case AppModule.Inventory
-                    newPanel = New Modules.InventoryPanel()
+                    newPanel = _serviceProvider.GetRequiredService(Of Modules.InventoryPanel)()
                 Case AppModule.POS
-                    newPanel = New Modules.PosPanel()
+                    newPanel = _serviceProvider.GetRequiredService(Of Modules.PosPanel)()
                 Case AppModule.Accounting
-                    newPanel = New Modules.AccountingPanel()
+                    newPanel = _serviceProvider.GetRequiredService(Of Modules.AccountingPanel)()
                 Case AppModule.DeveloperTools
-                    newPanel = New Modules.DeveloperToolsPanel()
+                    newPanel = _serviceProvider.GetRequiredService(Of Modules.DeveloperToolsPanel)()
             End Select
             
             If newPanel IsNot Nothing Then

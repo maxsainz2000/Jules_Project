@@ -11,6 +11,9 @@ Imports MerchSys.App.Views.Shell
 Imports MerchSys.App.Data
 Imports MerchSys.SharedKernel.Interfaces
 Imports MerchSys.App.Startup
+Imports MerchSys.App.Views.Shell.Modules
+Imports MerchSys.Purchasing.Startup
+
 
 Friend Module Program
 
@@ -69,6 +72,26 @@ Friend Module Program
                                   services.AddScoped(Of OwnerDashboardPresenter)()
 
                                   services.AddConnectionHealthMonitor()
+
+                                  ' Add database contexts
+                                  services.AddModuleDbContexts(config.GetSection("Sync")("MariaDbConnection"))
+
+                                  ' Add MediatR
+                                  services.AddMediatRServices()
+
+                                  ' Add Purchasing
+                                  services.AddPurchasingServices()
+
+                                  ' Add Low Stock Notifier
+                                  services.AddSingleton(Of ILowStockNotifier, WinFormsLowStockNotifier)()
+
+                                  ' Register UI Panels
+                                  services.AddTransient(Of PurchasingPanel)()
+                                  services.AddTransient(Of InventoryPanel)()
+                                  services.AddTransient(Of PosPanel)()
+                                  services.AddTransient(Of AccountingPanel)()
+                                  services.AddTransient(Of DeveloperToolsPanel)()
+
                               End Sub).
             Build()
 
