@@ -128,9 +128,9 @@ Implemented the Expiry Monitor screen (INV-12) — a dedicated view for monitori
 Implemented the Shrinkage View — a WinForms screen for recording inventory losses and viewing their history with financial impact. Depends on INV-07 (ShrinkageService, IStockService).
 
 ### Requirements
-- **MerchSys.Inventory/Presenters/ShrinkagePresenter.vb**: Presenter with three helper classes (`ShrinkageRowItem`, `ShrinkageProductItem`, `ShrinkageBatchItem`) and the main `ShrinkagePresenter`
-- **MerchSys.App/Views/Inventory/ShrinkageView.Designer code**: UserControl with summary cards, filter toolbar, history DataGrid, and MVP overlay dialog
-- **MerchSys.App/Views/Inventory/ShrinkageView.Designer code.vb**: Code-behind with DI constructor injection, DatePicker sync, reason filter handler, dialog confirmation/validation, and quantity input guard
+- **MerchSys.Inventory/Views/IShrinkageView.vb**: MVP View interface defining properties for summary cards, filter dates/reason, history list, and events for recording shrinkage and filtering.
+- **MerchSys.Inventory/Presenters/ShrinkagePresenter.vb**: MVP Presenter implementing the logic. Exposes `ShrinkageRowItem`, `ShrinkageProductItem`, `ShrinkageBatchItem`. Handles recording shrinkage via `IShrinkageService`.
+- **MerchSys.Inventory/Views/ShrinkageView.vb**: WinForms UserControl implementing `IShrinkageView`. Contains summary cards, filter toolbar (with DatePicker and Reason DropDown), history `DataGridView`. Instead of an overlay dialog, use standard WinForms `Form.ShowDialog()` via a `RecordShrinkageDialog` form for creating a new shrinkage record.
 
 ## Feature: INV-14
 
