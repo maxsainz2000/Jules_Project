@@ -99,8 +99,11 @@ Friend Module Program
             Try
                 Dim logger = host.Services.GetService(Of Microsoft.Extensions.Logging.ILogger(Of MariaDbSchemaInitializer))()
                 MariaDbSchemaInitializer.Initialize(connString, logger)
+
+                ' Initialize module databases
+                DatabaseInitializer.Initialize(_serviceProvider)
             Catch ex As Exception
-                MessageBox.Show("Failed to initialize central database schema:" & Environment.NewLine & ex.Message, "Startup Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                MessageBox.Show("Failed to initialize central database schema or module databases:" & Environment.NewLine & ex.Message, "Startup Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
                 Environment.Exit(1)
             End Try
         End If
