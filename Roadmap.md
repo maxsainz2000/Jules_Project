@@ -41,7 +41,7 @@
 - [x] INT-01
 - [x] INT-02
 - [x] INT-03
-- [ ] INT-04
+- [x] INT-04
 - [ ] INT-05
 - [ ] INT-06
 - [ ] INT-07
