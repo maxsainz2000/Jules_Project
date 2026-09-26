@@ -571,7 +571,13 @@ path, MediatR contract, or INFRA-26 concurrency semantic was changed.
 > Minor deviation from the plan: the folder is `Paging/` (namespace `MerchSys.SharedKernel.Paging`)
 > rather than `Querying/`, to avoid confusion with the existing MediatR `Queries/` folder.
 
+#### B. Data-Access Resiliency Hardening
+- **Secondary Indexes**: Add EF Core index configurations for the timestamp and ID columns used in history queries (e.g., `CreatedAt`, `Id`) to support efficient seek pagination across all major modules.
+- **Explicit Connection Pooling**: Ensure `Pooling=true` and explicit pool size limits are set in the MariaDB connection string configuration in `MerchSys.App`.
 
+#### C. Query Pagination Migration
+- Refactor the unbounded history queries across all module repositories/services to consume `PageRequest` and return `PagedResult(Of T)` using keyset pagination (`WHERE CreatedAt < CursorDate OR (CreatedAt = CursorDate AND Id < CursorId) ORDER BY CreatedAt DESC, Id DESC LIMIT PageSize + 1`).
+- No business rule, write path, or MediatR contract should change.
 
 ## Verification (from INFRA-verification-checklist.md)
 
