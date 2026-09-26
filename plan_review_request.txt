@@ -1,0 +1,28 @@
+1. **Create `IStockDashboardView.vb`** in `src/MerchSys.Inventory/Views`.
+   - Interface `IStockDashboardView` defining properties for summary cards (Total Stock Value, Low Stock Count, Expired Count, etc.), filter text, category filter, status filter.
+   - Methods: `SetProductRows(rows As IEnumerable(Of ProductRowItem))`
+   - Events: `FilterChanged`, `ProductSelected`.
+2. **Create `ProductRowItem.vb`** in `src/MerchSys.Inventory/Presenters` (or alongside the View) to hold the combined data from `StockDashboardDto` and `StockoutEstimateDto`.
+   - Properties like `ProductId`, `ProductName`, `SKU`, `CategoryId`, `CurrentQuantity`, `TotalValue`, `IsBelowThreshold`, `RiskLevel`, `EstimatedDaysUntilStockout`, `EstimatedStockoutDate`.
+3. **Create `StockDashboardPresenter.vb`** in `src/MerchSys.Inventory/Presenters`.
+   - Class `StockDashboardPresenter`.
+   - Dependencies injected: `IStockDashboardView`, `IStockDashboardService`, `IStockoutEstimationService`.
+   - Handles `FilterChanged` and `ProductSelected` events from the view.
+   - Uses `System.Windows.Forms.Timer` for a 60-second auto-refresh, loading data from services, mapping it to `ProductRowItem`, and calling `SetProductRows`.
+   - Filters the data locally based on the View's filter text, category, and status.
+4. **Create `StockDashboardView.vb`** in `src/MerchSys.Inventory/Views`.
+   - A WinForms UserControl implementing `IStockDashboardView`.
+   - Has 5 summary card labels (e.g., Total Stock Value, Low Stock Products, Expired/Near Expiry Batches, Critical Risk Products, Total Products).
+   - Filter `TextBox` for text.
+   - Filter `ComboBox` for category and status.
+   - `DataGridView` for products.
+   - `DataGridView` for bottom detail panel for batch lists.
+   - Handlers for UI events (TextChanged, SelectedIndexChanged, CellClick) to raise the MVP interface events.
+   - Implements `CellFormatting` for the products grid to color-code status/expiry badges.
+5. **Update `InventoryConfig.vb`** in `src/MerchSys.Inventory/Startup`.
+   - Register `IStockDashboardView` as Transient.
+   - Register `StockDashboardPresenter` as Transient.
+6. **Verify and Pre-commit steps**
+   - Run tests.
+   - Complete pre-commit steps to ensure proper testing, verification, review, and reflection are done.
+7. **Submit the change**.

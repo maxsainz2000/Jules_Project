@@ -1,5 +1,7 @@
 Imports Microsoft.Extensions.DependencyInjection
 Imports MerchSys.Inventory.Services
+Imports MerchSys.Inventory.Views
+Imports MerchSys.Inventory.Presenters
 
 Namespace Startup
 
@@ -14,6 +16,10 @@ Namespace Startup
             services.AddScoped(Of IShrinkageService, ShrinkageService)()
             services.AddScoped(Of IVelocityService, VelocityService)()
             services.AddScoped(Of IStockoutEstimationService, StockoutEstimationService)()
+
+            ' MVP Registration for Stock Dashboard
+            services.AddTransient(Of IStockDashboardView, StockDashboardView)()
+            services.AddTransient(Of StockDashboardPresenter)()
         End Sub
 
     End Module
