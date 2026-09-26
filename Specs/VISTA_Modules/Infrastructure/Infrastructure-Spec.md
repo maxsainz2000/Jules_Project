@@ -571,9 +571,9 @@ path, MediatR contract, or INFRA-26 concurrency semantic was changed.
 > Minor deviation from the plan: the folder is `Paging/` (namespace `MerchSys.SharedKernel.Paging`)
 > rather than `Querying/`, to avoid confusion with the existing MediatR `Queries/` folder.
 
-#### B. Data-Access Resiliency Hardening
-- **Secondary Indexes**: Add EF Core index configurations for the timestamp and ID columns used in history queries (e.g., `CreatedAt`, `Id`) to support efficient seek pagination across all major modules.
-- **Explicit Connection Pooling**: Ensure `Pooling=true` and explicit pool size limits are set in the MariaDB connection string configuration in `MerchSys.App`.
+#### B. Data-Access Resiliency Hardening (CRITICAL - DO NOT SKIP)
+- **Secondary Indexes**: You MUST add EF Core index configurations in `BaseDbContext.vb` or individual entity configurations for `CreatedAt` and `Id`. Specifically, add `.HasIndex(Function(e) New With {e.CreatedAt, e.Id})` to large transactional tables (e.g., `PurchaseOrder`, `VatReturn`) to support efficient seek pagination.
+- **Explicit Connection Pooling**: You MUST modify `ConnectionStringLoader.GetMariaDbConnectionString` in `MerchSys.App` to parse the connection string from configuration, and explicitly append `Pooling=true;Min Pool Size=1;Max Pool Size=100;` to it before returning.
 
 #### C. Query Pagination Migration
 - Refactor the unbounded history queries across all module repositories/services to consume `PageRequest` and return `PagedResult(Of T)` using keyset pagination (`WHERE CreatedAt < CursorDate OR (CreatedAt = CursorDate AND Id < CursorId) ORDER BY CreatedAt DESC, Id DESC LIMIT PageSize + 1`).
