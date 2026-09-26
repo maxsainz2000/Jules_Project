@@ -15,23 +15,36 @@ Namespace Presenters
         Public Property ActiveModule As AppModule
         Public Property ActiveModuleName As String
 
-        Public Property PurchasingItems As New List(Of NavigationItem)
-        Public Property InventoryItems As New List(Of NavigationItem)
-        Public Property PosItems As New List(Of NavigationItem)
-        Public Property AccountingItems As New List(Of NavigationItem)
-        Public Property DeveloperToolsItems As New List(Of NavigationItem)
+        Public Property NavigationGroups As New Dictionary(Of String, List(Of NavigationItem))
+        Private ReadOnly _serviceProvider As IServiceProvider
 
-        Public Event ActiveModuleChanged As EventHandler(Of AppModule)
-
-        Public Sub New(view As MainWindow, sessionService As LoginSessionService, serviceScopeFactory As IServiceScopeFactory)
-            _view = view
+        Public Sub New(view As IMainWindowView, sessionService As LoginSessionService, serviceScopeFactory As IServiceScopeFactory, serviceProvider As IServiceProvider)
+            ' HACK: We receive IMainWindowView but might need to cast to Form to listen to events
+            _view = DirectCast(view, MainWindow)
             _sessionService = sessionService
             _serviceScopeFactory = serviceScopeFactory
+            _serviceProvider = serviceProvider
 
             AddHandler _view.Load, AddressOf OnViewLoad
             AddHandler _view.LogoutRequested, AddressOf OnLogoutRequested
             AddHandler _view.DashboardRequested, AddressOf OnDashboardRequested
             AddHandler _view.ModuleSelected, AddressOf OnModuleSelectedFromView
+            AddHandler view.NavigationRequested, AddressOf OnNavigationRequested
+        End Sub
+
+        Private Sub OnNavigationRequested(sender As Object, item As NavigationItem)
+            If item.ViewType IsNot Nothing Then
+                NavigateTo(item.ViewType)
+            End If
+        End Sub
+
+        Public Sub NavigateTo(viewType As Type)
+            Dim viewInstance = DirectCast(_serviceProvider.GetRequiredService(viewType), UserControl)
+            _view.ShowView(viewInstance)
+        End Sub
+
+        Public Sub NavigateToDefault()
+            NavigateTo(GetType(StockDashboardView))
         End Sub
 
         Private Sub OnViewLoad(sender As Object, e As EventArgs)
@@ -67,58 +80,31 @@ Namespace Presenters
                     ActiveModuleName = "Developer Tools"
             End Select
             _view.SyncActiveModuleVisuals(moduleId)
-            RaiseEvent ActiveModuleChanged(Me, moduleId)
+
+            ' To simplify, we might want to tell the view to render the navigation based on selected module.
+            ' But the requirement is that it renders all nav buttons, grouped by NavigationGroup.
+            ' So let's re-render just to be safe.
+            _view.RenderNavigation(NavigationGroups)
         End Sub
 
         Public Sub RebuildModuleCollections()
-            PurchasingItems.Clear()
-            InventoryItems.Clear()
-            PosItems.Clear()
-            AccountingItems.Clear()
-            DeveloperToolsItems.Clear()
+            NavigationGroups.Clear()
+            Dim inventoryItems As New List(Of NavigationItem)
+            Dim purchasingItems As New List(Of NavigationItem)
+            Dim posItems As New List(Of NavigationItem)
+            Dim accountingItems As New List(Of NavigationItem)
 
             ' We would build these lists based on the role.
             Dim role = _sessionService.CurrentUserRole.Value
-            If role = UserRole.Manager Then
-                ' Add mock Manager nav items for demonstration or matching previous structure
-                PurchasingItems.Add(New NavigationItem With { .DisplayName = "Purchase Orders" })
-                PurchasingItems.Add(New NavigationItem With { .DisplayName = "Goods Receiving" })
-                PurchasingItems.Add(New NavigationItem With { .DisplayName = "Vendor Directory" })
-                PurchasingItems.Add(New NavigationItem With { .DisplayName = "Accounts Payable" })
-                
-                InventoryItems.Add(New NavigationItem With { .DisplayName = "Reorder Suggestions" })
-                InventoryItems.Add(New NavigationItem With { .DisplayName = "Stock Dashboard" })
-                InventoryItems.Add(New NavigationItem With { .DisplayName = "Product Management" })
-                InventoryItems.Add(New NavigationItem With { .DisplayName = "Expiry Monitor" })
-                InventoryItems.Add(New NavigationItem With { .DisplayName = "Shrinkage" })
-                
-                PosItems.Add(New NavigationItem With { .DisplayName = "Sales Cart" })
-                PosItems.Add(New NavigationItem With { .DisplayName = "Credit Management" })
-                PosItems.Add(New NavigationItem With { .DisplayName = "Transaction History" })
-                PosItems.Add(New NavigationItem With { .DisplayName = "Daily Summary" })
-                PosItems.Add(New NavigationItem With { .DisplayName = "VAT Settings" })
-                PosItems.Add(New NavigationItem With { .DisplayName = "Tamper Audit Report" })
-                
-                AccountingItems.Add(New NavigationItem With { .DisplayName = "Financial Overview" })
-                AccountingItems.Add(New NavigationItem With { .DisplayName = "Income Statement" })
-                AccountingItems.Add(New NavigationItem With { .DisplayName = "Sales Summary" })
-                AccountingItems.Add(New NavigationItem With { .DisplayName = "VAT Return (BIR)" })
-                
-#If DEBUG Then
-                DeveloperToolsItems.Add(New NavigationItem With { .DisplayName = "Developer Tools" })
-#End If
-            ElseIf role = UserRole.Owner Then
-                PurchasingItems.Add(New NavigationItem With { .DisplayName = "Purchase Orders" })
-                PurchasingItems.Add(New NavigationItem With { .DisplayName = "Accounts Payable" })
-                
-                InventoryItems.Add(New NavigationItem With { .DisplayName = "Stock Dashboard" })
-                
-                PosItems.Add(New NavigationItem With { .DisplayName = "Transaction History" })
-                
-                AccountingItems.Add(New NavigationItem With { .DisplayName = "Financial Overview" })
-                AccountingItems.Add(New NavigationItem With { .DisplayName = "Income Statement" })
-                AccountingItems.Add(New NavigationItem With { .DisplayName = "Sales Summary" })
+
+            inventoryItems.Add(New NavigationItem With { .Name = "Stock Dashboard", .ViewType = GetType(StockDashboardView), .NavigationGroup = "Inventory" })
+
+            If role = UserRole.Manager OrElse role = UserRole.Owner Then
+                NavigationGroups("Inventory") = inventoryItems
             End If
+
+            _view.RenderNavigation(NavigationGroups)
+            NavigateToDefault()
         End Sub
 
         Private _currentViewScope As IServiceScope
