@@ -11,6 +11,7 @@ Imports MerchSys.App.Views.Shell
 Imports MerchSys.App.Data
 Imports MerchSys.SharedKernel.Interfaces
 Imports MerchSys.App.Startup
+Imports MerchSys.Purchasing.Services
 
 Friend Module Program
 
@@ -69,17 +70,34 @@ Friend Module Program
                                   services.AddScoped(Of OwnerDashboardPresenter)()
 
                                   services.AddConnectionHealthMonitor()
+
+                                  ' Module registrations
+                                  Dim connString = config.GetSection("Sync")("MariaDbConnection")
+                                  services.AddModuleDbContexts(connString)
+                                  services.AddMediatRServices()
+                                  services.AddPurchasingServices()
+
+                                  ' Inline registrations for Inventory, POS, and Accounting
+                                  ' Inventory
+                                  services.AddScoped(Of ILowStockNotifier, MerchSys.Inventory.Services.WinFormsLowStockNotifier)()
+
+                                  ' POS
+                                  ' Add POS specific registrations here as needed
+
+                                  ' Accounting
+                                  ' Add Accounting specific registrations here as needed
+
                               End Sub).
             Build()
 
         _serviceProvider = host.Services
 
         Dim configService = host.Services.GetRequiredService(Of IConfiguration)()
-        Dim connString = configService.GetSection("Sync")("MariaDbConnection")
-        If Not String.IsNullOrWhiteSpace(connString) Then
+        Dim connStringMain = configService.GetSection("Sync")("MariaDbConnection")
+        If Not String.IsNullOrWhiteSpace(connStringMain) Then
             Try
                 Dim logger = host.Services.GetService(Of Microsoft.Extensions.Logging.ILogger(Of MariaDbSchemaInitializer))()
-                MariaDbSchemaInitializer.Initialize(connString, logger)
+                MariaDbSchemaInitializer.Initialize(connStringMain, logger)
             Catch ex As Exception
                 MessageBox.Show("Failed to initialize central database schema:" & Environment.NewLine & ex.Message, "Startup Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
                 Environment.Exit(1)

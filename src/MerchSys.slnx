@@ -5,4 +5,5 @@
   <Project Path="MerchSys.POS/MerchSys.POS.vbproj" />
   <Project Path="MerchSys.Purchasing/MerchSys.Purchasing.vbproj" />
   <Project Path="MerchSys.SharedKernel/MerchSys.SharedKernel.vbproj" />
+  <Project Path="Notification.WinForms/Notification.WinForms.vbproj" />
 </Solution>
