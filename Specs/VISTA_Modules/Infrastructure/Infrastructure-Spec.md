@@ -548,7 +548,9 @@ This progress report documents the implementation of **INFRA-33: Post-Pivot Mari
 
 ### Requirements
 Concise list of changes made:
-
+1. **EF Core 10 VB.NET `ToListAsync` Empty List Bug**: Due to a known issue with the Pomelo provider in VB.NET, `ToListAsync()` on full entities silently returns an empty list. Replaced full entity `ToListAsync()` calls with raw `MySqlConnector.MySqlConnection` reader loops across all module services, strictly following the `GEMINI.md` build trap guidance.
+2. **WinForms Boolean Databinding (`TINYINT(1)`)**: MariaDB maps booleans as `TINYINT(1)`, causing `InvalidCastException` in WinForms `DataGridView` CheckBox columns (e.g., `IsDeleted` fields). Added explicit value conversions for Boolean properties in `BaseDbContext` to ensure WinForms databinding compatibility.
+3. **DateTime Millisecond Truncation (Phantom Concurrency Exceptions)**: WinForms `DateTimePicker` truncates milliseconds, causing EF Core to throw false `DbUpdateConcurrencyException`s against MariaDB's native `DATETIME(6)` columns. Configured all `DateTime` properties globally in `BaseDbContext` to use `DATETIME(6)` precision via `configurationBuilder.Properties(Of DateTime)().HaveColumnType("DATETIME(6)")` to ensure exact matches.
 ## Feature: INFRA-34
 
 ### Overview
