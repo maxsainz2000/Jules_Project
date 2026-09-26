@@ -11,6 +11,7 @@ Imports MerchSys.App.Views.Shell
 Imports MerchSys.App.Data
 Imports MerchSys.SharedKernel.Interfaces
 Imports MerchSys.App.Startup
+Imports MerchSys.Purchasing.Startup
 
 Friend Module Program
 
@@ -69,6 +70,30 @@ Friend Module Program
                                   services.AddScoped(Of OwnerDashboardPresenter)()
 
                                   services.AddConnectionHealthMonitor()
+
+                                  Dim moduleConnStr = context.Configuration.GetSection("Sync")("MariaDbConnection")
+                                  services.AddModuleDbContexts(moduleConnStr)
+                                  services.AddMediatRServices()
+                                  services.AddPurchasingServices()
+
+                                  ' Inventory Module UI
+                                  services.AddScoped(Of MerchSys.App.Views.Shell.Modules.InventoryPanel)()
+                                  services.AddScoped(Of MerchSys.App.Presenters.Modules.ProductManagementPresenter)()
+
+                                  ' POS Module UI
+                                  services.AddScoped(Of MerchSys.App.Views.Shell.Modules.PosPanel)()
+
+                                  ' Accounting Module UI
+                                  services.AddScoped(Of MerchSys.App.Views.Shell.Modules.AccountingPanel)()
+
+                                  ' Purchasing Module UI
+                                  services.AddScoped(Of MerchSys.App.Views.Shell.Modules.PurchasingPanel)()
+
+                                  ' Other UI modules
+                                  services.AddScoped(Of MerchSys.App.Views.Shell.Modules.DeveloperToolsPanel)()
+
+                                  ' Other Services
+                                  services.AddScoped(Of MerchSys.App.Services.WinFormsLowStockNotifier)()
                               End Sub).
             Build()
 
