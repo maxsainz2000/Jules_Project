@@ -98,9 +98,9 @@ Implemented predictive stockout estimation for the Inventory module. Calculates 
 Implemented the Stock Dashboard View — the primary Inventory screen. Provides real-time stock visibility across all products with FIFO-costed values, color-coded status, expiry alerts, and predictive stockout estimates. Driven by the existing `IStockDashboardService` (INV-05) and `IStockoutEstimationService` (INV-09).
 
 ### Requirements
-- **Presenters/StockDashboardPresenter.vb**: ObservableObject Presenter combining `StockDashboardDto` and `StockoutEstimateDto` into `ProductRowItem` rows. Implements category/status/text filtering, product detail drill-down, and 60-second auto-refresh via `System.Timers.Timer` + captured `SynchronizationContext`.
-- **Views/Inventory/StockDashboardView.Designer code**: WinForms UserControl with five summary cards, filter toolbar, color-coded DataGrid (DataTrigger row styles), color-coded status/expiry badge columns, and a bottom detail panel for batch list + recent movements.
-- **Views/Inventory/StockDashboardView.Designer code.vb**: Code-behind with constructor injection, `SelectionChanged` handler that fires `SelectProductCommand`, and Escape key handler to clear the search box.
+- **Views/IStockDashboardView.vb**: The MVP View interface defining properties for summary cards, filter text, and methods to bind/display the DataGridView rows (e.g. `SetProductRows(rows As List(Of ProductRowItem))`), plus events for filter changes and product selection.
+- **Presenters/StockDashboardPresenter.vb**: MVP Presenter implementing the logic. Combines `StockDashboardDto` and `StockoutEstimateDto` into `ProductRowItem` rows. Listens to View events for category/status/text filtering and product detail drill-down. Uses a `System.Windows.Forms.Timer` for 60-second auto-refresh.
+- **Views/StockDashboardView.vb**: WinForms UserControl implementing `IStockDashboardView`. Has five summary card labels, a filter text box, a `DataGridView` for products (use `CellFormatting` event for color-coded status/expiry badge columns), and a bottom detail panel for batch lists. Hooks up events to the Presenter.
 
 ## Feature: INV-11
 
