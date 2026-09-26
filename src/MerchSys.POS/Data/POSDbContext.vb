@@ -12,6 +12,7 @@ Namespace Data
 
         Protected Overrides Sub OnModelCreating(modelBuilder As ModelBuilder)
             MyBase.OnModelCreating(modelBuilder)
+            modelBuilder.ApplyConfigurationsFromAssembly(GetType(POSDbContext).Assembly)
 
             For Each entityType In modelBuilder.Model.GetEntityTypes()
                 entityType.SetTableName("Pos_" & entityType.GetTableName())

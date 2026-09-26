@@ -12,6 +12,7 @@ Namespace Data
 
         Protected Overrides Sub OnModelCreating(modelBuilder As ModelBuilder)
             MyBase.OnModelCreating(modelBuilder)
+            modelBuilder.ApplyConfigurationsFromAssembly(GetType(AccountingDbContext).Assembly)
 
             For Each entityType In modelBuilder.Model.GetEntityTypes()
                 entityType.SetTableName("Acc_" & entityType.GetTableName())

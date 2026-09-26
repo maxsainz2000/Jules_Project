@@ -1,6 +1,8 @@
 Imports System.Linq.Expressions
 Imports System.Threading
 Imports Microsoft.EntityFrameworkCore
+Imports Microsoft.EntityFrameworkCore.Metadata.Builders
+Imports Microsoft.EntityFrameworkCore.Metadata.Conventions
 Imports MerchSys.SharedKernel.Interfaces
 
 Namespace Data
@@ -16,6 +18,7 @@ Namespace Data
             MyBase.ConfigureConventions(configurationBuilder)
             configurationBuilder.Properties(Of String)().
                 HaveMaxLength(256)
+            configurationBuilder.Conventions.Add(Function(sp) New IgnoreNonTokenRowVersionConvention())
         End Sub
 
         Protected Overrides Sub OnModelCreating(modelBuilder As ModelBuilder)
@@ -58,6 +61,23 @@ Namespace Data
 
             Return MyBase.SaveChangesAsync(cancellationToken)
         End Function
+
+        ''' <summary>
+        ''' A model finalizing convention that removes the 'RowVersion' property from entity types
+        ''' unless it has been explicitly mapped as a concurrency token (IsRowVersion).
+        ''' </summary>
+        Private Class IgnoreNonTokenRowVersionConvention
+            Implements IModelFinalizingConvention
+
+            Public Sub ProcessModelFinalizing(modelBuilder As IConventionModelBuilder, context As IConventionContext(Of IConventionModelBuilder)) Implements IModelFinalizingConvention.ProcessModelFinalizing
+                For Each entityType In modelBuilder.Metadata.GetEntityTypes()
+                    Dim rowVersionProp = entityType.FindProperty("RowVersion")
+                    If rowVersionProp IsNot Nothing AndAlso Not rowVersionProp.IsConcurrencyToken Then
+                        entityType.RemoveProperty("RowVersion")
+                    End If
+                Next
+            End Sub
+        End Class
 
     End Class
 
