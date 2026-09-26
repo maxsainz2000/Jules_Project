@@ -39,7 +39,7 @@
 
 ## Phase 2: Shared Kernel & Integration
 - [x] INT-01
-- [ ] INT-02
+- [x] INT-02
 - [ ] INT-03
 - [ ] INT-04
 - [ ] INT-05
