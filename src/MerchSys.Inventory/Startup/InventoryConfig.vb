@@ -24,6 +24,10 @@ Namespace Startup
             ' MVP Registration for Product Management
             services.AddTransient(Of IProductManagementView, ProductManagementView)()
             services.AddTransient(Of ProductManagementPresenter)()
+
+            ' MVP Registration for Expiry Monitor
+            services.AddTransient(Of IExpiryMonitorView, ExpiryMonitorView)()
+            services.AddTransient(Of ExpiryMonitorPresenter)()
         End Sub
 
     End Module
