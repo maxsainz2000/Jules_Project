@@ -11,6 +11,7 @@ Namespace Startup
             services.AddScoped(Of IExpiryTrackingService, ExpiryTrackingService)()
             services.AddScoped(Of IStockDashboardService, StockDashboardService)()
             services.AddScoped(Of ILowStockAlertService, LowStockAlertService)()
+            services.AddScoped(Of IShrinkageService, ShrinkageService)()
         End Sub
 
     End Module
