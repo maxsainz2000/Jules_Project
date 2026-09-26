@@ -18,6 +18,13 @@ Namespace Data
             MyBase.ConfigureConventions(configurationBuilder)
             configurationBuilder.Properties(Of String)().
                 HaveMaxLength(256)
+
+            ' Fix for WinForms DataGridView Boolean binding (MariaDB TINYINT(1))
+            configurationBuilder.Properties(Of Boolean)().HaveConversion(Of Integer)()
+
+            ' Prevent phantom concurrency exceptions caused by WinForms DateTimePicker truncating ms
+            configurationBuilder.Properties(Of DateTime)().HaveColumnType("DATETIME(6)")
+
             configurationBuilder.Conventions.Add(Function(sp) New IgnoreNonTokenRowVersionConvention())
         End Sub
 
