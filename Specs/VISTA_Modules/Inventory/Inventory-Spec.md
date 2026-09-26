@@ -118,10 +118,9 @@ Implemented the Product Management view — a manager-only screen for full produ
 Implemented the Expiry Monitor screen (INV-12) — a dedicated view for monitoring batch expiry dates, with near-expiry alerts, expired batch listing, and one-click write-off to shrinkage.
 
 ### Requirements
-- **MerchSys.Inventory/Presenters/ExpiryMonitorPresenter.vb**: Presenter with two ObservableCollections (`NearExpiryBatches`, `ExpiredBatches`), three summary properties (`NearExpiryCount`, `ExpiredCount`, `TotalValueAtRisk`), a configurable `DaysThreshold` (default 30, clamped 1–365), `WriteOffCommand` (AsyncRelayCommand(Of ExpiryRowItem)), `RefreshCommand`, status feedback properties (`StatusMessage`, `IsStatusError`), and 60-second auto-refresh timer using the `classlib-Presenter-auto-refresh-timer` pattern.
-- Created `MerchSys.Inventory/Presenters/ExpiryRowItem.vb` (nested in the Presenter file) — flat bindable row with `UrgencyLevel` ("Red" ≤7 days, "Orange" 8–14 days, "Yellow" 15–30 days) driving DataGrid row coloring.
-- **MerchSys.App/Views/Inventory/ExpiryMonitorView.Designer code**: three summary cards (NearExpiryCount, ExpiredCount, TotalValueAtRisk), threshold spinner (TextBox + RepeatButtons), TabControl with Near-Expiry and Expired tabs; row styles keyed to `UrgencyLevel`; Expired tab includes a per-row "Write Off" button in a DataGridTemplateColumn.
-- **MerchSys.App/Views/Inventory/ExpiryMonitorView.Designer code.vb**: constructor-injected Presenter, `WriteOffButton_Click` handler (shows MessageBox confirmation before invoking `WriteOffCommand`), threshold spinner handlers, and numeric-only input filter for the threshold TextBox.
+- **MerchSys.Inventory/Views/IExpiryMonitorView.vb**: MVP View interface defining methods to display near-expiry and expired batches, update summary cards (NearExpiryCount, ExpiredCount, TotalValueAtRisk), and events for refresh, changing threshold, and requesting a write-off.
+- **MerchSys.Inventory/Presenters/ExpiryMonitorPresenter.vb**: MVP Presenter implementing the logic. Exposes `ExpiryRowItem` (with `UrgencyLevel` driving row coloring). Injects `IExpiryTrackingService` and `IShrinkageService` (for write-offs). Implements a 60-second auto-refresh timer using `System.Windows.Forms.Timer`.
+- **MerchSys.Inventory/Views/ExpiryMonitorView.vb**: WinForms UserControl implementing `IExpiryMonitorView`. Contains summary cards, a threshold `NumericUpDown`, and a `TabControl` with Near-Expiry and Expired `DataGridView` tabs. The Expired tab includes a `DataGridViewButtonColumn` for the "Write Off" action. Uses `CellFormatting` event for row coloring based on `UrgencyLevel`.
 
 ## Feature: INV-13
 
