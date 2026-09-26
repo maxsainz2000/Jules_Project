@@ -5,5 +5,9 @@ Namespace Entities
         Inherits SoftDeletableEntity
 
         Public Property SKU As String
+        Public Property RetailPrice As Decimal
+        Public Property Unit As String
+        Public Property HasExpiry As Boolean
+        Public Property MinimumThreshold As Integer
     End Class
 End Namespace
