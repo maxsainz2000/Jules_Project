@@ -38,7 +38,7 @@
 - [x] INFRA-34
 
 ## Phase 2: Shared Kernel & Integration
-- [ ] INT-01
+- [x] INT-01
 - [ ] INT-02
 - [ ] INT-03
 - [ ] INT-04
