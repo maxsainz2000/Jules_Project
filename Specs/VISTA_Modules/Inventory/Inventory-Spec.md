@@ -10,7 +10,7 @@ Implemented the five core domain entity classes for the Inventory module as spec
 - **Entities/Product.vb**: `SoftDeletableEntity` subclass; catalog entry with SKU, retail price, unit, HasExpiry flag, and MinimumThreshold; `CurrentStock` and `TotalValue` are service-computed (not stored)
 - **Entities/StockBatch.vb**: `AuditableEntity` subclass; FIFO core with QuantityReceived/Remaining, UnitCost, ReceiptDate, ExpiryDate; `IsExpired` and `IsFullyConsumed` are computed read-only properties; `SourcePurchaseOrderId` is a plain integer (no EF nav)
 - **Entities/ShrinkageRecord.vb**: `AuditableEntity` subclass; captures financial impact of losses with Reason, QuantityLost, UnitCost, TotalValue
-- **Entities/StockAlertConfig.vb**: `AuditableEntity` subclass; per-product alert thresholds with ExpiryAlertDays defaulting to 30
+- **Entities/StockAlertConfig.vb**: `AuditableEntity` subclass; per-product alert thresholds with `ProductId` as Integer, and `ExpiryAlertDays` defaulting to 30
 
 ## Feature: INV-02
 
