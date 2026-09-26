@@ -55,7 +55,7 @@
 - [x] INV-09
 - [x] INV-10
 - [x] INV-11
-- [ ] INV-12
+- [x] INV-12
 - [ ] INV-13
 - [ ] INV-14
 - [ ] INV-15
