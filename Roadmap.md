@@ -47,7 +47,7 @@
 - [x] INV-01
 - [x] INV-02
 - [x] INV-03
-- [ ] INV-04
+- [x] INV-04
 - [ ] INV-05
 - [ ] INV-06
 - [ ] INV-07
