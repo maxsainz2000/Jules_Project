@@ -26,6 +26,11 @@ Namespace Configuration
                 If logger IsNot Nothing Then
                     logger.LogWarning("Sync:MariaDbConnection is missing or empty. Please configure appsettings.Production.json.")
                 End If
+                Return connString
+            End If
+
+            If Not connString.Contains("Pooling=true", StringComparison.OrdinalIgnoreCase) Then
+                connString = connString.TrimEnd(";"c) & ";Pooling=true;Min Pool Size=1;Max Pool Size=100;"
             End If
 
             Return connString

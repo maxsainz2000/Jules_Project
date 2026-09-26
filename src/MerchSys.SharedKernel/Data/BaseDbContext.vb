@@ -31,6 +31,19 @@ Namespace Data
         Protected Overrides Sub OnModelCreating(modelBuilder As ModelBuilder)
             MyBase.OnModelCreating(modelBuilder)
             ApplySoftDeleteFilters(modelBuilder)
+            ApplySecondaryIndexes(modelBuilder)
+        End Sub
+
+        Private Sub ApplySecondaryIndexes(modelBuilder As ModelBuilder)
+            For Each entityType In modelBuilder.Model.GetEntityTypes()
+                If GetType(IAuditable).IsAssignableFrom(entityType.ClrType) Then
+                    Dim idProp = entityType.FindProperty("Id")
+                    Dim createdAtProp = entityType.FindProperty(NameOf(IAuditable.CreatedAt))
+                    If idProp IsNot Nothing AndAlso createdAtProp IsNot Nothing Then
+                        entityType.AddIndex({createdAtProp, idProp})
+                    End If
+                End If
+            Next
         End Sub
 
         Private Sub ApplySoftDeleteFilters(modelBuilder As ModelBuilder)
