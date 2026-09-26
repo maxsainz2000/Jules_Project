@@ -25,6 +25,7 @@ Partial Class MainWindow
         Me.pnlHeader = New System.Windows.Forms.Panel()
         Me.lblUserIdentity = New System.Windows.Forms.Label()
         Me.pnlContent = New System.Windows.Forms.Panel()
+        Me.pnlSidebar = New System.Windows.Forms.Panel()
         Me.pnlHeader.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -49,12 +50,21 @@ Partial Class MainWindow
         Me.lblUserIdentity.TabIndex = 0
         Me.lblUserIdentity.Text = "User"
         '
+        ' pnlSidebar
+        '
+        Me.pnlSidebar.Dock = System.Windows.Forms.DockStyle.Left
+        Me.pnlSidebar.BackColor = System.Drawing.Color.FromArgb(44, 62, 80)
+        Me.pnlSidebar.Location = New System.Drawing.Point(0, 50)
+        Me.pnlSidebar.Name = "pnlSidebar"
+        Me.pnlSidebar.Size = New System.Drawing.Size(200, 400)
+        Me.pnlSidebar.TabIndex = 3
+        '
         ' pnlContent
         '
         Me.pnlContent.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.pnlContent.Location = New System.Drawing.Point(0, 50)
+        Me.pnlContent.Location = New System.Drawing.Point(200, 50)
         Me.pnlContent.Name = "pnlContent"
-        Me.pnlContent.Size = New System.Drawing.Size(800, 400)
+        Me.pnlContent.Size = New System.Drawing.Size(600, 400)
         Me.pnlContent.TabIndex = 2
         '
         'MainWindow
@@ -63,6 +73,7 @@ Partial Class MainWindow
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(800, 450)
         Me.Controls.Add(Me.pnlContent)
+        Me.Controls.Add(Me.pnlSidebar)
         Me.Controls.Add(Me.pnlHeader)
         Me.Name = "MainWindow"
         Me.Text = "MainWindow"
@@ -75,5 +86,6 @@ Partial Class MainWindow
     Friend WithEvents pnlHeader As System.Windows.Forms.Panel
     Friend WithEvents lblUserIdentity As System.Windows.Forms.Label
     Friend WithEvents pnlContent As System.Windows.Forms.Panel
+    Friend WithEvents pnlSidebar As System.Windows.Forms.Panel
 
 End Class

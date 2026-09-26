@@ -61,15 +61,13 @@ Friend Module Program
                                   services.AddScoped(Of LoginPresenter)()
                                   
                                   ' Shell infrastructure
-                                  services.AddScoped(Of ActivityRailPresenter)()
-                                  services.AddScoped(Of ActivityRail)()
-                                  services.AddScoped(Of ModuleDetailPanel)()
-
-                                  services.AddScoped(Of MainWindow)()
-                                  services.AddScoped(Of MainWindowPresenter)()
+                                  services.AddSingleton(Of MainWindow)()
+                                  services.AddSingleton(Of IMainWindowView)(Function(sp) sp.GetRequiredService(Of MainWindow)())
+                                  services.AddSingleton(Of MainWindowPresenter)()
 
                                   services.AddScoped(Of IOwnerDashboardView, OwnerDashboardView)()
                                   services.AddScoped(Of OwnerDashboardPresenter)()
+                                  services.AddTransient(Of Views.StockDashboardView)()
 
                                   services.AddConnectionHealthMonitor()
 
@@ -151,18 +149,12 @@ Friend Module Program
             If loggedIn Then
                 _idleMonitor.Start()
 
-                ' Create a scope for the main window flow
-                Using mainScope = _serviceProvider.CreateScope()
-                    Dim mainWindow = mainScope.ServiceProvider.GetRequiredService(Of MainWindow)()
-                    _mainWindowForm = mainWindow
-                    Dim mainPresenter = mainScope.ServiceProvider.GetRequiredService(Of MainWindowPresenter)()
-                    
-                    ' Wire up the presenters
-                    Dim moduleDetailPanel = mainScope.ServiceProvider.GetRequiredService(Of ModuleDetailPanel)()
-                    moduleDetailPanel.SetPresenter(mainPresenter)
-                    
-                    Application.Run(mainWindow)
-                End Using
+                ' Since MainWindow and MainWindowPresenter are Singletons, we can resolve them directly from the root provider
+                Dim mainWindow = _serviceProvider.GetRequiredService(Of MainWindow)()
+                _mainWindowForm = mainWindow
+                Dim mainPresenter = _serviceProvider.GetRequiredService(Of MainWindowPresenter)()
+
+                Application.Run(mainWindow)
 
                 _idleMonitor.Stop()
                 _mainWindowForm = Nothing
