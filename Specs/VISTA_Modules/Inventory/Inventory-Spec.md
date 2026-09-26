@@ -53,8 +53,8 @@ Implemented batch-level expiry date tracking for perishable products (pesticides
 Implemented the Stock Dashboard Service (INV-05): a read-only aggregation layer that provides the real-time stock dashboard with per-product summaries, FIFO valuation, low-stock/expiry counts, and product-level batch detail.
 
 ### Requirements
-- **Services/IStockDashboardService.vb**: interface + all DTOs (`StockDashboardDto`, `ProductSummaryDto`, `ProductDetailDto`, `StockBatchSummaryDto`, `ShrinkageSummaryDto`, `StockMovementDto`)
-- **Services/StockDashboardService.vb**: concrete implementation with two methods
+- **Services/IStockDashboardService.vb**: interface + all DTOs (`StockDashboardDto`, `ProductSummaryDto`, `ProductDetailDto`, `StockBatchSummaryDto`, `ShrinkageSummaryDto`, `StockMovementDto`). CRITICAL: Since `StockMovement` entities are added in a later integration phase, just implement `StockMovementDto` as an empty stub class for now, and have the service return an empty list for it in `ProductDetailDto`.
+- **Services/StockDashboardService.vb**: concrete implementation with `GetDashboardSummaryAsync` and `GetProductDetailAsync` methods.
 
 ## Feature: INV-06
 
