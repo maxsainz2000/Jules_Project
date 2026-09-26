@@ -4,6 +4,7 @@ Namespace Entities
     Public Class ShrinkageRecord
         Inherits AuditableEntity
 
+        Public Property ProductId As Integer
         Public Property Reason As String
         Public Property QuantityLost As Integer
         Public Property UnitCost As Decimal

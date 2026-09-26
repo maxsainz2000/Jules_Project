@@ -86,7 +86,7 @@ Namespace Services
 
             Dim expiredBatchesData = Await _dbContext.StockBatches.
                 Where(Function(b) b.QuantityRemaining > 0 AndAlso b.ExpiryDate.HasValue AndAlso b.ExpiryDate.Value.Date < today).
-                Select(Function(b) New With { .Id = b.Id, .QuantityRemaining = b.QuantityRemaining, .UnitCost = b.UnitCost }).
+                Select(Function(b) New With { .Id = b.Id, .ProductId = b.ProductId, .QuantityRemaining = b.QuantityRemaining, .UnitCost = b.UnitCost }).
                 ToListAsync()
 
             If Not expiredBatchesData.Any() Then
@@ -97,6 +97,7 @@ Namespace Services
                 Using transaction = Await _dbContext.Database.BeginTransactionAsync()
                     For Each batch In expiredBatchesData
                         Dim shrinkage = New ShrinkageRecord With {
+                            .ProductId = batch.ProductId,
                             .Reason = reason,
                             .QuantityLost = batch.QuantityRemaining,
                             .UnitCost = batch.UnitCost,

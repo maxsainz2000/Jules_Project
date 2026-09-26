@@ -9,6 +9,7 @@ Namespace Startup
         Public Sub AddInventoryServices(services As IServiceCollection)
             services.AddScoped(Of IStockService, StockService)()
             services.AddScoped(Of IExpiryTrackingService, ExpiryTrackingService)()
+            services.AddScoped(Of IStockDashboardService, StockDashboardService)()
         End Sub
 
     End Module
