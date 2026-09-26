@@ -32,6 +32,7 @@ Implemented INT-03: Cross-Module Contracts & Handlers. Wired all outstanding cro
 - **Queries/GetTotalARQuery.vb**: `IRequest(Of Decimal)`; sent by Accounting, handled by POS
 - **Queries/GetTotalAPQuery.vb**: `IRequest(Of Decimal)`; sent by Accounting, handled by Purchasing
 - **Queries/GetLowStockAlertCountQuery.vb**: `IRequest(Of Integer)`; sent by Accounting, handled by Inventory
+- **Handlers (CRITICAL INSTRUCTION FOR AI)**: Since the underlying domain services for Inventory, POS, and Purchasing are not implemented until later phases, you MUST implement the MediatR handlers for these queries in their respective module folders (e.g. `MerchSys.Inventory/Handlers/GetProductCostQueryHandler.vb`) as simple STUBS that return `0` or default values. Ensure these handler classes exist so MediatR can discover them via DI.
 
 ## Feature: INT-04
 
