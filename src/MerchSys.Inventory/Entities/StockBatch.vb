@@ -4,6 +4,7 @@ Namespace Entities
     Public Class StockBatch
         Inherits AuditableEntity
 
+        Public Property ProductId As Integer
         Public Property QuantityReceived As Integer
         Public Property QuantityRemaining As Integer
         Public Property UnitCost As Decimal

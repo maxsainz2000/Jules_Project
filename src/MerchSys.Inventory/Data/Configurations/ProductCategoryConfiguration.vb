@@ -8,6 +8,8 @@ Namespace Data.Configurations
 
         Public Sub Configure(builder As EntityTypeBuilder(Of ProductCategory)) Implements IEntityTypeConfiguration(Of ProductCategory).Configure
             builder.ToTable("ProductCategories")
+
+            builder.Property(Function(e) e.Name).HasMaxLength(100)
             builder.HasIndex(Function(e) e.Name).IsUnique()
         End Sub
     End Class
