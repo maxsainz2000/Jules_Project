@@ -1,3 +1,4 @@
+Imports MerchSys.Inventory.Startup
 Imports System.Windows.Forms
 Imports Microsoft.Extensions.DependencyInjection
 Imports Microsoft.Extensions.Hosting
@@ -77,6 +78,7 @@ Friend Module Program
 
                                   ' Add Purchasing
                                   services.AddPurchasingServices()
+                                  services.AddInventoryServices()
 
                                   ' Add Low Stock Notifier
                                   services.AddSingleton(Of ILowStockNotifier, WinFormsLowStockNotifier)()
