@@ -11,6 +11,7 @@ Namespace Services
         Public Property ProductId As Integer
         Public Property ProductName As String
         Public Property SKU As String
+        Public Property CurrentStock As Integer
         Public Property AverageDailySales As Decimal
         Public Property Category As VelocityCategory
     End Class

@@ -16,7 +16,7 @@ Namespace Services
         Public Async Function GetProductVelocitiesAsync() As Task(Of List(Of ProductVelocityDto)) Implements IVelocityService.GetProductVelocitiesAsync
             Dim products = Await _db.Products.
                 Where(Function(prod) Not prod.IsDeleted).
-                Select(Function(prod) New With { prod.Id, prod.Name, prod.SKU }).
+                Select(Function(prod) New With { prod.Id, prod.Name, prod.SKU, .CurrentStock = _db.StockBatches.Where(Function(b) b.ProductId = prod.Id).Sum(Function(b) CType(b.QuantityRemaining, Integer?)) }).
                 ToListAsync()
 
             Dim batches = Await _db.StockBatches.
@@ -58,6 +58,7 @@ Namespace Services
                     .ProductId = p.Id,
                     .ProductName = p.Name,
                     .SKU = p.SKU,
+                    .CurrentStock = If(p.CurrentStock.HasValue, p.CurrentStock.Value, 0),
                     .AverageDailySales = avgDailySales,
                     .Category = cat
                 })

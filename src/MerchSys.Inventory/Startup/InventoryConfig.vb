@@ -13,6 +13,7 @@ Namespace Startup
             services.AddScoped(Of ILowStockAlertService, LowStockAlertService)()
             services.AddScoped(Of IShrinkageService, ShrinkageService)()
             services.AddScoped(Of IVelocityService, VelocityService)()
+            services.AddScoped(Of IStockoutEstimationService, StockoutEstimationService)()
         End Sub
 
     End Module
