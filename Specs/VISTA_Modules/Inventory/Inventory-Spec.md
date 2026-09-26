@@ -139,16 +139,13 @@ Implemented the Product RetailPrice Change History feature — a secure, append-
 
 ### Requirements
 - **MerchSys.Inventory/Entities/ProductPriceHistory.vb**: Append-only domain model with `ProductId`, `OldPrice`, `NewPrice`, `ChangedAt`, `ChangedBy`, and `Reason`.
-- **MerchSys.Inventory/Data/Configurations/ProductPriceHistoryConfiguration.vb**: Maps to `Inv_ProductPriceHistory`, applies precision/scale controls, configures composite index, and restricts hard deletion.
-- **MerchSys.Inventory/Data/InventoryDbContext.vb**: Registered new `DbSet(Of ProductPriceHistory)`.
-- Created manual migration baseline `MerchSys.Inventory/Migrations/20260527100000_AddProductPriceHistory.vb`.
-- **MerchSys.App/Data/DatabaseInitializer.vb**: Registered the baseline migration and wrote the idempotent ADO.NET SQL migration script to apply the schema (table and index) automatically on app startup.
-- **MerchSys.Inventory/Presenters/ProductPriceHistoryPresenter.vb**: Popup viewer Presenter exposing list loading via explicit DTO projection (`PriceHistoryRowItem`) to circumvent the VB.NET full-entity query silent empty bug.
-- **MerchSys.Inventory/Presenters/ProductManagementPresenter.vb**: Injected `ISessionService` to fetch user credentials, added change reason binding `EditorPriceChangeReason`, and transactionally wrote price histories inside `SaveProductAsync` if prices changed.
-- **MerchSys.App/Application.Designer code.vb**: Registered the view model and popup window view in the startup DI container.
-- **MerchSys.App/Views/Inventory/ProductManagementView.Designer code**: Wired the "Price History" button next to existing toolbar actions and added the "Price Change Reason (optional)" textbox in the product edit card overlay.
-- **MerchSys.App/Views/Inventory/ProductManagementView.Designer code.vb**: Injected `IServiceProvider` and wrote the button click handler to dynamically instantiate, initialize, and display the history dialog.
-- Created `MerchSys.App/Views/Inventory/ProductPriceHistoryView.Designer code` & `ProductPriceHistoryView.Designer code.vb` — WinForms Window popup showcasing a premium DataGrid ledger with colored price deltas (green for increase, red for decrease) and operating logs.
+- **MerchSys.Inventory/Data/Configurations/ProductPriceHistoryConfiguration.vb**: Maps to `Inv_ProductPriceHistory`, applies precision/scale (18,2) controls, and configures composite index.
+- **MerchSys.Inventory/Data/InventoryDbContext.vb**: Register `DbSet(Of ProductPriceHistory)`. `DatabaseInitializer` will pick it up automatically via `EnsureCreatedAsync()`, so NO manual ADO.NET migrations are needed.
+- **MerchSys.Inventory/Views/IProductPriceHistoryView.vb**: MVP View interface for the popup.
+- **MerchSys.Inventory/Presenters/ProductPriceHistoryPresenter.vb**: MVP Presenter for the popup viewer. It exposes a `PriceHistoryRowItem` DTO to avoid EF Core bugs.
+- **MerchSys.Inventory/Presenters/ProductManagementPresenter.vb**: Update to inject `ISessionService` (or create an `IUserService` stub if it doesn't exist), and transactionally write price histories inside `SaveProductAsync` if the retail price changed.
+- **MerchSys.Inventory/Views/ProductManagementView.vb**: Add a "Price History" button next to existing toolbar actions. It resolves the new Presenter/View and calls `.ShowDialog()`.
+- **MerchSys.Inventory/Views/Dialogs/ProductPriceHistoryDialog.vb**: WinForms Form implementing `IProductPriceHistoryView`. Contains a DataGridView ledger. Use `CellFormatting` event to color the price delta column.
 
 ## Feature: INV-15
 
