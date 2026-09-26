@@ -53,7 +53,7 @@
 - [x] INV-07
 - [x] INV-08
 - [x] INV-09
-- [ ] INV-10
+- [x] INV-10
 - [ ] INV-11
 - [ ] INV-12
 - [ ] INV-13
