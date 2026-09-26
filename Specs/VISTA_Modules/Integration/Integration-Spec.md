@@ -15,11 +15,10 @@ Implemented the App Composition Root (INT-01): wired all module services, Presen
 Implemented Shell Navigation & View Wiring (INT-02): created the `NavigationItem`/`NavigationGroup` models, `MainWindowPresenter` (MVP navigation hub), rewired `MainWindow.Designer code` with a grouped sidebar, and updated `Application.Designer code.vb` to register all 16 Views, the 3 missing Purchasing Presenters, and the shell components.
 
 ### Requirements
-- **Models/NavigationItem.vb**: `NavigationItem` (observable `IsActive` for active highlighting) and `NavigationGroup` (group name + items list)
-- **Presenters/MainWindowPresenter.vb**: holds `NavigationGroups` (4 module groups, 16 items total; a 17th entry for `VatReturnView` was added in ACC-11/INT-13 via `BuildAccountingNavItems()` gated on `UserRole.Manager`), `CurrentView` (bound to content area), and `NavigateCommand` (resolves view from `IServiceProvider`, toggles `IsActive`); `NavigateToDefault()` opens `StockDashboardView` on launch
-- **MainWindow.Designer code**: full sidebar with dark theme (#2C3E50), app title, grouped nav items via nested `ItemsControl`, `NavItemButton` style with active (#3D566E) and hover (#34495E) states, `ContentControl` bound to `CurrentView`
-- **MainWindow.Designer code.vb**: constructor injection of `MainWindowPresenter`; `MainWindow_Loaded` calls `NavigateToDefault()`
-- **Application.Designer code.vb**: registered all 16 Views as Transient; registered 3 previously-missing Purchasing Presenters (`PurchaseOrderListPresenter`, `GoodsReceivingPresenter`, `VendorListPresenter`) as Transient; registered `MainWindowPresenter` and `MainWindow` as Singleton; `Application_Startup` resolves `ILowStockNotifier` on the UI thread (Notification.WinForms initialisation) then shows `MainWindow` from DI
+- **Models/NavigationItem.vb**: Simple class holding `Name As String`, `ViewType As Type`, `IsActive As Boolean` and `NavigationGroup As String`.
+- **Presenters/MainWindowPresenter.vb**: MVP Presenter holding `NavigationGroups` (4 module groups) and the `IMainWindowView`. Method `NavigateTo(viewType As Type)` resolves the module view from `IServiceProvider` (or factory) and tells the view to render it in the main content area. `NavigateToDefault()` opens the default view (e.g., `StockDashboardView` or whatever the first inventory view is).
+- **Views/MainWindow.vb**: A WinForms Form implementing `IMainWindowView`. It should have a sidebar `Panel` (Dock=Left, BackColor=#2C3E50) containing dynamically generated `Button` controls for nav items, and a content `Panel` (Dock=Fill). When a nav button is clicked, it calls the presenter. When the presenter tells the view to show a user control, it clears the content `Panel` and adds the new user control (Dock=Fill).
+- **Program.vb**: Register `MainWindow` and `MainWindowPresenter` as Singleton in DI. `Program.vb` resolves `MainWindowPresenter`, binds the view, and starts the application message loop using the `MainWindow` instance. Ensure all existing views referenced in the navigation are registered as Transient.
 
 ## Feature: INT-03
 
