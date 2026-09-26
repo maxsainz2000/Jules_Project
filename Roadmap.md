@@ -44,7 +44,7 @@
 - [x] INT-04
 
 ## Phase 3: Inventory
-- [ ] INV-01
+- [x] INV-01
 - [ ] INV-02
 - [ ] INV-03
 - [ ] INV-04
