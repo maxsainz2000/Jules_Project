@@ -1,7 +1,7 @@
 Imports MerchSys.SharedKernel.Entities
 
 Namespace Entities
-    Public Class Category
+    Public Class ProductCategory
         Inherits SoftDeletableEntity
 
         Public Property Name As String

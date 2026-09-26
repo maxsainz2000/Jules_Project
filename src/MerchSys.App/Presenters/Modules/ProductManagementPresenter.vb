@@ -36,28 +36,28 @@ Namespace Presenters.Modules
             Return newProduct
         End Function
 
-        Public Async Function SaveCategoryAsync(name As String) As Task(Of Category)
-            ' Policy B: Friendly duplicate handling for Category Name
-            Dim existingCategory = Await _dbContext.Set(Of Category)().
+        Public Async Function SaveProductCategoryAsync(name As String) As Task(Of ProductCategory)
+            ' Policy B: Friendly duplicate handling for ProductCategory Name
+            Dim existingProductCategory = Await _dbContext.Set(Of ProductCategory)().
                 IgnoreQueryFilters().
                 FirstOrDefaultAsync(Function(c) c.Name = name)
 
-            If existingCategory IsNot Nothing Then
-                If existingCategory.IsDeleted Then
+            If existingProductCategory IsNot Nothing Then
+                If existingProductCategory.IsDeleted Then
                     Throw New Exception($"A deleted category already exists with the name '{name}'. Please restore it or choose a different name.")
                 Else
                     Throw New Exception($"A category already exists with the name '{name}'.")
                 End If
             End If
 
-            Dim newCategory As New Category With {
+            Dim newProductCategory As New ProductCategory With {
                 .Name = name
             }
 
-            _dbContext.Set(Of Category)().Add(newCategory)
+            _dbContext.Set(Of ProductCategory)().Add(newProductCategory)
             Await _dbContext.SaveChangesAsync()
 
-            Return newCategory
+            Return newProductCategory
         End Function
     End Class
 End Namespace
