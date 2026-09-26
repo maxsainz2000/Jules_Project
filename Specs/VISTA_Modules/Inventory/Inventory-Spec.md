@@ -108,9 +108,9 @@ Implemented the Stock Dashboard View — the primary Inventory screen. Provides 
 Implemented the Product Management view — a manager-only screen for full product catalog CRUD and category management. Based on INV-11.
 
 ### Requirements
-- **Presenters/ProductManagementPresenter.vb**: Presenter with product CRUD, category CRUD, filtering, and overlay dialog state. Injects `InventoryDbContext` directly. Exposes `ProductManagementRowItem` and `CategoryManagementItem` row types.
-- **Views/Inventory/ProductManagementView.Designer code**: TabControl with Products tab (DataGrid + toolbar + overlay product editor) and Categories sub-tab (DataGrid + overlay category editor). Deactivate/Reactivate button toggles using `Style.Triggers` on `SelectedProductIsActive`.
-- **Views/Inventory/ProductManagementView.Designer code.vb**: Code-behind; constructor-injected Presenter, Escape key clears search.
+- **Views/IProductManagementView.vb**: MVP View interface defining properties for product/category lists, current selection, and events for Add/Edit/Delete/Save.
+- **Presenters/ProductManagementPresenter.vb**: MVP Presenter implementing product CRUD and category CRUD. Injects `InventoryDbContext` directly. Exposes `ProductManagementRowItem` and `CategoryManagementItem` row types.
+- **Views/ProductManagementView.vb**: WinForms UserControl implementing `IProductManagementView`. Contains a `TabControl` with Products tab (DataGridView + toolbar) and Categories tab (DataGridView). Uses standard WinForms `Form.ShowDialog()` for add/edit forms instead of overlay dialog state.
 
 ## Feature: INV-12
 
