@@ -42,25 +42,6 @@
 - [x] INT-02
 - [x] INT-03
 - [x] INT-04
-- [ ] INT-05
-- [ ] INT-06
-- [ ] INT-07
-- [ ] INT-08
-- [ ] INT-09
-- [ ] INT-10
-- [ ] INT-11
-- [ ] INT-12
-- [ ] INT-13
-- [ ] INT-14
-- [ ] INT-15
-- [ ] INT-16
-- [ ] INT-17
-- [ ] INT-19
-- [ ] INT-20
-- [ ] INT-21
-- [ ] INT-22
-- [ ] INT-23
-- [ ] INT-24
 
 ## Phase 3: Inventory
 - [ ] INV-01
@@ -191,3 +172,24 @@
 - [ ] UX-50
 
 
+
+## Phase 6.5: Integration Enhancements
+- [ ] INT-05
+- [ ] INT-06
+- [ ] INT-07
+- [ ] INT-08
+- [ ] INT-09
+- [ ] INT-10
+- [ ] INT-11
+- [ ] INT-12
+- [ ] INT-13
+- [ ] INT-14
+- [ ] INT-15
+- [ ] INT-16
+- [ ] INT-17
+- [ ] INT-19
+- [ ] INT-20
+- [ ] INT-21
+- [ ] INT-22
+- [ ] INT-23
+- [ ] INT-24
