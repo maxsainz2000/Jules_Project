@@ -28,6 +28,10 @@ Namespace Startup
             ' MVP Registration for Expiry Monitor
             services.AddTransient(Of IExpiryMonitorView, ExpiryMonitorView)()
             services.AddTransient(Of ExpiryMonitorPresenter)()
+
+            ' MVP Registration for Shrinkage
+            services.AddTransient(Of IShrinkageView, ShrinkageView)()
+            services.AddTransient(Of ShrinkagePresenter)()
         End Sub
 
     End Module
