@@ -1,7 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\MerchSys.SharedKernel\MerchSys.SharedKernel.vbproj" />
+    <ProjectReference Include="..\Notification.WinForms\Notification.WinForms.vbproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -12,7 +13,9 @@
 
   <PropertyGroup>
     <RootNamespace>MerchSys.Inventory</RootNamespace>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
 
 </Project>
