@@ -44,17 +44,9 @@ Generated manual EF Core migrations for all four module DbContexts (Purchasing, 
 - **Data/InventoryDbContextFactory.vb**: same pattern for Inventory
 - **Data/POSDbContextFactory.vb**: same pattern for POS
 - **Data/AccountingDbContextFactory.vb**: same pattern for Accounting
-- **Migrations/20260507100001_InitialPurchasing.vb**: manual migration for 9 Purchasing tables + 3 vendor seed rows
-- **Migrations/PurchasingDbContextModelSnapshot.vb**: model snapshot for future migration diffs
-- **Migrations/20260507100002_InitialInventory.vb**: manual migration for 5 Inventory tables + 4 categories + 20 product seed rows
-- **Migrations/InventoryDbContextModelSnapshot.vb**: model snapshot
-- **Migrations/20260507100003_InitialPOS.vb**: manual migration for 6 POS tables + 3 credit account seed rows
-- **Migrations/POSDbContextModelSnapshot.vb**: model snapshot
-- **Migrations/20260507100004_InitialAccounting.vb**: manual migration for 4 Accounting tables (no seed data)
-- **Migrations/AccountingDbContextModelSnapshot.vb**: model snapshot
-- **Data/DatabaseInitializer.vb**: ADO.NET initializer that applies all 4 migrations idempotently on app startup (workaround for EF CLI VB.NET bug)
-- **Application.Designer code.vb**: calls `DatabaseInitializer.Initialize()` before the main window is shown
-- Added `Microsoft.EntityFrameworkCore.Design` v10.0.7 to `MerchSys.App.vbproj` (required for EF CLI startup project)
+- **Data/DatabaseInitializer.vb**: ADO.NET initializer that ensures all 4 databases/contexts are initialized idempotently on app startup. (CRITICAL INSTRUCTION FOR AI: Since the domain entities for Inventory, POS, and Accounting do not exist yet, do NOT attempt to write out the full manual migrations for all 24 tables right now. Instead, just scaffold the empty/basic `DbContext` classes and their factories, and have `DatabaseInitializer` call `Database.EnsureCreatedAsync()` or similar basic initialization for now).
+- **Program.vb**: calls `DatabaseInitializer.Initialize()` (or similar) before the main window is shown
+- Added `Microsoft.EntityFrameworkCore.Design` (latest compatible version) to `MerchSys.App.vbproj`
 - Installed `dotnet-ef` 10.0.7 global tool
 
 ## Feature: INT-05
