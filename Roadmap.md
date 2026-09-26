@@ -49,7 +49,7 @@
 - [x] INV-03
 - [x] INV-04
 - [x] INV-05
-- [ ] INV-06
+- [x] INV-06
 - [ ] INV-07
 - [ ] INV-08
 - [ ] INV-09
