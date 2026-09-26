@@ -6,8 +6,8 @@
 Implemented the App Composition Root (INT-01): wired all module services, Presenters, and MediatR into the `Application.Designer code.vb` DI container, and created the `WinFormsLowStockNotifier` concrete class.
 
 ### Requirements
-- **Program.vb**: replaced the placeholder TODO comments with full DI registrations for all modules; added calls to `AddModuleDbContexts()`, `AddMediatRServices()`, and `AddPurchasingServices()` (extension method); inlined Inventory, POS, and Accounting registrations. (CRITICAL INSTRUCTION FOR AI: Do not leave ANY TODO comments. You must fully inline the `AddTransient`/`AddScoped` calls for EVERY single service and presenter belonging to Inventory, POS, and Accounting by inspecting their respective folders).
-- **Services/WinFormsLowStockNotifier.vb**: concrete `ILowStockNotifier` implementation backed by `Notification.WinForms`'s `NotificationManager`
+- **Program.vb**: replaced the placeholder TODO comments with full DI registrations for all modules; added calls to `AddModuleDbContexts()`, `AddMediatRServices()`, and `AddPurchasingServices()` (extension method); inlined Inventory, POS, and Accounting registrations. (CRITICAL INSTRUCTION FOR AI: Do not leave ANY TODO comments. You must fully inline the `AddTransient`/`AddScoped` calls for EVERY single class/interface belonging to Inventory, POS, and Accounting. This includes ALL Domain Services, Repositories, and Handlers by deeply inspecting their respective project folders, NOT just the UI Presenters/Views!)
+- **Services/WinFormsLowStockNotifier.vb**: Ensure the `ILowStockNotifier` interface exists (create it in `MerchSys.SharedKernel` if it doesn't). Then create the `WinFormsLowStockNotifier` class that `Implements ILowStockNotifier` and is backed by `Notification.WinForms`'s `NotificationManager`.
 
 ## Feature: INT-02
 
