@@ -34,7 +34,7 @@
 - [x] INFRA-30
 - [x] INFRA-31
 - [x] INFRA-32
-- [ ] INFRA-33
+- [x] INFRA-33
 - [ ] INFRA-34
 
 ## Phase 2: Shared Kernel & Integration
