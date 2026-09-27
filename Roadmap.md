@@ -64,7 +64,7 @@
 - [x] PUR-01
 - [x] PUR-02
 - [x] PUR-03
-- [ ] PUR-04
+- [x] PUR-04
 - [ ] PUR-05
 - [ ] PUR-06
 - [ ] PUR-07
