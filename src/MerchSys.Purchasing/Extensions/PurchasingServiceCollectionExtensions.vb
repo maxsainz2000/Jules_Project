@@ -10,6 +10,7 @@ Namespace Extensions
             services.AddScoped(Of IGoodsReceivingService, GoodsReceivingService)()
             services.AddScoped(Of IVendorService, VendorService)()
             services.AddScoped(Of IAccountsPayableService, AccountsPayableService)()
+            services.AddScoped(Of IReorderService, ReorderService)()
         End Sub
     End Module
 End Namespace
