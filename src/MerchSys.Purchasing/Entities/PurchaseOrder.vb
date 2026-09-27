@@ -6,6 +6,7 @@ Namespace Entities
         Inherits SoftDeletableEntity
 
         Public Property OrderNumber As String
+        Public Property VendorId As Integer
         Public Property Status As PurchaseOrderStatus
     End Class
 End Namespace

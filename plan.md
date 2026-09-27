@@ -1,20 +1,17 @@
-1. **Shared paging contract (SharedKernel) - NEW**
-   - The files `PageRequest.vb` and `PagedResult(Of T).vb` have been added to `src/MerchSys.SharedKernel/Paging/` with the exact properties required. I will just verify and maybe fix `PagedResult` to match instructions (e.g. `NextCursorDate` as `DateTime?`, `NextCursorId` as `Integer?`).
-
-2. **Data-Access Resiliency Hardening - Secondary Indexes**
-   - I'll add the index configuration `.HasIndex(Function(e) New With { e.CreatedAt, e.Id })` for history queries on tables that implement `AuditableEntity`. Let's identify the entities that need it: `PurchaseOrder`, `VendorProduct`, `PurchaseOrderLine`, `Vendor`, `ReorderConfig`, `StockAlertConfig`, `Category`, `Product`, `VatReturn`, `FinancialPeriod`, `VatConfiguration`. Let's verify which ones have `CreatedAt`. Wait, I can just apply it to all of them if they inherit from `AuditableEntity` or `SoftDeletableEntity` (which inherits from `AuditableEntity`). I'll add the indexes to their `IEntityTypeConfiguration` in the respective `Data/Configurations` folders.
-
-3. **Data-Access Resiliency Hardening - Explicit Connection Pooling**
-   - Add `"Pooling": true` and limits to the `appsettings.json` connection string setup or update `appsettings.Production.template.json`. I'll update `src/MerchSys.App/appsettings.Production.template.json` to have `"MariaDbConnection": "Server=<Server>;Database=merchsys_central;Uid=merchsys_sync;Pwd=<Password>;Pooling=true;Min Pool Size=5;Max Pool Size=100;"`.
-
-4. **Query Pagination Migration**
-   - *Requirement:* Refactor the unbounded history queries across all module repositories/services to consume `PageRequest` and return `PagedResult(Of T)` using keyset pagination.
-   - If there are currently *no* unbounded history queries (which is what my grepping shows), memory states: "When a task directs modifying 'missing' files or entities, immediately scaffold or create minimal versions of them if they are not found in the current branch, rather than searching other branches or requesting user confirmation."
-   - Therefore, I will **create** minimal history querying methods that consume `PageRequest` and return `PagedResult(Of T)` across the services. E.g., `GetPurchaseOrderHistoryAsync(request As PageRequest)` in `PurchaseOrderService`, `GetProductHistoryAsync` in some Inventory service, etc. Wait, I should add them to existing services or create new ones if needed.
-   - Specifically, I'll add `GetHistoryAsync(request As PageRequest)` in `PurchaseOrderService`, `VendorProductService`, `VendorService` etc. using keyset pagination: `"WHERE CreatedAt < CursorDate OR (CreatedAt = CursorDate AND Id < CursorId) ORDER BY CreatedAt DESC, Id DESC LIMIT PageSize + 1"`. Or I can use EF Core LINQ.
-   - Wait, memory says: "Due to an EF Core 10 VB.NET bug, `ToListAsync()` on a full entity query silently returns an empty list. Use a raw `MySqlConnector.MySqlConnection` reader loop instead. `CountAsync()` and scalar projections work normally."
-   - This means I need to write raw SQL + `MySqlCommand` + `ExecuteReaderAsync()` to implement keyset pagination in these methods!
-   - I'll add a `GetHistoryAsync(request As PageRequest)` in `PurchaseOrderService`. I'll do this for one main entity in each module, or the ones that clearly represent history (e.g., `PurchaseOrder`, `VatReturn`).
-
-5. **Pre commit checks**
-   - Call `pre_commit_instructions` and follow them before `submit`.
+1. **Update `PurchasingDbContext.vb`**
+   - Add DbSet properties for `Vendor`, `PurchaseOrder`, `PurchaseOrderLine`, `GoodsReceipt`, `GoodsReceiptLine`, and `AccountsPayableEntry`.
+   - Wire `PurchasingSeedData.Seed(modelBuilder)` into `OnModelCreating`.
+2. **Update/Create EF Core Configurations**
+   - **`VendorConfiguration.vb`**: Map to `Vendors` (so it becomes `Pur_Vendors`), set a unique index on `Name`, and configure a cascade delete restriction to `PurchaseOrders`.
+   - **`PurchaseOrderConfiguration.vb`**: Map to `PurchaseOrders` (becomes `Pur_PurchaseOrders`), set a unique index on `OrderNumber`, and configure cascade deletes for `Lines` and `GoodsReceipts`. Wait, I need to check if there are navigation properties. If there are no navigation properties (as per memory), I can't configure cascade deletes using EF Core navigation properties on the relationship. Let me re-read the memory: "When referencing entities across different modules or aggregates, use plain integer IDs (e.g., SourcePurchaseOrderId) without creating Entity Framework navigation properties." But inside the *same* module, do they use navigation properties? Let me check `PurchaseOrder.vb` and `Vendor.vb`. They don't have navigation properties. If they don't have navigation properties, EF Core relationships might be configured via `HasMany().WithOne()` or not at all. Let me check the entities again.
+   Wait, if there are no navigation properties, I can still configure the foreign keys in the Configuration classes using `HasOne(Of Vendor)().WithMany().HasForeignKey(...)`. I will add this.
+   - **`PurchaseOrderLineConfiguration.vb`**: Map to `PurchaseOrderLines` (wait, the prompt says "map to Pur_PurchaseOrderLines", but wait: if the context prepends `Pur_`, then I should map to `PurchaseOrderLines` as per the memory: "Because module table prefixes (e.g., 'Inv_') are dynamically prepended in the OnModelCreating loop of module DbContexts, EF Core builder.ToTable() configurations inside IEntityTypeConfiguration classes must specify the unprefixed table name (e.g., 'Products', not 'Inv_Products')."). So for `PurchaseOrderLine` I will use `.ToTable("PurchaseOrderLines")`. Set precision `(18,4)` on `UnitCost` and `(18,2)` on `LineTotal`.
+   - **`GoodsReceiptConfiguration.vb`**: Map to `GoodsReceipts`, set a unique index on `ReceiptNumber`, cascade delete to `Lines`.
+   - **`GoodsReceiptLineConfiguration.vb`**: Map to `GoodsReceiptLines`, set precision `(18,4)` on `UnitCost`.
+   - **`AccountsPayableConfiguration.vb`**: Map to `AccountsPayable`, set precision `(18,2)` on monetary columns, add composite index on `VendorId` + `IsPaid`.
+3. **Add `PurchasingSeedData.vb`**
+   - Seed 3 sample vendors: AgriChem Supplies (5-day lead), FarmFresh Seeds Corp. (7-day lead), Golden Feeds Trading (3-day lead).
+4. **Complete pre-commit steps**
+   - Complete pre-commit steps to ensure proper testing, verification, review, and reflection are done.
+5. **Submit changes**
+   - Push to branch and submit.
