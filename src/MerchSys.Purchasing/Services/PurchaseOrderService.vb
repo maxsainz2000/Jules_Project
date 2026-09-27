@@ -142,6 +142,9 @@ Namespace Services
 
             Dim apEntry As New AccountsPayableEntry With {
                 .VendorId = po.VendorId,
+                .PurchaseOrderId = po.Id,
+                .InvoiceDate = DateTime.UtcNow,
+                .DueDate = DateTime.UtcNow.AddDays(30),
                 .TotalAmount = po.TotalAmount,
                 .AmountPaid = 0,
                 .IsPaid = False

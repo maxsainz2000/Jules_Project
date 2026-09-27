@@ -6,6 +6,9 @@ Namespace Entities
         Inherits AuditableEntity
 
         Public Property VendorId As Integer
+        Public Property PurchaseOrderId As Integer?
+        Public Property InvoiceDate As DateTime
+        Public Property DueDate As DateTime
         Public Property TotalAmount As Decimal
         Public Property AmountPaid As Decimal
         Public Property IsPaid As Boolean
