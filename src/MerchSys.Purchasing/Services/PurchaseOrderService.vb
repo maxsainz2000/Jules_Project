@@ -67,7 +67,7 @@ Namespace Services
             Return result
         End Function
 
-        Public Async Function CreateDraftAsync(Optional notes As String = Nothing, Optional expectedDeliveryDate As DateTime? = Nothing) As Task(Of PurchaseOrder) Implements IPurchaseOrderService.CreateDraftAsync
+        Public Async Function CreateDraftAsync(vendorId As Integer, Optional notes As String = Nothing, Optional expectedDeliveryDate As DateTime? = Nothing) As Task(Of PurchaseOrder) Implements IPurchaseOrderService.CreateDraftAsync
             Dim year = DateTime.UtcNow.Year
             Dim prefix = "PO"
             Dim prefixFilter = $"{prefix}-{year.ToString("0000")}-"
@@ -85,6 +85,7 @@ Namespace Services
                 .Status = PurchaseOrderStatus.Draft,
                 .Notes = notes,
                 .ExpectedDeliveryDate = expectedDeliveryDate,
+                .VendorId = vendorId,
                 .TotalAmount = 0
             }
 
@@ -94,10 +95,11 @@ Namespace Services
             Return newPo
         End Function
 
-        Public Async Function UpdateDraftAsync(id As Integer, Optional notes As String = Nothing, Optional expectedDeliveryDate As DateTime? = Nothing) As Task(Of PurchaseOrder) Implements IPurchaseOrderService.UpdateDraftAsync
+        Public Async Function UpdateDraftAsync(id As Integer, vendorId As Integer, Optional notes As String = Nothing, Optional expectedDeliveryDate As DateTime? = Nothing) As Task(Of PurchaseOrder) Implements IPurchaseOrderService.UpdateDraftAsync
             Dim po = Await _dbContext.Set(Of PurchaseOrder)().FindAsync(id)
             If po Is Nothing Then Throw New InvalidOperationException("Purchase order not found.")
             If po.Status <> PurchaseOrderStatus.Draft Then Throw New InvalidOperationException("Only draft purchase orders can be updated.")
+            po.VendorId = vendorId
 
             If notes IsNot Nothing Then po.Notes = notes
             If expectedDeliveryDate IsNot Nothing Then po.ExpectedDeliveryDate = expectedDeliveryDate
@@ -163,6 +165,7 @@ Namespace Services
                 .PurchaseOrderId = id,
                 .ProductName = line.ProductName,
                 .UnitCost = line.UnitCost,
+                .Quantity = line.Quantity,
                 .LineTotal = line.LineTotal
             }
 
