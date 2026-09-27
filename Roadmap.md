@@ -63,7 +63,7 @@
 ## Phase 4: Purchasing
 - [x] PUR-01
 - [x] PUR-02
-- [ ] PUR-03
+- [x] PUR-03
 - [ ] PUR-04
 - [ ] PUR-05
 - [ ] PUR-06
