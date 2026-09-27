@@ -138,6 +138,7 @@ Implemented the Shrinkage View — a WinForms screen for recording inventory los
 Implemented the Product RetailPrice Change History feature — a secure, append-only database transaction history tracking changes to a product's retail price (who changed it, when it changed, previous/current prices, and the change reason), coupled with an interactive read-only popup viewer launched from the main Product Management panel.
 
 ### Requirements
+- **[CRITICAL JULES INSTRUCTION]**: You must successfully create a branch, write the code, and push the PR. Do not abort the session without pushing.
 - **MerchSys.Inventory/Entities/ProductPriceHistory.vb**: Append-only domain model with `ProductId`, `OldPrice`, `NewPrice`, `ChangedAt`, `ChangedBy`, and `Reason`.
 - **MerchSys.Inventory/Data/Configurations/ProductPriceHistoryConfiguration.vb**: Maps to `Inv_ProductPriceHistory`, applies precision/scale (18,2) controls, and configures composite index.
 - **MerchSys.Inventory/Data/InventoryDbContext.vb**: Register `DbSet(Of ProductPriceHistory)`. `DatabaseInitializer` will pick it up automatically via `EnsureCreatedAsync()`, so NO manual ADO.NET migrations are needed.
