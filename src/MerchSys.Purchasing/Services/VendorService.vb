@@ -3,16 +3,20 @@ Imports MerchSys.Purchasing.Data
 Imports MerchSys.Purchasing.Entities
 Imports System.Threading.Tasks
 Imports System
+Imports System.Linq
+Imports System.Collections.Generic
 
 Namespace Services
     Public Class VendorService
+        Implements IVendorService
+
         Private ReadOnly _dbContext As PurchasingDbContext
 
         Public Sub New(dbContext As PurchasingDbContext)
             _dbContext = dbContext
         End Sub
 
-        Public Async Function GetHistoryAsync(request As MerchSys.SharedKernel.Paging.PageRequest) As Task(Of MerchSys.SharedKernel.Paging.PagedResult(Of Vendor))
+        Public Async Function GetHistoryAsync(request As MerchSys.SharedKernel.Paging.PageRequest) As Task(Of MerchSys.SharedKernel.Paging.PagedResult(Of Vendor)) Implements IVendorService.GetHistoryAsync
             Dim result As New MerchSys.SharedKernel.Paging.PagedResult(Of Vendor)()
             Dim conn = DirectCast(_dbContext.Database.GetDbConnection(), MySqlConnector.MySqlConnection)
             Await _dbContext.Database.OpenConnectionAsync()
@@ -57,8 +61,9 @@ Namespace Services
             Return result
         End Function
 
-        Public Async Function CreateAsync(name As String) As Task(Of Vendor)
+        Public Async Function CreateAsync(dto As CreateVendorDto) As Task(Of VendorDetailDto) Implements IVendorService.CreateAsync
             ' Policy B: Friendly duplicate handling. Check against all (including soft-deleted).
+            Dim name = dto.Name
             Dim existingVendor = Await _dbContext.Set(Of Vendor)().
                 IgnoreQueryFilters().
                 FirstOrDefaultAsync(Function(v) v.Name = name)
@@ -72,17 +77,24 @@ Namespace Services
             End If
 
             Dim newVendor As New Vendor With {
-                .Name = name
+                .Name = name,
+                .LeadTimeDays = dto.LeadTimeDays
             }
 
             _dbContext.Set(Of Vendor)().Add(newVendor)
             Await _dbContext.SaveChangesAsync()
 
-            Return newVendor
+            Return New VendorDetailDto With {
+                .Id = newVendor.Id,
+                .Name = newVendor.Name,
+                .LeadTimeDays = newVendor.LeadTimeDays,
+                .IsDeleted = newVendor.IsDeleted
+            }
         End Function
 
-        Public Async Function UpdateAsync(id As Integer, newName As String) As Task(Of Vendor)
+        Public Async Function UpdateAsync(id As Integer, dto As UpdateVendorDto) As Task(Of VendorDetailDto) Implements IVendorService.UpdateAsync
             ' Policy B: Friendly duplicate handling
+            Dim newName = dto.Name
             Dim existingDuplicate = Await _dbContext.Set(Of Vendor)().
                 IgnoreQueryFilters().
                 FirstOrDefaultAsync(Function(v) v.Name = newName AndAlso v.Id <> id)
@@ -101,9 +113,114 @@ Namespace Services
             End If
 
             vendorToUpdate.Name = newName
+            vendorToUpdate.LeadTimeDays = dto.LeadTimeDays
             Await _dbContext.SaveChangesAsync()
 
-            Return vendorToUpdate
+            Return New VendorDetailDto With {
+                .Id = vendorToUpdate.Id,
+                .Name = vendorToUpdate.Name,
+                .LeadTimeDays = vendorToUpdate.LeadTimeDays,
+                .IsDeleted = vendorToUpdate.IsDeleted
+            }
+        End Function
+
+        Public Async Function DeleteAsync(id As Integer) As Task(Of Boolean) Implements IVendorService.DeleteAsync
+            Dim vendorToDelete = Await _dbContext.Set(Of Vendor)().FindAsync(id)
+            If vendorToDelete Is Nothing Then
+                Return False
+            End If
+
+            vendorToDelete.IsDeleted = True
+            Await _dbContext.SaveChangesAsync()
+            Return True
+        End Function
+
+        Public Async Function GetByIdAsync(id As Integer) As Task(Of VendorDetailDto) Implements IVendorService.GetByIdAsync
+            Dim result = Await _dbContext.Set(Of Vendor)().
+                Where(Function(v) v.Id = id).
+                Select(Function(v) New VendorDetailDto With {
+                    .Id = v.Id,
+                    .Name = v.Name,
+                    .LeadTimeDays = v.LeadTimeDays,
+                    .IsDeleted = v.IsDeleted
+                }).
+                FirstOrDefaultAsync()
+
+            Return result
+        End Function
+
+        Public Async Function GetAllAsync() As Task(Of List(Of VendorDetailDto)) Implements IVendorService.GetAllAsync
+            ' We project to VendorDetailDto first via Select, to avoid the VB.NET EF Core bug where ToListAsync()
+            ' silently returns an empty list on full entity queries.
+            Dim results = Await _dbContext.Set(Of Vendor)().
+                Select(Function(v) New VendorDetailDto With {
+                    .Id = v.Id,
+                    .Name = v.Name,
+                    .LeadTimeDays = v.LeadTimeDays,
+                    .IsDeleted = v.IsDeleted
+                }).
+                ToListAsync()
+            Return results
+        End Function
+
+        Public Async Function SearchAsync(searchTerm As String) As Task(Of List(Of VendorDetailDto)) Implements IVendorService.SearchAsync
+            Dim query = _dbContext.Set(Of Vendor)().AsQueryable()
+
+            If Not String.IsNullOrWhiteSpace(searchTerm) Then
+                query = query.Where(Function(v) EF.Functions.Like(v.Name, $"%{searchTerm}%"))
+            End If
+
+            Dim results = Await query.
+                Select(Function(v) New VendorDetailDto With {
+                    .Id = v.Id,
+                    .Name = v.Name,
+                    .LeadTimeDays = v.LeadTimeDays,
+                    .IsDeleted = v.IsDeleted
+                }).
+                ToListAsync()
+            Return results
+        End Function
+
+        Public Async Function GetPurchaseHistoryAsync(vendorId As Integer) As Task(Of VendorPurchaseHistoryDto) Implements IVendorService.GetPurchaseHistoryAsync
+            Dim vendorData = Await _dbContext.Set(Of Vendor)().
+                Where(Function(v) v.Id = vendorId).
+                Select(Function(v) New With {
+                    .VendorId = v.Id,
+                    .VendorName = v.Name
+                }).
+                FirstOrDefaultAsync()
+
+            If vendorData Is Nothing Then
+                Return Nothing
+            End If
+
+            Dim ordersData = Await _dbContext.Set(Of PurchaseOrder)().
+                Where(Function(po) po.VendorId = vendorId).
+                GroupBy(Function(po) po.VendorId).
+                Select(Function(g) New With {
+                    .TotalOrders = g.Count(),
+                    .TotalAmount = g.Sum(Function(po) po.TotalAmount),
+                    .LastOrderDate = g.Max(Function(po) CType(po.CreatedAt, DateTime?))
+                }).
+                FirstOrDefaultAsync()
+
+            If ordersData Is Nothing Then
+                Return New VendorPurchaseHistoryDto With {
+                    .VendorId = vendorData.VendorId,
+                    .VendorName = vendorData.VendorName,
+                    .TotalOrders = 0,
+                    .TotalAmount = 0D,
+                    .LastOrderDate = Nothing
+                }
+            Else
+                Return New VendorPurchaseHistoryDto With {
+                    .VendorId = vendorData.VendorId,
+                    .VendorName = vendorData.VendorName,
+                    .TotalOrders = ordersData.TotalOrders,
+                    .TotalAmount = ordersData.TotalAmount,
+                    .LastOrderDate = ordersData.LastOrderDate
+                }
+            End If
         End Function
     End Class
 End Namespace
