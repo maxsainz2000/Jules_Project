@@ -10,5 +10,7 @@ Namespace Entities
         Public Property UnitCost As Decimal
         Public Property ExpiryDate As DateTime?
         Public Property HasDiscrepancy As Boolean
+        Public Property QuantityReceived As Integer
+        Public Property DiscrepancyNotes As String
     End Class
 End Namespace

@@ -6,5 +6,7 @@ Namespace Entities
 
         Public Property ReceiptNumber As String
         Public Property PurchaseOrderId As Integer
+
+        Public Property Lines As List(Of GoodsReceiptLine) = New List(Of GoodsReceiptLine)()
     End Class
 End Namespace
