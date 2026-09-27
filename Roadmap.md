@@ -57,7 +57,7 @@
 - [x] INV-11
 - [x] INV-12
 - [x] INV-13
-- [ ] INV-14
+- [x] INV-14
 - [ ] INV-15
 
 ## Phase 4: Purchasing
