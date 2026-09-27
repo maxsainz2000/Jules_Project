@@ -61,7 +61,7 @@
 - [x] INV-15
 
 ## Phase 4: Purchasing
-- [ ] PUR-01
+- [x] PUR-01
 - [ ] PUR-02
 - [ ] PUR-03
 - [ ] PUR-04
