@@ -7,6 +7,7 @@ Namespace Extensions
         <Extension()>
         Public Sub AddPurchasingServices(services As IServiceCollection)
             services.AddScoped(Of IPurchaseOrderService, PurchaseOrderService)()
+            services.AddScoped(Of IGoodsReceivingService, GoodsReceivingService)()
         End Sub
     End Module
 End Namespace

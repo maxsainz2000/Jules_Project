@@ -10,7 +10,7 @@ Namespace Data.Configurations
             builder.ToTable("GoodsReceipts")
             builder.HasIndex(Function(e) e.ReceiptNumber).IsUnique()
 
-            builder.HasMany(Of GoodsReceiptLine)().
+            builder.HasMany(Function(e) e.Lines).
                 WithOne().
                 HasForeignKey(Function(l) l.GoodsReceiptId).
                 OnDelete(DeleteBehavior.Cascade)
