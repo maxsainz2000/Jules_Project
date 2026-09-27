@@ -11,6 +11,7 @@ Namespace Views
         Event EditProductRequested As EventHandler(Of ProductManagementRowItem)
         Event SaveProductRequested As EventHandler(Of ProductManagementRowItem)
         Event DeleteProductRequested As EventHandler(Of ProductManagementRowItem)
+        Event ViewPriceHistoryRequested As EventHandler(Of ProductManagementRowItem)
         Event AddCategoryRequested As EventHandler
         Event EditCategoryRequested As EventHandler(Of CategoryManagementItem)
         Event SaveCategoryRequested As EventHandler(Of CategoryManagementItem)

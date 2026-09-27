@@ -15,6 +15,7 @@ Namespace Views
         Public Event EditProductRequested As EventHandler(Of ProductManagementRowItem) Implements IProductManagementView.EditProductRequested
         Public Event SaveProductRequested As EventHandler(Of ProductManagementRowItem) Implements IProductManagementView.SaveProductRequested
         Public Event DeleteProductRequested As EventHandler(Of ProductManagementRowItem) Implements IProductManagementView.DeleteProductRequested
+        Public Event ViewPriceHistoryRequested As EventHandler(Of ProductManagementRowItem) Implements IProductManagementView.ViewPriceHistoryRequested
         Public Event AddCategoryRequested As EventHandler Implements IProductManagementView.AddCategoryRequested
         Public Event EditCategoryRequested As EventHandler(Of CategoryManagementItem) Implements IProductManagementView.EditCategoryRequested
         Public Event SaveCategoryRequested As EventHandler(Of CategoryManagementItem) Implements IProductManagementView.SaveCategoryRequested
@@ -22,18 +23,21 @@ Namespace Views
 
         Private _products As IReadOnlyList(Of ProductManagementRowItem) = New List(Of ProductManagementRowItem)()
         Private _categories As IReadOnlyList(Of CategoryManagementItem) = New List(Of CategoryManagementItem)()
+        Private ReadOnly _serviceProvider As IServiceProvider
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
         Public Property Presenter As ProductManagementPresenter Implements IProductManagementView.Presenter
 
-        Public Sub New()
+        Public Sub New(serviceProvider As IServiceProvider)
             InitializeComponent()
+            _serviceProvider = serviceProvider
 
             AddHandler Me.Load, Sub(sender, e) RaiseEvent LoadView(Me, EventArgs.Empty)
 
             AddHandler btnAddProduct.Click, AddressOf btnAddProduct_Click
             AddHandler btnEditProduct.Click, AddressOf btnEditProduct_Click
             AddHandler btnDeleteProduct.Click, AddressOf btnDeleteProduct_Click
+            AddHandler btnPriceHistory.Click, AddressOf btnPriceHistory_Click
 
             AddHandler btnAddCategory.Click, AddressOf btnAddCategory_Click
             AddHandler btnEditCategory.Click, AddressOf btnEditCategory_Click
@@ -131,6 +135,17 @@ Namespace Views
                 If MessageBox.Show("Are you sure you want to delete this product?", "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) = DialogResult.Yes Then
                     RaiseEvent DeleteProductRequested(Me, selectedItem)
                 End If
+            End If
+        End Sub
+
+        Private Sub btnPriceHistory_Click(sender As Object, e As EventArgs)
+            Dim selectedItem = GetSelectedProduct()
+            If selectedItem IsNot Nothing Then
+                RaiseEvent ViewPriceHistoryRequested(Me, selectedItem)
+
+                Dim presenter = CType(_serviceProvider.GetService(GetType(ProductPriceHistoryPresenter)), ProductPriceHistoryPresenter)
+                presenter.View.ProductId = selectedItem.Id
+                presenter.View.ShowDialog(Me)
             End If
         End Sub
 
