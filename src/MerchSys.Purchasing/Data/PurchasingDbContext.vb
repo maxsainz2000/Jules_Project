@@ -16,6 +16,7 @@ Namespace Data
         Public Property AccountsPayable As DbSet(Of AccountsPayableEntry)
         Public Property ReorderConfigs As DbSet(Of ReorderConfig)
         Public Property ReorderSuggestions As DbSet(Of ReorderSuggestion)
+        Public Property PriceChangeAlerts As DbSet(Of PriceChangeAlert)
 
         Public Sub New(options As DbContextOptions(Of PurchasingDbContext))
             MyBase.New(options)

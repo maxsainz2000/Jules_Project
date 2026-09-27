@@ -7,6 +7,7 @@ Namespace Extensions
         <Extension()>
         Public Sub AddPurchasingServices(services As IServiceCollection)
             services.AddScoped(Of IPurchaseOrderService, PurchaseOrderService)()
+            services.AddScoped(Of IPriceChangeService, PriceChangeService)()
             services.AddScoped(Of IGoodsReceivingService, GoodsReceivingService)()
             services.AddScoped(Of IVendorService, VendorService)()
             services.AddScoped(Of IAccountsPayableService, AccountsPayableService)()
