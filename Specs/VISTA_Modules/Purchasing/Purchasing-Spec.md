@@ -64,6 +64,7 @@ Implemented the Goods Receiving service layer for the Purchasing module. When go
 - Saves `GoodsReceipt` + `GoodsReceiptLine` records and transitions PO to `Received` in a single `SaveChangesAsync` call.
 - Publishes `GoodsReceivedEvent` via `IMediator.Publish()` after the database save.
 - Returns the reloaded `GoodsReceipt` with lines included.
+- **CRITICAL**: For `GetReceiptsForPOAsync` (and any other query returning a list of full entities), you MUST avoid EF Core `ToListAsync()` due to a known VB.NET bug where it silently returns an empty list. You MUST either project to a DTO first, or use a raw `MySqlConnector.MySqlConnection` reader loop. Do NOT use `ToListAsync()` on full entity queries.
 - **Extensions/PurchasingServiceCollectionExtensions.vb**: registered `IGoodsReceivingService` → `GoodsReceivingService` as Scoped.
 
 ## Feature: PUR-05
