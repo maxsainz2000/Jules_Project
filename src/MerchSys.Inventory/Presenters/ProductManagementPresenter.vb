@@ -4,8 +4,10 @@ Imports System.Linq
 Imports System.Threading.Tasks
 Imports Microsoft.EntityFrameworkCore
 Imports MerchSys.Inventory.Data
+Imports Microsoft.Extensions.DependencyInjection
 Imports MerchSys.Inventory.Entities
 Imports MerchSys.Inventory.Views
+Imports MerchSys.SharedKernel.Interfaces
 Imports MySqlConnector
 
 Namespace Presenters
@@ -30,10 +32,14 @@ Namespace Presenters
     Public Class ProductManagementPresenter
         Private ReadOnly _view As IProductManagementView
         Private ReadOnly _db As InventoryDbContext
+        Private ReadOnly _sessionService As ISessionService
+        Private ReadOnly _serviceProvider As IServiceProvider
 
-        Public Sub New(view As IProductManagementView, db As InventoryDbContext)
+        Public Sub New(view As IProductManagementView, db As InventoryDbContext, sessionService As ISessionService, serviceProvider As IServiceProvider)
             _view = view
             _db = db
+            _sessionService = sessionService
+            _serviceProvider = serviceProvider
 
             _view.Presenter = Me
 
@@ -42,7 +48,16 @@ Namespace Presenters
             AddHandler _view.DeleteProductRequested, Async Sub(sender, e) Await DeleteProductAsync(e.Id)
             AddHandler _view.SaveCategoryRequested, Async Sub(sender, e) Await SaveCategoryAsync(e)
             AddHandler _view.DeleteCategoryRequested, Async Sub(sender, e) Await DeleteCategoryAsync(e.Id)
+            AddHandler _view.ViewPriceHistoryRequested, Async Sub(sender, productId) Await ViewPriceHistoryAsync(productId)
         End Sub
+
+        Private Async Function ViewPriceHistoryAsync(productId As Integer) As Task
+            Dim presenter = _serviceProvider.GetRequiredService(Of ProductPriceHistoryPresenter)()
+            Await presenter.LoadHistoryAsync(productId)
+            If TypeOf _view Is System.Windows.Forms.IWin32Window Then
+                presenter.View.ShowDialog(CType(_view, System.Windows.Forms.IWin32Window))
+            End If
+        End Function
 
         Private Async Function HandleLoadViewAsync() As Task
             Await LoadCategoriesAsync()
@@ -114,14 +129,19 @@ Namespace Presenters
 
         Public Async Function SaveProductAsync(dto As ProductManagementRowItem) As Task
             Dim entity As Product
+            Dim oldPrice As Decimal? = Nothing
+            Dim isNew As Boolean = False
+
             If dto.Id = 0 Then
                 entity = New Product()
                 _db.Products.Add(entity)
+                isNew = True
             Else
                 entity = Await _db.Products.FindAsync(dto.Id)
                 If entity Is Nothing Then
                     Throw New Exception("Product not found")
                 End If
+                oldPrice = entity.RetailPrice
             End If
 
             entity.ProductCategoryId = dto.CategoryId
@@ -132,7 +152,35 @@ Namespace Presenters
             entity.HasExpiry = dto.HasExpiry
             entity.MinimumThreshold = dto.MinimumThreshold
 
-            Await _db.SaveChangesAsync()
+            If isNew Then
+                Await _db.SaveChangesAsync()
+                If dto.RetailPrice > 0 Then
+                    Dim history = New ProductPriceHistory With {
+                        .ProductId = entity.Id,
+                        .OldPrice = 0,
+                        .NewPrice = dto.RetailPrice,
+                        .ChangedAt = DateTime.UtcNow,
+                        .ChangedBy = If(_sessionService?.CurrentUsername, "System"),
+                        .Reason = "Initial price set"
+                    }
+                    _db.ProductPriceHistories.Add(history)
+                    Await _db.SaveChangesAsync()
+                End If
+            Else
+                If oldPrice.HasValue AndAlso oldPrice.Value <> dto.RetailPrice Then
+                    Dim history = New ProductPriceHistory With {
+                        .ProductId = entity.Id,
+                        .OldPrice = oldPrice.Value,
+                        .NewPrice = dto.RetailPrice,
+                        .ChangedAt = DateTime.UtcNow,
+                        .ChangedBy = If(_sessionService?.CurrentUsername, "System"),
+                        .Reason = "Manual update from Product Management"
+                    }
+                    _db.ProductPriceHistories.Add(history)
+                End If
+                Await _db.SaveChangesAsync()
+            End If
+
             Await LoadProductsAsync()
         End Function
 

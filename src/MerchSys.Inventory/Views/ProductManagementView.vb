@@ -19,6 +19,7 @@ Namespace Views
         Public Event EditCategoryRequested As EventHandler(Of CategoryManagementItem) Implements IProductManagementView.EditCategoryRequested
         Public Event SaveCategoryRequested As EventHandler(Of CategoryManagementItem) Implements IProductManagementView.SaveCategoryRequested
         Public Event DeleteCategoryRequested As EventHandler(Of CategoryManagementItem) Implements IProductManagementView.DeleteCategoryRequested
+        Public Event ViewPriceHistoryRequested As EventHandler(Of Integer) Implements IProductManagementView.ViewPriceHistoryRequested
 
         Private _products As IReadOnlyList(Of ProductManagementRowItem) = New List(Of ProductManagementRowItem)()
         Private _categories As IReadOnlyList(Of CategoryManagementItem) = New List(Of CategoryManagementItem)()
@@ -34,6 +35,7 @@ Namespace Views
             AddHandler btnAddProduct.Click, AddressOf btnAddProduct_Click
             AddHandler btnEditProduct.Click, AddressOf btnEditProduct_Click
             AddHandler btnDeleteProduct.Click, AddressOf btnDeleteProduct_Click
+            AddHandler btnPriceHistory.Click, AddressOf btnPriceHistory_Click
 
             AddHandler btnAddCategory.Click, AddressOf btnAddCategory_Click
             AddHandler btnEditCategory.Click, AddressOf btnEditCategory_Click
@@ -131,6 +133,13 @@ Namespace Views
                 If MessageBox.Show("Are you sure you want to delete this product?", "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) = DialogResult.Yes Then
                     RaiseEvent DeleteProductRequested(Me, selectedItem)
                 End If
+            End If
+        End Sub
+
+        Private Sub btnPriceHistory_Click(sender As Object, e As EventArgs)
+            Dim selectedItem = GetSelectedProduct()
+            If selectedItem IsNot Nothing Then
+                RaiseEvent ViewPriceHistoryRequested(Me, selectedItem.Id)
             End If
         End Sub
 

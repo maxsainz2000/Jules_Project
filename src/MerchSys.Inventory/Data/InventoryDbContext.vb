@@ -11,6 +11,7 @@ Namespace Data
         Public Property StockBatches As DbSet(Of Entities.StockBatch)
         Public Property ShrinkageRecords As DbSet(Of Entities.ShrinkageRecord)
         Public Property StockAlertConfigs As DbSet(Of Entities.StockAlertConfig)
+        Public Property ProductPriceHistories As DbSet(Of Entities.ProductPriceHistory)
 
         Public Sub New(options As DbContextOptions(Of InventoryDbContext))
             MyBase.New(options)
