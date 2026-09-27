@@ -7,6 +7,7 @@ Imports MerchSys.Inventory.Data
 Imports MerchSys.Inventory.Entities
 Imports MerchSys.Inventory.Views
 Imports MySqlConnector
+Imports MerchSys.SharedKernel.Interfaces
 
 Namespace Presenters
 
@@ -30,10 +31,12 @@ Namespace Presenters
     Public Class ProductManagementPresenter
         Private ReadOnly _view As IProductManagementView
         Private ReadOnly _db As InventoryDbContext
+        Private ReadOnly _sessionService As ISessionService
 
-        Public Sub New(view As IProductManagementView, db As InventoryDbContext)
+        Public Sub New(view As IProductManagementView, db As InventoryDbContext, sessionService As ISessionService)
             _view = view
             _db = db
+            _sessionService = sessionService
 
             _view.Presenter = Me
 
@@ -113,26 +116,54 @@ Namespace Presenters
         End Function
 
         Public Async Function SaveProductAsync(dto As ProductManagementRowItem) As Task
-            Dim entity As Product
-            If dto.Id = 0 Then
-                entity = New Product()
-                _db.Products.Add(entity)
-            Else
-                entity = Await _db.Products.FindAsync(dto.Id)
-                If entity Is Nothing Then
-                    Throw New Exception("Product not found")
-                End If
-            End If
+            Using tx = Await _db.Database.BeginTransactionAsync()
+                Try
+                    Dim entity As Product
+                    Dim oldPrice As Decimal = 0
+                    Dim isNew As Boolean = False
 
-            entity.ProductCategoryId = dto.CategoryId
-            entity.Name = dto.Name
-            entity.SKU = dto.SKU
-            entity.RetailPrice = dto.RetailPrice
-            entity.Unit = dto.Unit
-            entity.HasExpiry = dto.HasExpiry
-            entity.MinimumThreshold = dto.MinimumThreshold
+                    If dto.Id = 0 Then
+                        entity = New Product()
+                        isNew = True
+                        _db.Products.Add(entity)
+                    Else
+                        entity = Await _db.Products.FindAsync(dto.Id)
+                        If entity Is Nothing Then
+                            Throw New Exception("Product not found")
+                        End If
+                        oldPrice = entity.RetailPrice
+                    End If
 
-            Await _db.SaveChangesAsync()
+                    entity.ProductCategoryId = dto.CategoryId
+                    entity.Name = dto.Name
+                    entity.SKU = dto.SKU
+                    entity.RetailPrice = dto.RetailPrice
+                    entity.Unit = dto.Unit
+                    entity.HasExpiry = dto.HasExpiry
+                    entity.MinimumThreshold = dto.MinimumThreshold
+
+                    Await _db.SaveChangesAsync()
+
+                    If isNew OrElse oldPrice <> dto.RetailPrice Then
+                        Dim history = New ProductPriceHistory With {
+                            .ProductId = entity.Id,
+                            .OldPrice = oldPrice,
+                            .NewPrice = dto.RetailPrice,
+                            .ChangedAt = DateTime.UtcNow,
+                            .ChangedBy = _sessionService.CurrentUsername,
+                            .Reason = If(isNew, "Initial Price", "Manual Update")
+                        }
+                        _db.ProductPriceHistories.Add(history)
+                        Await _db.SaveChangesAsync()
+                    End If
+
+                    Await tx.CommitAsync()
+                Catch ex As Exception
+                    ' Cannot Await inside Catch in VB.NET.
+                    ' The transaction will be rolled back automatically when tx is disposed.
+                    Throw
+                End Try
+            End Using
             Await LoadProductsAsync()
         End Function
 

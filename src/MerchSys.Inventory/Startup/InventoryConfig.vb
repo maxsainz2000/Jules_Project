@@ -25,6 +25,10 @@ Namespace Startup
             services.AddTransient(Of IProductManagementView, ProductManagementView)()
             services.AddTransient(Of ProductManagementPresenter)()
 
+            ' MVP Registration for Product Price History
+            services.AddTransient(Of IProductPriceHistoryView, Dialogs.ProductPriceHistoryDialog)()
+            services.AddTransient(Of ProductPriceHistoryPresenter)()
+
             ' MVP Registration for Expiry Monitor
             services.AddTransient(Of IExpiryMonitorView, ExpiryMonitorView)()
             services.AddTransient(Of ExpiryMonitorPresenter)()

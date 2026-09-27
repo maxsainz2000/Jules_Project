@@ -27,6 +27,7 @@ Namespace Views
             Me.btnAddProduct = New System.Windows.Forms.ToolStripButton()
             Me.btnEditProduct = New System.Windows.Forms.ToolStripButton()
             Me.btnDeleteProduct = New System.Windows.Forms.ToolStripButton()
+            Me.btnPriceHistory = New System.Windows.Forms.ToolStripButton()
             Me.tabCategories = New System.Windows.Forms.TabPage()
             Me.dgvCategories = New System.Windows.Forms.DataGridView()
             Me.toolStripCategories = New System.Windows.Forms.ToolStrip()
@@ -81,7 +82,7 @@ Namespace Views
             '
             ' toolStripProducts
             '
-            Me.toolStripProducts.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.btnAddProduct, Me.btnEditProduct, Me.btnDeleteProduct})
+            Me.toolStripProducts.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.btnAddProduct, Me.btnEditProduct, Me.btnDeleteProduct, Me.btnPriceHistory})
             Me.toolStripProducts.Location = New System.Drawing.Point(3, 3)
             Me.toolStripProducts.Name = "toolStripProducts"
             Me.toolStripProducts.Size = New System.Drawing.Size(786, 25)
@@ -108,6 +109,13 @@ Namespace Views
             Me.btnDeleteProduct.Name = "btnDeleteProduct"
             Me.btnDeleteProduct.Size = New System.Drawing.Size(44, 22)
             Me.btnDeleteProduct.Text = "Delete"
+            '
+            ' btnPriceHistory
+            '
+            Me.btnPriceHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
+            Me.btnPriceHistory.Name = "btnPriceHistory"
+            Me.btnPriceHistory.Size = New System.Drawing.Size(75, 22)
+            Me.btnPriceHistory.Text = "Price History"
             '
             ' tabCategories
             '
@@ -195,6 +203,7 @@ Namespace Views
         Friend WithEvents btnAddProduct As System.Windows.Forms.ToolStripButton
         Friend WithEvents btnEditProduct As System.Windows.Forms.ToolStripButton
         Friend WithEvents btnDeleteProduct As System.Windows.Forms.ToolStripButton
+        Friend WithEvents btnPriceHistory As System.Windows.Forms.ToolStripButton
         Friend WithEvents dgvCategories As System.Windows.Forms.DataGridView
         Friend WithEvents toolStripCategories As System.Windows.Forms.ToolStrip
         Friend WithEvents btnAddCategory As System.Windows.Forms.ToolStripButton
