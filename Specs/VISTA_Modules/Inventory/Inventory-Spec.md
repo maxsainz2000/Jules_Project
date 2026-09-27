@@ -140,7 +140,7 @@ Implemented the Product RetailPrice Change History feature — a secure, append-
 ### Requirements
 - **[CRITICAL JULES INSTRUCTION]**: You must successfully create a branch, write the code, and push the PR. Do not abort the session without pushing.
 - **MerchSys.Inventory/Entities/ProductPriceHistory.vb**: Append-only domain model with `ProductId`, `OldPrice`, `NewPrice`, `ChangedAt`, `ChangedBy`, and `Reason`.
-- **MerchSys.Inventory/Data/Configurations/ProductPriceHistoryConfiguration.vb**: Maps to `Inv_ProductPriceHistory`, applies precision/scale (18,2) controls, and configures composite index.
+- **MerchSys.Inventory/Data/Configurations/ProductPriceHistoryConfiguration.vb**: Maps to `Inv_ProductPriceHistory` EXACTLY (use `builder.ToTable("ProductPriceHistory")` - singular, do not pluralize to ProductPriceHistories), applies precision/scale (18,2) controls, and configures composite index.
 - **MerchSys.Inventory/Data/InventoryDbContext.vb**: Register `DbSet(Of ProductPriceHistory)`. `DatabaseInitializer` will pick it up automatically via `EnsureCreatedAsync()`, so NO manual ADO.NET migrations are needed.
 - **MerchSys.Inventory/Views/IProductPriceHistoryView.vb**: MVP View interface for the popup.
 - **MerchSys.Inventory/Presenters/ProductPriceHistoryPresenter.vb**: MVP Presenter for the popup viewer. It exposes a `PriceHistoryRowItem` DTO to avoid EF Core bugs.
