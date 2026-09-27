@@ -59,7 +59,10 @@ Namespace Presenters
                     .CategoryId = prod.CategoryId,
                     .CurrentQuantity = prod.CurrentQuantity,
                     .TotalValue = prod.TotalValue,
-                    .IsBelowThreshold = prod.IsBelowThreshold
+                    .IsBelowThreshold = prod.IsBelowThreshold,
+                    .RetailPrice = prod.RetailPrice,
+                    .AverageUnitCost = prod.AverageUnitCost,
+                    .FifoOldestUnitCost = prod.FifoOldestUnitCost
                 }
 
                 If est IsNot Nothing Then

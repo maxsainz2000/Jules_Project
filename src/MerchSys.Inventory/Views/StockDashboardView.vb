@@ -70,6 +70,25 @@ Namespace Views
             _dgvProducts.Columns.Add(New DataGridViewTextBoxColumn() With {.DataPropertyName = "SKU", .HeaderText = "SKU", .Name = "SKU"})
             _dgvProducts.Columns.Add(New DataGridViewTextBoxColumn() With {.DataPropertyName = "CurrentQuantity", .HeaderText = "Quantity", .Name = "CurrentQuantity"})
             _dgvProducts.Columns.Add(New DataGridViewTextBoxColumn() With {.DataPropertyName = "TotalValue", .HeaderText = "Value", .Name = "TotalValue"})
+
+            Dim colRetail = New DataGridViewTextBoxColumn() With {.DataPropertyName = "RetailPrice", .HeaderText = "Retail Price", .Name = "RetailPrice"}
+            colRetail.HeaderCell.ToolTipText = "Retail Price"
+            colRetail.DefaultCellStyle.Format = "₱{0:N2}"
+            colRetail.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight
+            _dgvProducts.Columns.Add(colRetail)
+
+            Dim colAvg = New DataGridViewTextBoxColumn() With {.DataPropertyName = "AverageUnitCost", .HeaderText = "Avg Cost", .Name = "AverageUnitCost"}
+            colAvg.HeaderCell.ToolTipText = "Avg Cost"
+            colAvg.DefaultCellStyle.Format = "₱{0:N2}"
+            colAvg.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight
+            _dgvProducts.Columns.Add(colAvg)
+
+            Dim colFifo = New DataGridViewTextBoxColumn() With {.DataPropertyName = "FifoOldestUnitCost", .HeaderText = "FIFO Cost", .Name = "FifoOldestUnitCost"}
+            colFifo.HeaderCell.ToolTipText = "FIFO Cost"
+            colFifo.DefaultCellStyle.Format = "₱{0:N2}"
+            colFifo.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight
+            _dgvProducts.Columns.Add(colFifo)
+
             _dgvProducts.Columns.Add(New DataGridViewCheckBoxColumn() With {.DataPropertyName = "IsBelowThreshold", .HeaderText = "Low Stock?", .Name = "IsBelowThreshold"})
             _dgvProducts.Columns.Add(New DataGridViewTextBoxColumn() With {.DataPropertyName = "RiskLevel", .HeaderText = "Risk", .Name = "RiskLevel"})
 

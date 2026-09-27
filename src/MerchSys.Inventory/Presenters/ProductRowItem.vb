@@ -10,6 +10,9 @@ Namespace Presenters
         Public Property CurrentQuantity As Integer
         Public Property TotalValue As Decimal
         Public Property IsBelowThreshold As Boolean
+        Public Property RetailPrice As Decimal
+        Public Property AverageUnitCost As Decimal
+        Public Property FifoOldestUnitCost As Decimal
 
         ' From StockoutEstimateDto
         Public Property RiskLevel As StockoutRiskLevel

@@ -21,7 +21,8 @@ Namespace Services
                     .Name = p.Name,
                     .SKU = p.SKU,
                     .CategoryId = p.ProductCategoryId,
-                    .MinimumThreshold = p.MinimumThreshold
+                    .MinimumThreshold = p.MinimumThreshold,
+                    .RetailPrice = p.RetailPrice
                 }).ToListAsync()
 
             Dim batchesData = Await _dbContext.StockBatches.
@@ -30,7 +31,8 @@ Namespace Services
                     .ProductId = b.ProductId,
                     .QuantityRemaining = b.QuantityRemaining,
                     .UnitCost = b.UnitCost,
-                    .ExpiryDate = b.ExpiryDate
+                    .ExpiryDate = b.ExpiryDate,
+                    .ReceiptDate = b.ReceiptDate
                 }).ToListAsync()
 
             Dim result = New StockDashboardDto With {
@@ -51,6 +53,14 @@ Namespace Services
 
                 result.TotalStockValue += totalVal
 
+                Dim nonExpiredBatches = productBatches.Where(Function(batch) Not batch.ExpiryDate.HasValue OrElse batch.ExpiryDate.Value.Date > today).ToList()
+                Dim nonExpiredQty = nonExpiredBatches.Sum(Function(batch) batch.QuantityRemaining)
+                Dim nonExpiredVal = nonExpiredBatches.Sum(Function(batch) batch.QuantityRemaining * batch.UnitCost)
+                Dim avgCost = If(nonExpiredQty > 0, nonExpiredVal / nonExpiredQty, 0D)
+
+                Dim oldestBatch = nonExpiredBatches.OrderBy(Function(batch) batch.ReceiptDate).FirstOrDefault()
+                Dim fifoCost = If(oldestBatch IsNot Nothing, oldestBatch.UnitCost, 0D)
+
                 result.ProductSummaries.Add(New ProductSummaryDto With {
                     .ProductId = p.Id,
                     .ProductName = p.Name,
@@ -58,7 +68,10 @@ Namespace Services
                     .CategoryId = p.CategoryId,
                     .CurrentQuantity = currentQty,
                     .TotalValue = totalVal,
-                    .IsBelowThreshold = isBelow
+                    .IsBelowThreshold = isBelow,
+                    .RetailPrice = p.RetailPrice,
+                    .AverageUnitCost = avgCost,
+                    .FifoOldestUnitCost = fifoCost
                 })
             Next
 

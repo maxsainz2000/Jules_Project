@@ -20,6 +20,9 @@ Namespace Services
         Public Property CurrentQuantity As Integer
         Public Property TotalValue As Decimal
         Public Property IsBelowThreshold As Boolean
+        Public Property RetailPrice As Decimal
+        Public Property AverageUnitCost As Decimal
+        Public Property FifoOldestUnitCost As Decimal
     End Class
 
     Public Class ProductDetailDto
