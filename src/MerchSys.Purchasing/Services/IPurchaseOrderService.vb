@@ -11,9 +11,11 @@ Namespace Services
 
     Public Interface IPurchaseOrderService
         Function GetHistoryAsync(request As PageRequest) As Task(Of PagedResult(Of PurchaseOrder))
-        Function CreateDraftAsync(Optional notes As String = Nothing, Optional expectedDeliveryDate As DateTime? = Nothing) As Task(Of PurchaseOrder)
-        Function UpdateDraftAsync(id As Integer, Optional notes As String = Nothing, Optional expectedDeliveryDate As DateTime? = Nothing) As Task(Of PurchaseOrder)
+        Function CreateDraftAsync(vendorId As Integer, Optional notes As String = Nothing, Optional expectedDeliveryDate As DateTime? = Nothing) As Task(Of PurchaseOrder)
+        Function GetByIdAsync(id As Integer) As Task(Of PurchaseOrder)
+        Function UpdateDraftAsync(id As Integer, vendorId As Integer, Optional notes As String = Nothing, Optional expectedDeliveryDate As DateTime? = Nothing) As Task(Of PurchaseOrder)
         Function SubmitAsync(id As Integer) As Task
+        Function DeleteAsync(id As Integer) As Task
         Function ReceiveAsync(id As Integer) As Task
         Function VerifyAsync(id As Integer) As Task
         Function CloseAsync(id As Integer) As Task
