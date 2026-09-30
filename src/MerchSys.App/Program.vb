@@ -78,6 +78,10 @@ Friend Module Program
 
                                   ' Add Purchasing
                                   services.AddPurchasingServices()
+                                  services.AddTransient(Of Views.Shell.Modules.Purchasing.IPurchaseOrderListView, Views.Shell.Modules.Purchasing.PurchaseOrderListView)()
+                                  services.AddTransient(Of Views.Shell.Modules.Purchasing.PurchaseOrderListPresenter)()
+                                  services.AddTransient(Of Views.Shell.Modules.Purchasing.IPurchaseOrderEditorView, Views.Shell.Modules.Purchasing.PurchaseOrderEditorView)()
+                                  services.AddTransient(Of Views.Shell.Modules.Purchasing.PurchaseOrderEditorPresenter)()
                                   services.AddInventoryServices()
 
                                   ' Add Low Stock Notifier
