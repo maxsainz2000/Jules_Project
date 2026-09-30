@@ -67,7 +67,21 @@ Namespace Services
             Return result
         End Function
 
-        Public Async Function CreateDraftAsync(Optional notes As String = Nothing, Optional expectedDeliveryDate As DateTime? = Nothing) As Task(Of PurchaseOrder) Implements IPurchaseOrderService.CreateDraftAsync
+        Public Async Function GetByIdAsync(id As Integer) As Task(Of PurchaseOrder) Implements IPurchaseOrderService.GetByIdAsync
+            Return Await _dbContext.Set(Of PurchaseOrder)().
+                Include(Function(po) po.Lines).
+                FirstOrDefaultAsync(Function(po) po.Id = id)
+        End Function
+
+        Public Async Function DeleteAsync(id As Integer) As Task Implements IPurchaseOrderService.DeleteAsync
+            Dim po = Await _dbContext.Set(Of PurchaseOrder)().FindAsync(id)
+            If po IsNot Nothing Then
+                po.IsDeleted = True
+                Await _dbContext.SaveChangesAsync()
+            End If
+        End Function
+
+        Public Async Function CreateDraftAsync(vendorId As Integer, Optional notes As String = Nothing, Optional expectedDeliveryDate As DateTime? = Nothing) As Task(Of PurchaseOrder) Implements IPurchaseOrderService.CreateDraftAsync
             Dim year = DateTime.UtcNow.Year
             Dim prefix = "PO"
             Dim prefixFilter = $"{prefix}-{year.ToString("0000")}-"
@@ -82,6 +96,7 @@ Namespace Services
 
             Dim newPo As New PurchaseOrder With {
                 .OrderNumber = newOrderNumber,
+                .VendorId = vendorId,
                 .Status = PurchaseOrderStatus.Draft,
                 .Notes = notes,
                 .ExpectedDeliveryDate = expectedDeliveryDate,
@@ -94,11 +109,12 @@ Namespace Services
             Return newPo
         End Function
 
-        Public Async Function UpdateDraftAsync(id As Integer, Optional notes As String = Nothing, Optional expectedDeliveryDate As DateTime? = Nothing) As Task(Of PurchaseOrder) Implements IPurchaseOrderService.UpdateDraftAsync
+        Public Async Function UpdateDraftAsync(id As Integer, vendorId As Integer, Optional notes As String = Nothing, Optional expectedDeliveryDate As DateTime? = Nothing) As Task(Of PurchaseOrder) Implements IPurchaseOrderService.UpdateDraftAsync
             Dim po = Await _dbContext.Set(Of PurchaseOrder)().FindAsync(id)
             If po Is Nothing Then Throw New InvalidOperationException("Purchase order not found.")
             If po.Status <> PurchaseOrderStatus.Draft Then Throw New InvalidOperationException("Only draft purchase orders can be updated.")
 
+            po.VendorId = vendorId
             If notes IsNot Nothing Then po.Notes = notes
             If expectedDeliveryDate IsNot Nothing Then po.ExpectedDeliveryDate = expectedDeliveryDate
 

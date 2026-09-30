@@ -11,5 +11,6 @@ Namespace Entities
         Public Property Notes As String
         Public Property ExpectedDeliveryDate As DateTime?
         Public Property TotalAmount As Decimal
+        Public Property Lines As New List(Of PurchaseOrderLine)
     End Class
 End Namespace
