@@ -25,7 +25,8 @@ MIGRATE FROM WPF/MVVM to WINFORMS MVP: Instead of WPF XAML and ViewModels, you M
 3. **Strict Validation (CRITICAL FOR QA)**
    - **Editing Non-Drafts:** You MUST ensure that the UI prevents editing a non-draft Purchase Order. The `PurchaseOrderListPresenter.OnEditClickedAsync()` or the view itself must verify that the PO's status is `Draft` before opening the editor. If the PO is not `Draft`, either disable the Edit button or show an error message and do not open the editor. If the editor is opened, it must not allow saving changes to a non-draft PO (the service will throw an `InvalidOperationException` if you try).
    - **Submit Logic:** Submitting must transition the PO status to `Submitted`.
-   - **Role-Based Visibility:** If the current user role is `Owner` (read-only), hide the New, Edit, Submit, and Delete buttons.
+   - **Role-Based Visibility (CRITICAL FOR QA):** You MUST implement role-based logic using `UserContext.CurrentRole`. If the current user role is `Owner` (read-only), you MUST hide or disable the New, Edit, Submit, and Delete buttons in the `PurchaseOrderListView` and ensure the editor is read-only.
+
 
 4. **Architecture Rules**
    - Follow strict WinForms MVP.
