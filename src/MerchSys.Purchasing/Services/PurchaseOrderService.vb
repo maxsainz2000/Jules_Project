@@ -67,7 +67,7 @@ Namespace Services
             Return result
         End Function
 
-        Public Async Function CreateDraftAsync(Optional notes As String = Nothing, Optional expectedDeliveryDate As DateTime? = Nothing) As Task(Of PurchaseOrder) Implements IPurchaseOrderService.CreateDraftAsync
+        Public Async Function CreateDraftAsync(vendorId As Integer, Optional notes As String = Nothing, Optional expectedDeliveryDate As DateTime? = Nothing) As Task(Of PurchaseOrder) Implements IPurchaseOrderService.CreateDraftAsync
             Dim year = DateTime.UtcNow.Year
             Dim prefix = "PO"
             Dim prefixFilter = $"{prefix}-{year.ToString("0000")}-"
@@ -82,6 +82,7 @@ Namespace Services
 
             Dim newPo As New PurchaseOrder With {
                 .OrderNumber = newOrderNumber,
+                .VendorId = vendorId,
                 .Status = PurchaseOrderStatus.Draft,
                 .Notes = notes,
                 .ExpectedDeliveryDate = expectedDeliveryDate,
@@ -94,11 +95,12 @@ Namespace Services
             Return newPo
         End Function
 
-        Public Async Function UpdateDraftAsync(id As Integer, Optional notes As String = Nothing, Optional expectedDeliveryDate As DateTime? = Nothing) As Task(Of PurchaseOrder) Implements IPurchaseOrderService.UpdateDraftAsync
+        Public Async Function UpdateDraftAsync(id As Integer, vendorId As Integer, Optional notes As String = Nothing, Optional expectedDeliveryDate As DateTime? = Nothing) As Task(Of PurchaseOrder) Implements IPurchaseOrderService.UpdateDraftAsync
             Dim po = Await _dbContext.Set(Of PurchaseOrder)().FindAsync(id)
             If po Is Nothing Then Throw New InvalidOperationException("Purchase order not found.")
             If po.Status <> PurchaseOrderStatus.Draft Then Throw New InvalidOperationException("Only draft purchase orders can be updated.")
 
+            po.VendorId = vendorId
             If notes IsNot Nothing Then po.Notes = notes
             If expectedDeliveryDate IsNot Nothing Then po.ExpectedDeliveryDate = expectedDeliveryDate
 
@@ -162,6 +164,7 @@ Namespace Services
             Dim newLine As New PurchaseOrderLine With {
                 .PurchaseOrderId = id,
                 .ProductName = line.ProductName,
+                .Quantity = line.Quantity,
                 .UnitCost = line.UnitCost,
                 .LineTotal = line.LineTotal
             }
@@ -196,5 +199,45 @@ Namespace Services
                 Await _dbContext.SaveChangesAsync()
             End If
         End Function
-    End Class
+    
+        Public Async Function GetByIdAsync(id As Integer) As Task(Of PurchaseOrder) Implements IPurchaseOrderService.GetByIdAsync
+            Dim items = Await _dbContext.Set(Of PurchaseOrder)().Where(Function(p) p.Id = id).Select(Function(p) New With { .Id = p.Id, .OrderNumber = p.OrderNumber, .VendorId = p.VendorId, .Status = p.Status, .Notes = p.Notes, .ExpectedDeliveryDate = p.ExpectedDeliveryDate, .TotalAmount = p.TotalAmount, .CreatedAt = p.CreatedAt, .CreatedBy = p.CreatedBy, .ModifiedAt = p.ModifiedAt, .ModifiedBy = p.ModifiedBy, .IsDeleted = p.IsDeleted }).ToListAsync()
+            If items.Count = 0 Then Return Nothing
+            Dim item = items(0)
+            Return New PurchaseOrder With { .Id = item.Id, .OrderNumber = item.OrderNumber, .VendorId = item.VendorId, .Status = item.Status, .Notes = item.Notes, .ExpectedDeliveryDate = item.ExpectedDeliveryDate, .TotalAmount = item.TotalAmount, .CreatedAt = item.CreatedAt, .CreatedBy = item.CreatedBy, .ModifiedAt = item.ModifiedAt, .ModifiedBy = item.ModifiedBy, .IsDeleted = item.IsDeleted }
+        End Function
+
+        Public Async Function GetLinesAsync(id As Integer) As Task(Of List(Of PurchaseOrderLine)) Implements IPurchaseOrderService.GetLinesAsync
+            Dim items = Await _dbContext.Set(Of PurchaseOrderLine)().Where(Function(p) p.PurchaseOrderId = id).Select(Function(p) New With { .Id = p.Id, .PurchaseOrderId = p.PurchaseOrderId, .ProductId = p.ProductId, .ProductName = p.ProductName, .Quantity = p.Quantity, .UnitCost = p.UnitCost, .LineTotal = p.LineTotal, .CreatedAt = p.CreatedAt, .CreatedBy = p.CreatedBy, .RowVersion = p.RowVersion }).ToListAsync()
+            Dim ret As New List(Of PurchaseOrderLine)
+            For Each item In items
+                ret.Add(New PurchaseOrderLine With { .Id = item.Id, .PurchaseOrderId = item.PurchaseOrderId, .ProductId = item.ProductId, .ProductName = item.ProductName, .Quantity = item.Quantity, .UnitCost = item.UnitCost, .LineTotal = item.LineTotal, .CreatedAt = item.CreatedAt, .CreatedBy = item.CreatedBy, .RowVersion = item.RowVersion })
+            Next
+            Return ret
+        End Function
+
+        Public Async Function DeleteAsync(id As Integer) As Task Implements IPurchaseOrderService.DeleteAsync
+            Dim po = Await _dbContext.Set(Of PurchaseOrder)().FindAsync(id)
+            If po Is Nothing Then Throw New InvalidOperationException("Purchase order not found.")
+            If po.Status <> PurchaseOrderStatus.Draft Then Throw New InvalidOperationException("Can only delete draft purchase orders.")
+            _dbContext.Set(Of PurchaseOrder)().Remove(po)
+            Await _dbContext.SaveChangesAsync()
+        End Function
+
+        Public Async Function SearchAsync(term As String, status As PurchaseOrderStatus?) As Task(Of List(Of PurchaseOrder)) Implements IPurchaseOrderService.SearchAsync
+            Dim query = _dbContext.Set(Of PurchaseOrder)().AsQueryable()
+            If Not String.IsNullOrWhiteSpace(term) Then
+                query = query.Where(Function(p) p.OrderNumber.Contains(term))
+            End If
+            If status.HasValue Then
+                query = query.Where(Function(p) p.Status = status.Value)
+            End If
+            Dim items = Await query.Select(Function(p) New With { .Id = p.Id, .OrderNumber = p.OrderNumber, .VendorId = p.VendorId, .Status = p.Status, .Notes = p.Notes, .ExpectedDeliveryDate = p.ExpectedDeliveryDate, .TotalAmount = p.TotalAmount, .CreatedAt = p.CreatedAt, .CreatedBy = p.CreatedBy, .ModifiedAt = p.ModifiedAt, .ModifiedBy = p.ModifiedBy, .IsDeleted = p.IsDeleted }).ToListAsync()
+            Dim ret As New List(Of PurchaseOrder)
+            For Each item In items
+                ret.Add(New PurchaseOrder With { .Id = item.Id, .OrderNumber = item.OrderNumber, .VendorId = item.VendorId, .Status = item.Status, .Notes = item.Notes, .ExpectedDeliveryDate = item.ExpectedDeliveryDate, .TotalAmount = item.TotalAmount, .CreatedAt = item.CreatedAt, .CreatedBy = item.CreatedBy, .ModifiedAt = item.ModifiedAt, .ModifiedBy = item.ModifiedBy, .IsDeleted = item.IsDeleted })
+            Next
+            Return ret
+        End Function
+End Class
 End Namespace
