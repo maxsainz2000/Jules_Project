@@ -70,7 +70,7 @@
 - [x] PUR-07
 - [x] PUR-08
 - [x] PUR-09
-- [ ] PUR-10
+- [x] PUR-10
 - [ ] PUR-11
 - [ ] PUR-12
 - [ ] PUR-13
