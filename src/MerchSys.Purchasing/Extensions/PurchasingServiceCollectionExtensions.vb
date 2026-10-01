@@ -20,11 +20,14 @@ Namespace Extensions
             services.AddTransient(Of IPurchaseOrderListView, PurchaseOrderListView)()
             services.AddTransient(Of IPurchaseOrderEditorView, PurchaseOrderEditorDialog)()
             services.AddTransient(Of IGoodsReceivingView, GoodsReceivingView)()
+            services.AddTransient(Of IVendorDirectoryView, VendorDirectoryView)()
             
             ' Presenters
             services.AddTransient(Of PurchaseOrderListPresenter)()
             services.AddTransient(Of PurchaseOrderEditorPresenter)()
             services.AddTransient(Of GoodsReceivingPresenter)()
+            services.AddTransient(Of VendorEditorPresenter)()
+            services.AddTransient(Of VendorListPresenter)()
         End Sub
     End Module
 End Namespace

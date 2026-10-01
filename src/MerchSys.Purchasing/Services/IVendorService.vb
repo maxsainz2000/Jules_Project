@@ -7,18 +7,36 @@ Imports MerchSys.SharedKernel.Paging
 Namespace Services
     Public Class CreateVendorDto
         Public Property Name As String
+        Public Property Phone As String
+        Public Property Email As String
+        Public Property ContactPerson As String
+        Public Property Address As String
+        Public Property TaxId As String
+        Public Property Notes As String
         Public Property LeadTimeDays As Integer
     End Class
 
     Public Class UpdateVendorDto
         Public Property Id As Integer
         Public Property Name As String
+        Public Property Phone As String
+        Public Property Email As String
+        Public Property ContactPerson As String
+        Public Property Address As String
+        Public Property TaxId As String
+        Public Property Notes As String
         Public Property LeadTimeDays As Integer
     End Class
 
     Public Class VendorDetailDto
         Public Property Id As Integer
         Public Property Name As String
+        Public Property Phone As String
+        Public Property Email As String
+        Public Property ContactPerson As String
+        Public Property Address As String
+        Public Property TaxId As String
+        Public Property Notes As String
         Public Property LeadTimeDays As Integer
         Public Property IsDeleted As Boolean
     End Class
