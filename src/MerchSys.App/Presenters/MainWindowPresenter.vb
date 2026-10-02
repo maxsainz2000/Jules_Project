@@ -57,6 +57,7 @@ Namespace Presenters
 
             ' Add mock nav items
             purchasingGroup.Items.Add(New NavigationItem With { .Name = "Purchasing Panel", .ViewType = GetType(PurchasingPanel), .NavigationGroup = "Purchasing" })
+            purchasingGroup.Items.Add(New NavigationItem With { .Name = "Vendor Product Catalog", .ViewType = GetType(MerchSys.Purchasing.Views.Purchasing.VendorCatalogView), .NavigationGroup = "Purchasing" })
             inventoryGroup.Items.Add(New NavigationItem With { .Name = "Inventory Panel", .ViewType = GetType(InventoryPanel), .NavigationGroup = "Inventory" })
             posGroup.Items.Add(New NavigationItem With { .Name = "POS Panel", .ViewType = GetType(PosPanel), .NavigationGroup = "POS" })
             accountingGroup.Items.Add(New NavigationItem With { .Name = "Accounting Panel", .ViewType = GetType(AccountingPanel), .NavigationGroup = "Accounting" })
