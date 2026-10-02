@@ -1,18 +1,40 @@
 Imports Microsoft.EntityFrameworkCore
 Imports MerchSys.Purchasing.Data
 Imports MerchSys.Purchasing.Entities
+Imports MerchSys.SharedKernel.Interfaces
+Imports MerchSys.SharedKernel.Enums
 Imports System.Threading.Tasks
 Imports System
 
 Namespace Services
     Public Class VendorProductService
-        Private ReadOnly _dbContext As PurchasingDbContext
+        Implements IVendorProductService
 
-        Public Sub New(dbContext As PurchasingDbContext)
+        Private ReadOnly _dbContext As PurchasingDbContext
+        Private ReadOnly _sessionService As ISessionService
+
+        Public Sub New(dbContext As PurchasingDbContext, sessionService As ISessionService)
             _dbContext = dbContext
+            _sessionService = sessionService
         End Sub
 
-        Public Async Function GetHistoryAsync(request As MerchSys.SharedKernel.Paging.PageRequest) As Task(Of MerchSys.SharedKernel.Paging.PagedResult(Of VendorProduct))
+        Private Sub EnsureCanMutate()
+            If Not _sessionService.IsAuthenticated Then
+                Throw New UnauthorizedAccessException("User is not authenticated.")
+            End If
+
+            Dim role = _sessionService.CurrentUserRole
+            If role = UserRole.Owner OrElse role Is Nothing Then
+                Throw New UnauthorizedAccessException("Role not authorized to mutate vendor products.")
+            End If
+
+            ' Developer is a superset of Manager, so both are allowed
+            If role <> UserRole.Manager AndAlso role <> UserRole.Developer Then
+                 Throw New UnauthorizedAccessException("Manager or Developer role required to mutate vendor products.")
+            End If
+        End Sub
+
+        Public Async Function GetHistoryAsync(request As MerchSys.SharedKernel.Paging.PageRequest) As Task(Of MerchSys.SharedKernel.Paging.PagedResult(Of VendorProduct)) Implements IVendorProductService.GetHistoryAsync
             Dim result As New MerchSys.SharedKernel.Paging.PagedResult(Of VendorProduct)()
             Dim conn = DirectCast(_dbContext.Database.GetDbConnection(), MySqlConnector.MySqlConnection)
             Await _dbContext.Database.OpenConnectionAsync()
@@ -60,7 +82,9 @@ Namespace Services
             Return result
         End Function
 
-        Public Async Function AddCatalogEntryAsync(vendorId As Integer, productId As Integer, unitCost As Decimal, notes As String) As Task(Of VendorProduct)
+        Public Async Function AddCatalogEntryAsync(vendorId As Integer, productId As Integer, unitCost As Decimal, notes As String) As Task(Of VendorProduct) Implements IVendorProductService.AddCatalogEntryAsync
+            EnsureCanMutate()
+
             ' Policy B: Friendly duplicate handling & auto-restore
             Dim existingEntry = Await _dbContext.Set(Of VendorProduct)().
                 IgnoreQueryFilters().
@@ -91,6 +115,33 @@ Namespace Services
             Await _dbContext.SaveChangesAsync()
 
             Return newEntry
+        End Function
+
+        Public Async Function UpdateCatalogEntryAsync(id As Integer, unitCost As Decimal, notes As String) As Task(Of VendorProduct) Implements IVendorProductService.UpdateCatalogEntryAsync
+            EnsureCanMutate()
+
+            Dim entry = Await _dbContext.Set(Of VendorProduct)().FindAsync(id)
+            If entry Is Nothing Then
+                Throw New Exception("Vendor product not found.")
+            End If
+
+            entry.UnitCost = unitCost
+            entry.Notes = notes
+
+            Await _dbContext.SaveChangesAsync()
+            Return entry
+        End Function
+
+        Public Async Function DeleteCatalogEntryAsync(id As Integer) As Task Implements IVendorProductService.DeleteCatalogEntryAsync
+            EnsureCanMutate()
+
+            Dim entry = Await _dbContext.Set(Of VendorProduct)().FindAsync(id)
+            If entry Is Nothing Then
+                Throw New Exception("Vendor product not found.")
+            End If
+
+            _dbContext.Set(Of VendorProduct)().Remove(entry)
+            Await _dbContext.SaveChangesAsync()
         End Function
     End Class
 End Namespace

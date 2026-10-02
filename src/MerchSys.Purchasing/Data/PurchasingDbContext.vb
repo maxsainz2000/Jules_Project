@@ -11,6 +11,7 @@ Namespace Data
         Public Property Vendors As DbSet(Of Vendor)
         Public Property PurchaseOrders As DbSet(Of PurchaseOrder)
         Public Property PurchaseOrderLines As DbSet(Of PurchaseOrderLine)
+        Public Property VendorProducts As DbSet(Of VendorProduct)
         Public Property GoodsReceipts As DbSet(Of GoodsReceipt)
         Public Property GoodsReceiptLines As DbSet(Of GoodsReceiptLine)
         Public Property AccountsPayable As DbSet(Of AccountsPayableEntry)

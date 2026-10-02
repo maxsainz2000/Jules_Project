@@ -3,6 +3,7 @@ Imports MerchSys.SharedKernel.Entities
 Namespace Entities
     Public Class VendorProduct
         Inherits SoftDeletableEntity
+        ' Entity representing a product in a vendor's catalog
 
         Public Property VendorId As Integer
         Public Property ProductId As Integer
