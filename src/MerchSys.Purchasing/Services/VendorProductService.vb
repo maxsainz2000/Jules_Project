@@ -3,16 +3,29 @@ Imports MerchSys.Purchasing.Data
 Imports MerchSys.Purchasing.Entities
 Imports System.Threading.Tasks
 Imports System
+Imports MerchSys.SharedKernel.Interfaces
+Imports MerchSys.SharedKernel.Enums
+Imports MerchSys.Purchasing.Dtos
 
 Namespace Services
     Public Class VendorProductService
-        Private ReadOnly _dbContext As PurchasingDbContext
+        Implements IVendorProductService
 
-        Public Sub New(dbContext As PurchasingDbContext)
+        Private ReadOnly _dbContext As PurchasingDbContext
+        Private ReadOnly _sessionService As ISessionService
+
+        Public Sub New(dbContext As PurchasingDbContext, sessionService As ISessionService)
             _dbContext = dbContext
+            _sessionService = sessionService
         End Sub
 
-        Public Async Function GetHistoryAsync(request As MerchSys.SharedKernel.Paging.PageRequest) As Task(Of MerchSys.SharedKernel.Paging.PagedResult(Of VendorProduct))
+        Private Sub EnforceManagerRole()
+            If _sessionService.CurrentUserRole = UserRole.Owner Then
+                Throw New UnauthorizedAccessException("Owners cannot modify vendor catalogs.")
+            End If
+        End Sub
+
+        Public Async Function GetHistoryAsync(request As MerchSys.SharedKernel.Paging.PageRequest) As Task(Of MerchSys.SharedKernel.Paging.PagedResult(Of VendorProduct)) Implements IVendorProductService.GetHistoryAsync
             Dim result As New MerchSys.SharedKernel.Paging.PagedResult(Of VendorProduct)()
             Dim conn = DirectCast(_dbContext.Database.GetDbConnection(), MySqlConnector.MySqlConnection)
             Await _dbContext.Database.OpenConnectionAsync()
@@ -60,7 +73,8 @@ Namespace Services
             Return result
         End Function
 
-        Public Async Function AddCatalogEntryAsync(vendorId As Integer, productId As Integer, unitCost As Decimal, notes As String) As Task(Of VendorProduct)
+        Public Async Function AddCatalogEntryAsync(vendorId As Integer, productId As Integer, unitCost As Decimal, notes As String) As Task(Of VendorProduct) Implements IVendorProductService.AddCatalogEntryAsync
+            EnforceManagerRole()
             ' Policy B: Friendly duplicate handling & auto-restore
             Dim existingEntry = Await _dbContext.Set(Of VendorProduct)().
                 IgnoreQueryFilters().
@@ -91,6 +105,64 @@ Namespace Services
             Await _dbContext.SaveChangesAsync()
 
             Return newEntry
+        End Function
+
+        Public Async Function UpdateCatalogEntryAsync(id As Integer, unitCost As Decimal, notes As String) As Task(Of VendorProduct) Implements IVendorProductService.UpdateCatalogEntryAsync
+            EnforceManagerRole()
+            Dim entry = Await _dbContext.Set(Of VendorProduct)().FindAsync(id)
+            If entry Is Nothing Then Throw New InvalidOperationException("Catalog entry not found.")
+
+            entry.UnitCost = unitCost
+            entry.Notes = notes
+
+            Await _dbContext.SaveChangesAsync()
+            Return entry
+        End Function
+
+        Public Async Function DeleteCatalogEntryAsync(id As Integer) As Task Implements IVendorProductService.DeleteCatalogEntryAsync
+            EnforceManagerRole()
+            Dim entry = Await _dbContext.Set(Of VendorProduct)().FindAsync(id)
+            If entry IsNot Nothing Then
+                _dbContext.Set(Of VendorProduct)().Remove(entry)
+                Await _dbContext.SaveChangesAsync()
+            End If
+        End Function
+
+        Public Async Function GetCatalogForVendorAsync(vendorId As Integer) As Task(Of System.Collections.Generic.List(Of VendorProductDto)) Implements IVendorProductService.GetCatalogForVendorAsync
+            Dim dtos As New System.Collections.Generic.List(Of VendorProductDto)()
+
+            Dim conn = DirectCast(_dbContext.Database.GetDbConnection(), MySqlConnector.MySqlConnection)
+            Dim wasClosed = (conn.State = System.Data.ConnectionState.Closed)
+            If wasClosed Then Await _dbContext.Database.OpenConnectionAsync()
+
+            Try
+                Using cmd = conn.CreateCommand()
+                    cmd.CommandText = "
+                        SELECT vp.Id, vp.VendorId, vp.ProductId, p.Name, vp.UnitCost, vp.Notes
+                        FROM Pur_VendorProducts vp
+                        JOIN Inv_Products p ON vp.ProductId = p.Id
+                        WHERE vp.VendorId = @VendorId AND vp.IsDeleted = 0
+                    "
+                    cmd.Parameters.Add(New MySqlConnector.MySqlParameter("@VendorId", vendorId))
+
+                    Using reader = Await cmd.ExecuteReaderAsync()
+                        While Await reader.ReadAsync()
+                            dtos.Add(New VendorProductDto With {
+                                .Id = reader.GetInt32(0),
+                                .VendorId = reader.GetInt32(1),
+                                .ProductId = reader.GetInt32(2),
+                                .ProductName = reader.GetString(3),
+                                .UnitCost = reader.GetDecimal(4),
+                                .Notes = If(reader.IsDBNull(5), Nothing, reader.GetString(5))
+                            })
+                        End While
+                    End Using
+                End Using
+            Finally
+                If wasClosed Then conn.Close()
+            End Try
+
+            Return dtos
         End Function
     End Class
 End Namespace
