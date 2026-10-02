@@ -31,6 +31,27 @@ Namespace Data
                             ADD COLUMN IF NOT EXISTS VatableSales DECIMAL(18,2) NOT NULL DEFAULT 0.00;
                         "
                         cmd.ExecuteNonQuery()
+
+                        ' 20260527110000_AddVendorProductCatalog
+                        cmd.CommandText = "
+                            CREATE TABLE IF NOT EXISTS Pur_VendorProducts (
+                                Id INT AUTO_INCREMENT PRIMARY KEY,
+                                VendorId INT NOT NULL,
+                                ProductId INT NOT NULL,
+                                UnitCost DECIMAL(18,2) NOT NULL,
+                                Notes LONGTEXT,
+                                CreatedAt DATETIME(6) NOT NULL,
+                                CreatedBy LONGTEXT,
+                                ModifiedAt DATETIME(6),
+                                ModifiedBy LONGTEXT,
+                                IsDeleted TINYINT(1) NOT NULL DEFAULT 0
+                            );
+
+                            -- Use CREATE INDEX IF NOT EXISTS which MariaDB supports for checking existing indexes
+                            CREATE UNIQUE INDEX IF NOT EXISTS IX_Pur_VendorProducts_VendorId_ProductId
+                            ON Pur_VendorProducts (VendorId, ProductId);
+                        "
+                        cmd.ExecuteNonQuery()
                     End Using
                 Finally
                     If wasClosed Then conn.Close()
