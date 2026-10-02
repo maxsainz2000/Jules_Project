@@ -7,7 +7,11 @@ Namespace Data.Configurations
         Implements IEntityTypeConfiguration(Of VendorProduct)
 
         Public Sub Configure(builder As EntityTypeBuilder(Of VendorProduct)) Implements IEntityTypeConfiguration(Of VendorProduct).Configure
+            ' Note: "Pur_" prefix is added dynamically in PurchasingDbContext.OnModelCreating
             builder.ToTable("VendorProducts")
+
+            ' Add unique index with filter for Soft Deletes
+            builder.HasIndex(Function(vp) New With {vp.VendorId, vp.ProductId}).IsUnique().HasFilter("IsDeleted = 0")
         End Sub
     End Class
 End Namespace

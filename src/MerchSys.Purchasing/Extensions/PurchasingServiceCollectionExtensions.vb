@@ -17,6 +17,7 @@ Namespace Extensions
             services.AddScoped(Of IVendorService, VendorService)()
             services.AddScoped(Of IAccountsPayableService, AccountsPayableService)()
             services.AddScoped(Of IReorderService, ReorderService)()
+            services.AddScoped(Of IVendorProductService, VendorProductService)()
             services.AddScoped(Of GoodsReceiptVatCalculator)()
             
             ' Views
