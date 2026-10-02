@@ -7,20 +7,31 @@ Imports MerchSys.SharedKernel.Paging
 Namespace Services
     Public Class CreateVendorDto
         Public Property Name As String
+        Public Property Phone As String
         Public Property LeadTimeDays As Integer
     End Class
 
     Public Class UpdateVendorDto
         Public Property Id As Integer
         Public Property Name As String
+        Public Property Phone As String
         Public Property LeadTimeDays As Integer
     End Class
 
     Public Class VendorDetailDto
         Public Property Id As Integer
         Public Property Name As String
+        Public Property Phone As String
         Public Property LeadTimeDays As Integer
         Public Property IsDeleted As Boolean
+    End Class
+
+    Public Class POSummaryRow
+        Public Property Id As Integer
+        Public Property OrderNumber As String
+        Public Property CreatedAt As DateTime
+        Public Property TotalAmount As Decimal
+        Public Property Status As MerchSys.SharedKernel.Enums.PurchaseOrderStatus
     End Class
 
     Public Class VendorPurchaseHistoryDto
@@ -29,6 +40,7 @@ Namespace Services
         Public Property TotalOrders As Integer
         Public Property TotalAmount As Decimal
         Public Property LastOrderDate As DateTime?
+        Public Property RecentPOs As New List(Of POSummaryRow)()
     End Class
 
     Public Interface IVendorService
