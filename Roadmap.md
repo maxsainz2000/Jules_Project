@@ -78,7 +78,7 @@
 - [x] PUR-15
 - [x] PUR-16-A
 - [x] PUR-16-B
-- [ ] PUR-16-C
+- [x] PUR-16-C
 - [ ] PUR-16-D
 
 ## Phase 5: Point of Sale (POS)
