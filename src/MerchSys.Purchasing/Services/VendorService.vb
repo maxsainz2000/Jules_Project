@@ -78,6 +78,7 @@ Namespace Services
 
             Dim newVendor As New Vendor With {
                 .Name = name,
+                .Phone = dto.Phone,
                 .LeadTimeDays = dto.LeadTimeDays
             }
 
@@ -87,6 +88,7 @@ Namespace Services
             Return New VendorDetailDto With {
                 .Id = newVendor.Id,
                 .Name = newVendor.Name,
+                .Phone = newVendor.Phone,
                 .LeadTimeDays = newVendor.LeadTimeDays,
                 .IsDeleted = newVendor.IsDeleted
             }
@@ -113,12 +115,14 @@ Namespace Services
             End If
 
             vendorToUpdate.Name = newName
+            vendorToUpdate.Phone = dto.Phone
             vendorToUpdate.LeadTimeDays = dto.LeadTimeDays
             Await _dbContext.SaveChangesAsync()
 
             Return New VendorDetailDto With {
                 .Id = vendorToUpdate.Id,
                 .Name = vendorToUpdate.Name,
+                .Phone = vendorToUpdate.Phone,
                 .LeadTimeDays = vendorToUpdate.LeadTimeDays,
                 .IsDeleted = vendorToUpdate.IsDeleted
             }
@@ -141,6 +145,7 @@ Namespace Services
                 Select(Function(v) New VendorDetailDto With {
                     .Id = v.Id,
                     .Name = v.Name,
+                    .Phone = v.Phone,
                     .LeadTimeDays = v.LeadTimeDays,
                     .IsDeleted = v.IsDeleted
                 }).
@@ -156,6 +161,7 @@ Namespace Services
                 Select(Function(v) New VendorDetailDto With {
                     .Id = v.Id,
                     .Name = v.Name,
+                    .Phone = v.Phone,
                     .LeadTimeDays = v.LeadTimeDays,
                     .IsDeleted = v.IsDeleted
                 }).
@@ -167,13 +173,14 @@ Namespace Services
             Dim query = _dbContext.Set(Of Vendor)().AsQueryable()
 
             If Not String.IsNullOrWhiteSpace(searchTerm) Then
-                query = query.Where(Function(v) EF.Functions.Like(v.Name, $"%{searchTerm}%"))
+                query = query.Where(Function(v) EF.Functions.Like(v.Name, $"%{searchTerm}%") OrElse EF.Functions.Like(v.Phone, $"%{searchTerm}%"))
             End If
 
             Dim results = Await query.
                 Select(Function(v) New VendorDetailDto With {
                     .Id = v.Id,
                     .Name = v.Name,
+                    .Phone = v.Phone,
                     .LeadTimeDays = v.LeadTimeDays,
                     .IsDeleted = v.IsDeleted
                 }).
@@ -204,23 +211,30 @@ Namespace Services
                 }).
                 FirstOrDefaultAsync()
 
-            If ordersData Is Nothing Then
-                Return New VendorPurchaseHistoryDto With {
-                    .VendorId = vendorData.VendorId,
-                    .VendorName = vendorData.VendorName,
-                    .TotalOrders = 0,
-                    .TotalAmount = 0D,
-                    .LastOrderDate = Nothing
-                }
-            Else
-                Return New VendorPurchaseHistoryDto With {
-                    .VendorId = vendorData.VendorId,
-                    .VendorName = vendorData.VendorName,
-                    .TotalOrders = ordersData.TotalOrders,
-                    .TotalAmount = ordersData.TotalAmount,
-                    .LastOrderDate = ordersData.LastOrderDate
-                }
-            End If
+            Dim recentOrders = Await _dbContext.Set(Of PurchaseOrder)().
+                Where(Function(po) po.VendorId = vendorId).
+                OrderByDescending(Function(po) po.CreatedAt).
+                Take(10).
+                Select(Function(po) New POSummaryRow With {
+                    .Id = po.Id,
+                    .OrderNumber = po.OrderNumber,
+                    .CreatedAt = po.CreatedAt,
+                    .TotalAmount = po.TotalAmount,
+                    .Status = po.Status
+                }).
+                ToListAsync()
+
+            Dim historyDto As New VendorPurchaseHistoryDto With {
+                .VendorId = vendorData.VendorId,
+                .VendorName = vendorData.VendorName,
+                .TotalOrders = If(ordersData IsNot Nothing, ordersData.TotalOrders, 0),
+                .TotalAmount = If(ordersData IsNot Nothing, ordersData.TotalAmount, 0D),
+                .LastOrderDate = If(ordersData IsNot Nothing, ordersData.LastOrderDate, Nothing)
+            }
+
+            historyDto.RecentPOs.AddRange(recentOrders)
+
+            Return historyDto
         End Function
     End Class
 End Namespace
