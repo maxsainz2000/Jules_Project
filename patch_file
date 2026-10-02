@@ -1,0 +1,25 @@
+--- src/MerchSys.Purchasing/Views/Dialogs/PurchaseOrderEditorDialog.vb
++++ src/MerchSys.Purchasing/Views/Dialogs/PurchaseOrderEditorDialog.vb
+@@ -25,7 +25,12 @@
+
+             dgvLines.AutoGenerateColumns = False
+             dgvLines.Columns.Add(New DataGridViewTextBoxColumn With { .DataPropertyName = "Id", .HeaderText = "ID", .Visible = False })
+-            dgvLines.Columns.Add(New DataGridViewTextBoxColumn With { .DataPropertyName = "ProductName", .HeaderText = "Product", .Width = 200 })
++
++            Dim colProduct = New DataGridViewComboBoxColumn() With { .DataPropertyName = "ProductName", .HeaderText = "Product", .Width = 200, .Name = "ProductNameColumn" }
++            dgvLines.Columns.Add(colProduct)
++
+             dgvLines.Columns.Add(New DataGridViewTextBoxColumn With { .DataPropertyName = "Quantity", .HeaderText = "Qty", .Width = 80 })
+             dgvLines.Columns.Add(New DataGridViewTextBoxColumn With { .DataPropertyName = "UnitCost", .HeaderText = "Unit Cost", .DefaultCellStyle = New DataGridViewCellStyle With { .Format = "₱0.00" } })
+             dgvLines.Columns.Add(New DataGridViewTextBoxColumn With { .DataPropertyName = "LineTotal", .HeaderText = "Total", .DefaultCellStyle = New DataGridViewCellStyle With { .Format = "₱0.00" } })
+@@ -194,6 +199,14 @@
+             cmbVendorProduct.ValueMember = "ProductId"
+             cmbVendorProduct.SelectedIndex = -1
++
++            If dgvLines.Columns.Contains("ProductNameColumn") Then
++                Dim colProduct = DirectCast(dgvLines.Columns("ProductNameColumn"), DataGridViewComboBoxColumn)
++                colProduct.DataSource = products
++                colProduct.DisplayMember = "ProductName"
++                colProduct.ValueMember = "ProductName"
++            End If
+         End Sub

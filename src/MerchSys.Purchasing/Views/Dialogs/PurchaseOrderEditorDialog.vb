@@ -19,13 +19,18 @@ Namespace Views.Dialogs
         Public Property OnRemoveLine As Func(Of Integer, Task) Implements IPurchaseOrderEditorView.OnRemoveLine
         <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
         Public Property OnLoadData As Func(Of Task) Implements IPurchaseOrderEditorView.OnLoadData
+        <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
+        Public Property OnVendorChanged As Func(Of Integer, Task) Implements IPurchaseOrderEditorView.OnVendorChanged
 
         Public Sub New()
             InitializeComponent()
             
             dgvLines.AutoGenerateColumns = False
             dgvLines.Columns.Add(New DataGridViewTextBoxColumn With { .DataPropertyName = "Id", .HeaderText = "ID", .Visible = False })
-            dgvLines.Columns.Add(New DataGridViewTextBoxColumn With { .DataPropertyName = "ProductName", .HeaderText = "Product", .Width = 200 })
+
+            Dim colProduct = New DataGridViewComboBoxColumn() With { .DataPropertyName = "ProductName", .HeaderText = "Product", .Width = 200, .Name = "ProductNameColumn", .DisplayStyle = DataGridViewComboBoxDisplayStyle.Nothing }
+            dgvLines.Columns.Add(colProduct)
+
             dgvLines.Columns.Add(New DataGridViewTextBoxColumn With { .DataPropertyName = "Quantity", .HeaderText = "Qty", .Width = 80 })
             dgvLines.Columns.Add(New DataGridViewTextBoxColumn With { .DataPropertyName = "UnitCost", .HeaderText = "Unit Cost", .DefaultCellStyle = New DataGridViewCellStyle With { .Format = "₱0.00" } })
             dgvLines.Columns.Add(New DataGridViewTextBoxColumn With { .DataPropertyName = "LineTotal", .HeaderText = "Total", .DefaultCellStyle = New DataGridViewCellStyle With { .Format = "₱0.00" } })
@@ -40,6 +45,22 @@ Namespace Views.Dialogs
             AddHandler btnRemoveLine.Click, Async Sub(s, e) Await TriggerRemoveLine()
             AddHandler txtUnitCost.TextChanged, AddressOf CalculateLineTotal
             AddHandler txtQuantity.TextChanged, AddressOf CalculateLineTotal
+
+            AddHandler cmbVendor.SelectedIndexChanged, Async Sub(s, e)
+                                                           If OnVendorChanged IsNot Nothing AndAlso cmbVendor.SelectedItem IsNot Nothing Then
+                                                               Dim vendor = DirectCast(cmbVendor.SelectedItem, Vendor)
+                                                               Await OnVendorChanged.Invoke(vendor.Id)
+                                                           End If
+                                                       End Sub
+
+            AddHandler cmbVendorProduct.SelectedIndexChanged, AddressOf OnProductSelectionChanged
+        End Sub
+
+        Private Sub OnProductSelectionChanged(sender As Object, e As EventArgs)
+            If cmbVendorProduct.SelectedItem IsNot Nothing Then
+                Dim vp = DirectCast(cmbVendorProduct.SelectedItem, Services.VendorProductDto)
+                txtUnitCost.Text = vp.UnitCost.ToString("0.00")
+            End If
         End Sub
         
         Private Sub CalculateLineTotal(sender As Object, e As EventArgs)
@@ -64,8 +85,15 @@ Namespace Views.Dialogs
                 Dim cost As Decimal
                 Dim total As Decimal
                 Dim qty As Integer
-                If String.IsNullOrWhiteSpace(txtProductName.Text) Then
-                    ShowError("Please enter a product name.")
+
+                If cmbVendorProduct.SelectedItem Is Nothing Then
+                    ShowError("Please select a product from the vendor catalog.")
+                    Return
+                End If
+
+                Dim productName = DirectCast(cmbVendorProduct.SelectedItem, Services.VendorProductDto).ProductName
+                If String.IsNullOrWhiteSpace(productName) Then
+                    ShowError("Selected product has an invalid name.")
                     Return
                 End If
                 If Not Integer.TryParse(txtQuantity.Text, qty) OrElse qty <= 0 Then
@@ -81,8 +109,8 @@ Namespace Views.Dialogs
                     Return
                 End If
                 
-                Await OnAddLine.Invoke(txtProductName.Text, qty, cost, total)
-                txtProductName.Clear()
+                Await OnAddLine.Invoke(productName, qty, cost, total)
+                cmbVendorProduct.SelectedIndex = -1
                 txtQuantity.Clear()
                 txtUnitCost.Clear()
                 txtLineTotal.Clear()
@@ -156,6 +184,20 @@ Namespace Views.Dialogs
             cmbVendor.ValueMember = "Id"
         End Sub
 
+        Public Sub BindVendorProducts(products As List(Of Services.VendorProductDto)) Implements IPurchaseOrderEditorView.BindVendorProducts
+            cmbVendorProduct.DataSource = products
+            cmbVendorProduct.DisplayMember = "ProductName"
+            cmbVendorProduct.ValueMember = "ProductId"
+            cmbVendorProduct.SelectedIndex = -1
+
+            If dgvLines.Columns.Contains("ProductNameColumn") Then
+                Dim colProduct = DirectCast(dgvLines.Columns("ProductNameColumn"), DataGridViewComboBoxColumn)
+                colProduct.DataSource = products
+                colProduct.DisplayMember = "ProductName"
+                colProduct.ValueMember = "ProductName"
+            End If
+        End Sub
+
         Public Sub BindLines(lines As List(Of PurchaseOrderLine)) Implements IPurchaseOrderEditorView.BindLines
             dgvLines.DataSource = Nothing
             dgvLines.DataSource = lines
@@ -169,7 +211,7 @@ Namespace Views.Dialogs
             cmbVendor.Enabled = Not isReadOnly
             txtNotes.ReadOnly = isReadOnly
             dtpDeliveryDate.Enabled = Not isReadOnly
-            txtProductName.Enabled = Not isReadOnly
+            cmbVendorProduct.Enabled = Not isReadOnly
             txtQuantity.Enabled = Not isReadOnly
             txtUnitCost.Enabled = Not isReadOnly
             txtLineTotal.Enabled = Not isReadOnly

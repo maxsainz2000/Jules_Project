@@ -27,7 +27,7 @@ Namespace Views.Dialogs
         Friend WithEvents lblTotal As System.Windows.Forms.Label
         Friend WithEvents lblStatus As System.Windows.Forms.Label
         
-        Friend WithEvents txtProductName As System.Windows.Forms.TextBox
+        Friend WithEvents cmbVendorProduct As System.Windows.Forms.ComboBox
         Friend WithEvents txtQuantity As System.Windows.Forms.TextBox
         Friend WithEvents txtUnitCost As System.Windows.Forms.TextBox
         Friend WithEvents txtLineTotal As System.Windows.Forms.TextBox
@@ -46,7 +46,7 @@ Namespace Views.Dialogs
             Me.lblTotal = New System.Windows.Forms.Label()
             Me.lblStatus = New System.Windows.Forms.Label()
             
-            Me.txtProductName = New System.Windows.Forms.TextBox()
+            Me.cmbVendorProduct = New System.Windows.Forms.ComboBox()
             Me.txtQuantity = New System.Windows.Forms.TextBox()
             Me.txtUnitCost = New System.Windows.Forms.TextBox()
             Me.txtLineTotal = New System.Windows.Forms.TextBox()
@@ -104,13 +104,14 @@ Namespace Views.Dialogs
             Me.dgvLines.ReadOnly = True
             Me.dgvLines.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect
             '
-            'txtProductName
+            'cmbVendorProduct
             '
-            Me.txtProductName.Location = New System.Drawing.Point(12, 130)
-            Me.txtProductName.Name = "txtProductName"
-            Me.txtProductName.Size = New System.Drawing.Size(150, 20)
-            Me.txtProductName.TabIndex = 5
-            Me.txtProductName.PlaceholderText = "Product Name"
+            Me.cmbVendorProduct.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+            Me.cmbVendorProduct.FormattingEnabled = True
+            Me.cmbVendorProduct.Location = New System.Drawing.Point(12, 130)
+            Me.cmbVendorProduct.Name = "cmbVendorProduct"
+            Me.cmbVendorProduct.Size = New System.Drawing.Size(150, 21)
+            Me.cmbVendorProduct.TabIndex = 5
             '
             'txtQuantity
             '
@@ -210,7 +211,7 @@ Namespace Views.Dialogs
             Me.Controls.Add(Me.txtLineTotal)
             Me.Controls.Add(Me.txtUnitCost)
             Me.Controls.Add(Me.txtQuantity)
-            Me.Controls.Add(Me.txtProductName)
+            Me.Controls.Add(Me.cmbVendorProduct)
             Me.Controls.Add(Me.dgvLines)
             Me.Controls.Add(Me.txtNotes)
             Me.Controls.Add(Me.lblStatus)

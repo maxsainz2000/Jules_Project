@@ -1,0 +1,140 @@
+--- src/MerchSys.Purchasing/Views/Dialogs/PurchaseOrderEditorDialog.Designer.vb
++++ src/MerchSys.Purchasing/Views/Dialogs/PurchaseOrderEditorDialog.Designer.vb
+@@ -27,7 +27,7 @@
+         Friend WithEvents lblTotal As System.Windows.Forms.Label
+         Friend WithEvents lblStatus As System.Windows.Forms.Label
+
+-        Friend WithEvents txtProductName As System.Windows.Forms.TextBox
++        Friend WithEvents cmbVendorProduct As System.Windows.Forms.ComboBox
+         Friend WithEvents txtQuantity As System.Windows.Forms.TextBox
+         Friend WithEvents txtUnitCost As System.Windows.Forms.TextBox
+         Friend WithEvents txtLineTotal As System.Windows.Forms.TextBox
+@@ -46,7 +46,7 @@
+             Me.lblTotal = New System.Windows.Forms.Label()
+             Me.lblStatus = New System.Windows.Forms.Label()
+
+-            Me.txtProductName = New System.Windows.Forms.TextBox()
++            Me.cmbVendorProduct = New System.Windows.Forms.ComboBox()
+             Me.txtQuantity = New System.Windows.Forms.TextBox()
+             Me.txtUnitCost = New System.Windows.Forms.TextBox()
+             Me.txtLineTotal = New System.Windows.Forms.TextBox()
+@@ -104,13 +104,14 @@
+             Me.dgvLines.ReadOnly = True
+             Me.dgvLines.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect
+             '
+-            'txtProductName
++            'cmbVendorProduct
+             '
+-            Me.txtProductName.Location = New System.Drawing.Point(12, 130)
+-            Me.txtProductName.Name = "txtProductName"
+-            Me.txtProductName.Size = New System.Drawing.Size(150, 20)
+-            Me.txtProductName.TabIndex = 5
+-            Me.txtProductName.PlaceholderText = "Product Name"
++            Me.cmbVendorProduct.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
++            Me.cmbVendorProduct.FormattingEnabled = True
++            Me.cmbVendorProduct.Location = New System.Drawing.Point(12, 130)
++            Me.cmbVendorProduct.Name = "cmbVendorProduct"
++            Me.cmbVendorProduct.Size = New System.Drawing.Size(150, 21)
++            Me.cmbVendorProduct.TabIndex = 5
+             '
+             'txtQuantity
+             '
+@@ -210,7 +211,7 @@
+             Me.Controls.Add(Me.txtLineTotal)
+             Me.Controls.Add(Me.txtUnitCost)
+             Me.Controls.Add(Me.txtQuantity)
+-            Me.Controls.Add(Me.txtProductName)
++            Me.Controls.Add(Me.cmbVendorProduct)
+             Me.Controls.Add(Me.dgvLines)
+             Me.Controls.Add(Me.txtNotes)
+             Me.Controls.Add(Me.lblStatus)
+--- src/MerchSys.Purchasing/Views/Dialogs/PurchaseOrderEditorDialog.vb
++++ src/MerchSys.Purchasing/Views/Dialogs/PurchaseOrderEditorDialog.vb
+@@ -19,6 +19,8 @@
+         Public Property OnRemoveLine As Func(Of Integer, Task) Implements IPurchaseOrderEditorView.OnRemoveLine
+         <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
+         Public Property OnLoadData As Func(Of Task) Implements IPurchaseOrderEditorView.OnLoadData
++        <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
++        Public Property OnVendorChanged As Func(Of Integer, Task) Implements IPurchaseOrderEditorView.OnVendorChanged
+
+         Public Sub New()
+             InitializeComponent()
+@@ -40,8 +42,24 @@
+             AddHandler btnRemoveLine.Click, Async Sub(s, e) Await TriggerRemoveLine()
+             AddHandler txtUnitCost.TextChanged, AddressOf CalculateLineTotal
+             AddHandler txtQuantity.TextChanged, AddressOf CalculateLineTotal
++
++            AddHandler cmbVendor.SelectedIndexChanged, Async Sub(s, e)
++                                                           If OnVendorChanged IsNot Nothing AndAlso cmbVendor.SelectedItem IsNot Nothing Then
++                                                               Dim vendor = DirectCast(cmbVendor.SelectedItem, Vendor)
++                                                               Await OnVendorChanged.Invoke(vendor.Id)
++                                                           End If
++                                                       End Sub
++
++            AddHandler cmbVendorProduct.SelectedIndexChanged, AddressOf OnProductSelectionChanged
+         End Sub
+
++        Private Sub OnProductSelectionChanged(sender As Object, e As EventArgs)
++            If cmbVendorProduct.SelectedItem IsNot Nothing Then
++                Dim vp = DirectCast(cmbVendorProduct.SelectedItem, Services.VendorProductDto)
++                txtUnitCost.Text = vp.UnitCost.ToString("0.00")
++            End If
++        End Sub
++
+         Private Sub CalculateLineTotal(sender As Object, e As EventArgs)
+             Dim cost As Decimal
+             Dim qty As Integer
+@@ -64,10 +82,17 @@
+                 Dim cost As Decimal
+                 Dim total As Decimal
+                 Dim qty As Integer
+-                If String.IsNullOrWhiteSpace(txtProductName.Text) Then
+-                    ShowError("Please enter a product name.")
++
++                If cmbVendorProduct.SelectedItem Is Nothing Then
++                    ShowError("Please select a product from the vendor catalog.")
+                     Return
+                 End If
++
++                Dim productName = DirectCast(cmbVendorProduct.SelectedItem, Services.VendorProductDto).ProductName
++                If String.IsNullOrWhiteSpace(productName) Then
++                    ShowError("Selected product has an invalid name.")
++                    Return
++                End If
+                 If Not Integer.TryParse(txtQuantity.Text, qty) OrElse qty <= 0 Then
+                     ShowError("Please enter a valid quantity.")
+                     Return
+@@ -81,8 +106,8 @@
+                     Return
+                 End If
+
+-                Await OnAddLine.Invoke(txtProductName.Text, qty, cost, total)
+-                txtProductName.Clear()
++                Await OnAddLine.Invoke(productName, qty, cost, total)
++                cmbVendorProduct.SelectedIndex = -1
+                 txtQuantity.Clear()
+                 txtUnitCost.Clear()
+                 txtLineTotal.Clear()
+@@ -155,6 +180,13 @@
+             cmbVendor.DisplayMember = "Name"
+             cmbVendor.ValueMember = "Id"
+         End Sub
++
++        Public Sub BindVendorProducts(products As List(Of Services.VendorProductDto)) Implements IPurchaseOrderEditorView.BindVendorProducts
++            cmbVendorProduct.DataSource = products
++            cmbVendorProduct.DisplayMember = "ProductName"
++            cmbVendorProduct.ValueMember = "ProductId"
++            cmbVendorProduct.SelectedIndex = -1
++        End Sub
+
+         Public Sub BindLines(lines As List(Of PurchaseOrderLine)) Implements IPurchaseOrderEditorView.BindLines
+             dgvLines.DataSource = Nothing
+@@ -169,7 +201,7 @@
+             cmbVendor.Enabled = Not isReadOnly
+             txtNotes.ReadOnly = isReadOnly
+             dtpDeliveryDate.Enabled = Not isReadOnly
+-            txtProductName.Enabled = Not isReadOnly
++            cmbVendorProduct.Enabled = Not isReadOnly
+             txtQuantity.Enabled = Not isReadOnly
+             txtUnitCost.Enabled = Not isReadOnly
+             txtLineTotal.Enabled = Not isReadOnly
