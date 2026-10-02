@@ -1,28 +1,23 @@
-1. **Create `IGoodsReceivingView.vb`**
-   - In `src/MerchSys.Purchasing/Views/`, create the interface for the view.
-   - It will need a way to bind a dropdown list of POs, bind the lines for the selected PO to a grid, and events for PO selection changing, discrepancy notes changing, and confirming receipt.
-
-2. **Create `GoodsReceivingPresenter.vb`**
-   - In `src/MerchSys.Purchasing/Presenters/`, create the presenter class.
-   - Create helper classes `POSelectorItem` and `GRLineItem`. `GRLineItem` needs to auto-recalculate `HasDiscrepancy` when quantities differ.
-   - Implement loading of Submitted POs via `IPurchaseOrderService.SearchAsync("", PurchaseOrderStatus.Submitted)`.
-   - On PO selection, load PO lines and populate the editable grid.
-   - Validation logic for discrepancy notes.
-   - Call `IGoodsReceivingService.ReceiveGoodsAsync` to process the receipt.
-
-3. **Create `GoodsReceivingView.vb` and `GoodsReceivingView.Designer.vb`**
-   - In `src/MerchSys.Purchasing/Views/`, create the WinForms UserControl.
-   - The UI contains a `ComboBox` for PO selection, a Confirm button, a Status bar, a placeholder panel, and a `DataGridView` for receiving items.
-   - Grid columns: Product (read-only), Qty Ordered (read-only), Qty Received (editable), Unit Cost (editable), Expiry Date (**using the custom `DataGridViewDateTimePickerColumn`**), Discrepancy Notes (editable), and a warning indicator.
-   - Set up amber highlight on discrepancy rows and red styling for notes.
-
-4. **Update `PurchasingServiceCollectionExtensions.vb`**
-   - Register `IGoodsReceivingView` mapped to `GoodsReceivingView` (Transient).
-   - Register `GoodsReceivingPresenter` (Transient).
-
-5. **Stage New Files**
-   - Run `git add src/MerchSys.Purchasing/UI/Controls/*` and `git add src/MerchSys.Purchasing/Views/*` and `git add src/MerchSys.Purchasing/Presenters/*`.
-
-6. **Compile and Pre-commit**
+1. **Service Verification**: Check `AccountsPayableService` and `IAccountsPayableService`. The method `GetAllAsync()` has already been added and returns all AP entries with Vendor and PurchaseOrder navigation ordered by InvoiceDate descending. So no code changes are needed here.
+2. **Extensions Registration**: Register `IAccountsPayableService -> AccountsPayableService` (Scoped) and `APLedgerPresenter` (Transient) in `PurchasingServiceCollectionExtensions.vb`. Also register `IAPLedgerView -> APLedgerView` (Transient). `AccountsPayableService` is already registered, so only add `IAPLedgerView`, `APLedgerView` and `APLedgerPresenter`.
+3. **Presenter Creation (`APLedgerPresenter.vb`)**:
+   - Create `APLedgerPresenter.vb` inside `src/MerchSys.Purchasing/Presenters/`.
+   - Add helper classes `APLedgerRow` (for grid display) and `VendorSelectorItem`.
+   - Implement filter logic (All/Outstanding/Overdue/Paid + vendor).
+   - Implement inline payment dialog state and commands.
+   - Add Boolean properties: `IsAllFilterActive`, `IsOutstandingFilterActive`, `IsOverdueFilterActive`, `IsPaidFilterActive`.
+   - Apply IsManager check for payment commands using `ISessionService`.
+4. **Interfaces and View Creation (`IAPLedgerView.vb` & `APLedgerView.vb`)**:
+   - Create `IAPLedgerView.vb` in `src/MerchSys.Purchasing/Views/`.
+   - Create `APLedgerView.vb` and `APLedgerView.Designer.vb` in `src/MerchSys.Purchasing/Views/Purchasing/` as WinForms UserControl.
+   - Provide summary header with total outstanding.
+   - Filter toolbar with status buttons (All, Outstanding, Overdue, Paid) and a vendor ComboBox.
+   - DataGridView with columns (`VendorName`, `InvoiceNumber`, `InvoiceDate`, `DueDate`, `TotalAmount`, `AmountPaid`, `Balance`, `IsPaid`, `IsOverdue`).
+   - Implement row highlighting: overdue (amber), paid (green).
+5. **Payment Dialog Creation (`APLedgerPaymentDialog.vb`)**:
+   - Create `APLedgerPaymentDialog.vb` and `APLedgerPaymentDialog.Designer.vb` in `src/MerchSys.Purchasing/Views/Dialogs/`.
+   - It will collect payment amount and confirm.
+6. **Pre-commit and Test**:
    - Run `dotnet build`.
-   - Follow pre-commit instructions.
+   - Complete pre commit steps to ensure proper testing, verification, review, and reflection are done.
+7. **Submit**: Create PR.

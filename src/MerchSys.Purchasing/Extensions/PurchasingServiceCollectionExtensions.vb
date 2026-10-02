@@ -3,6 +3,7 @@ Imports System.Runtime.CompilerServices
 Imports MerchSys.Purchasing.Services
 Imports MerchSys.Purchasing.Views
 Imports MerchSys.Purchasing.Views.Dialogs
+Imports MerchSys.Purchasing.Views.Purchasing
 Imports MerchSys.Purchasing.Presenters
 
 Namespace Extensions
@@ -21,6 +22,8 @@ Namespace Extensions
             services.AddTransient(Of IPurchaseOrderEditorView, PurchaseOrderEditorDialog)()
             services.AddTransient(Of IGoodsReceivingView, GoodsReceivingView)()
             services.AddTransient(Of IVendorDirectoryView, VendorDirectoryView)()
+            services.AddTransient(Of IAPLedgerView, APLedgerView)()
+            services.AddTransient(Of IAPLedgerPaymentDialog, APLedgerPaymentDialog)()
             
             ' Presenters
             services.AddTransient(Of PurchaseOrderListPresenter)()
@@ -28,6 +31,7 @@ Namespace Extensions
             services.AddTransient(Of GoodsReceivingPresenter)()
             services.AddTransient(Of VendorListPresenter)()
             services.AddTransient(Of VendorEditorPresenter)()
+            services.AddTransient(Of APLedgerPresenter)()
         End Sub
     End Module
 End Namespace
