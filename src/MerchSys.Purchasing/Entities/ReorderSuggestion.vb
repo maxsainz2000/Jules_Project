@@ -2,7 +2,7 @@ Imports MerchSys.SharedKernel.Entities
 
 Namespace Entities
     Public Class ReorderSuggestion
-        Inherits BaseEntity
+        Inherits AuditableEntity
 
         Public Property ProductId As Integer
         Public Property SuggestedQuantity As Integer

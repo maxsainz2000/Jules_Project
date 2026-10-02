@@ -180,6 +180,7 @@ Namespace Services
 
         Public Async Function GetAllSuggestionsAsync() As Task(Of List(Of ReorderSuggestion)) Implements IReorderService.GetAllSuggestionsAsync
             Dim rawList = Await _dbContext.ReorderSuggestions.
+                OrderByDescending(Function(s) s.CreatedAt).
                 Select(Function(s) New With {
                     .Id = s.Id,
                     .ProductId = s.ProductId,
@@ -187,7 +188,11 @@ Namespace Services
                     .Status = s.Status,
                     .ResultingPurchaseOrderId = s.ResultingPurchaseOrderId,
                     .Reason = s.Reason,
-                    .RowVersion = s.RowVersion
+                    .RowVersion = s.RowVersion,
+                    .CreatedAt = s.CreatedAt,
+                    .CreatedBy = s.CreatedBy,
+                    .ModifiedAt = s.ModifiedAt,
+                    .ModifiedBy = s.ModifiedBy
                 }).ToListAsync()
             Return rawList.Select(Function(s) New ReorderSuggestion With {
                     .Id = s.Id,
@@ -196,7 +201,11 @@ Namespace Services
                     .Status = s.Status,
                     .ResultingPurchaseOrderId = s.ResultingPurchaseOrderId,
                     .Reason = s.Reason,
-                    .RowVersion = s.RowVersion
+                    .RowVersion = s.RowVersion,
+                    .CreatedAt = s.CreatedAt,
+                    .CreatedBy = s.CreatedBy,
+                    .ModifiedAt = s.ModifiedAt,
+                    .ModifiedBy = s.ModifiedBy
                 }).ToList()
         End Function
 

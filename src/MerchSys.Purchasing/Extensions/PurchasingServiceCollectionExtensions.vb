@@ -24,6 +24,8 @@ Namespace Extensions
             services.AddTransient(Of IVendorDirectoryView, VendorDirectoryView)()
             services.AddTransient(Of IAPLedgerView, APLedgerView)()
             services.AddTransient(Of IAPLedgerPaymentDialog, APLedgerPaymentDialog)()
+            services.AddTransient(Of IReorderSuggestionsView, ReorderSuggestionsView)()
+            services.AddTransient(Of IReorderConfigEditorDialog, ReorderConfigEditorDialog)()
             
             ' Presenters
             services.AddTransient(Of PurchaseOrderListPresenter)()
@@ -32,6 +34,7 @@ Namespace Extensions
             services.AddTransient(Of VendorListPresenter)()
             services.AddTransient(Of VendorEditorPresenter)()
             services.AddTransient(Of APLedgerPresenter)()
+            services.AddTransient(Of ReorderSuggestionsPresenter)()
         End Sub
     End Module
 End Namespace
