@@ -1,6 +1,7 @@
 Imports Microsoft.Extensions.DependencyInjection
 Imports System.Runtime.CompilerServices
 Imports MerchSys.Purchasing.Services
+Imports MerchSys.Purchasing.Services.Vat
 Imports MerchSys.Purchasing.Views
 Imports MerchSys.Purchasing.Views.Dialogs
 Imports MerchSys.Purchasing.Views.Purchasing
@@ -16,6 +17,7 @@ Namespace Extensions
             services.AddScoped(Of IVendorService, VendorService)()
             services.AddScoped(Of IAccountsPayableService, AccountsPayableService)()
             services.AddScoped(Of IReorderService, ReorderService)()
+            services.AddScoped(Of GoodsReceiptVatCalculator)()
             
             ' Views
             services.AddTransient(Of IPurchaseOrderListView, PurchaseOrderListView)()
