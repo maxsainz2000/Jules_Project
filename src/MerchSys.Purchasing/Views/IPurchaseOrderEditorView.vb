@@ -15,8 +15,10 @@ Namespace Views
         Property OnAddLine As Func(Of String, Integer, Decimal, Decimal, Task)
         Property OnRemoveLine As Func(Of Integer, Task)
         Property OnLoadData As Func(Of Task)
+        Property OnVendorChanged As Func(Of Integer, Task)
 
         Sub BindVendors(vendors As List(Of Vendor))
+        Sub BindVendorProducts(products As List(Of MerchSys.Purchasing.Services.VendorProductDto))
         Sub BindLines(lines As List(Of PurchaseOrderLine))
         Sub UpdateTotal(total As Decimal)
         Sub SetReadOnly(isReadOnly As Boolean)
