@@ -34,13 +34,48 @@ Namespace Presenters
             Set(value As Integer)
                 _quantityReceived = value
                 HasDiscrepancy = (_quantityReceived <> QuantityOrdered)
+                ComputeValues()
             End Set
         End Property
 
+        Private _unitCost As Decimal
         Public Property UnitCost As Decimal
+            Get
+                Return _unitCost
+            End Get
+            Set(value As Decimal)
+                _unitCost = value
+                ComputeValues()
+            End Set
+        End Property
+
+        Private _vatClassification As VatTreatment
+        Public Property VatClassification As VatTreatment
+            Get
+                Return _vatClassification
+            End Get
+            Set(value As VatTreatment)
+                _vatClassification = value
+                ComputeValues()
+            End Set
+        End Property
+
         Public Property ExpiryDate As DateTime?
         Public Property DiscrepancyNotes As String
         Public Property HasDiscrepancy As Boolean
+        Public Property VatAmount As Decimal
+        Public Property VatableSales As Decimal
+
+        Private Sub ComputeValues()
+            Dim totalAmount = UnitCost * QuantityReceived
+            If VatClassification = VatTreatment.Vatable Then
+                VatableSales = Math.Round(totalAmount / 1.12D, 2)
+                VatAmount = totalAmount - VatableSales
+            Else
+                VatableSales = totalAmount
+                VatAmount = 0
+            End If
+        End Sub
     End Class
 
     Public Class GoodsReceivingPresenter
@@ -50,6 +85,12 @@ Namespace Presenters
         Private ReadOnly _goodsReceivingService As IGoodsReceivingService
         Private ReadOnly _vendorService As IVendorService
         Private _currentLines As List(Of GRLineItem) = New List(Of GRLineItem)()
+
+        Public ReadOnly Property VatTreatmentValues As List(Of VatTreatment)
+            Get
+                Return [Enum].GetValues(GetType(VatTreatment)).Cast(Of VatTreatment)().ToList()
+            End Get
+        End Property
 
         Public Sub New(purchaseOrderService As IPurchaseOrderService, goodsReceivingService As IGoodsReceivingService, vendorService As IVendorService)
             _purchaseOrderService = purchaseOrderService
@@ -120,7 +161,8 @@ Namespace Presenters
                     .QuantityOrdered = l.Quantity,
                     .QuantityReceived = l.Quantity,
                     .UnitCost = l.UnitCost,
-                    .HasDiscrepancy = False
+                    .HasDiscrepancy = False,
+                    .VatClassification = VatTreatment.Vatable
                 }).ToList()
 
                 _view.SetLineItems(_currentLines)
@@ -159,7 +201,10 @@ Namespace Presenters
                         .QuantityReceived = l.QuantityReceived,
                         .UnitCost = l.UnitCost,
                         .ExpiryDate = l.ExpiryDate,
-                        .DiscrepancyNotes = l.DiscrepancyNotes
+                        .DiscrepancyNotes = l.DiscrepancyNotes,
+                        .VatClassification = l.VatClassification,
+                        .VatableSales = l.VatableSales,
+                        .VatAmount = l.VatAmount
                     }).ToList()
                 }
 

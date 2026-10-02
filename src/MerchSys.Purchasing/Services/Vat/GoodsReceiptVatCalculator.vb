@@ -6,19 +6,30 @@ Namespace Services.Vat
 
         Public Function Calculate(dto As ReceiveGoodsDto) As GoodsReceiptVatBreakdown
             Dim totalAmount As Decimal = 0
+            Dim vatableInput As Decimal = 0
+            Dim vatExemptInput As Decimal = 0
+            Dim zeroRatedInput As Decimal = 0
+            Dim inputVat As Decimal = 0
 
             For Each line In dto.Lines
-                totalAmount += (line.UnitCost * line.QuantityReceived)
-            Next
+                Dim lineTotal = (line.UnitCost * line.QuantityReceived)
+                totalAmount += lineTotal
 
-            ' Option-2 simplification: assume all lines are vatable at 12%
-            Dim vatableInput As Decimal = Math.Round(totalAmount / 1.12D, 2)
-            Dim inputVat As Decimal = totalAmount - vatableInput
+                Select Case line.VatClassification
+                    Case SharedKernel.Enums.VatTreatment.Vatable
+                        vatableInput += line.VatableSales
+                        inputVat += line.VatAmount
+                    Case SharedKernel.Enums.VatTreatment.Exempt
+                        vatExemptInput += line.VatableSales
+                    Case SharedKernel.Enums.VatTreatment.ZeroRated
+                        zeroRatedInput += line.VatableSales
+                End Select
+            Next
 
             Dim breakdown As New GoodsReceiptVatBreakdown With {
                 .VatableInputs = vatableInput,
-                .VatExemptInputs = 0,
-                .ZeroRatedInputs = 0,
+                .VatExemptInputs = vatExemptInput,
+                .ZeroRatedInputs = zeroRatedInput,
                 .InputVat = inputVat,
                 .VendorInvoiceTotal = totalAmount
             }

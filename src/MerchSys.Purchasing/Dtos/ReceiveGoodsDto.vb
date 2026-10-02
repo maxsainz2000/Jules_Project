@@ -16,6 +16,9 @@ Namespace Dtos
         Public Property UnitCost As Decimal
         Public Property ExpiryDate As DateTime?
         Public Property DiscrepancyNotes As String
+        Public Property VatClassification As MerchSys.SharedKernel.Enums.VatTreatment
+        Public Property VatableSales As Decimal
+        Public Property VatAmount As Decimal
     End Class
 
 End Namespace

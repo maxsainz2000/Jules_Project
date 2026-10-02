@@ -1,5 +1,6 @@
 Imports Microsoft.Extensions.DependencyInjection
 Imports MerchSys.Purchasing.Data
+Imports Microsoft.EntityFrameworkCore
 Imports MerchSys.Inventory.Data
 Imports MerchSys.POS.Data
 Imports MerchSys.Accounting.Data
@@ -15,6 +16,25 @@ Namespace Data
                 ' Resolve each DbContext and ensure the database is created
                 Dim purchasingDb = services.GetRequiredService(Of PurchasingDbContext)()
                 purchasingDb.Database.EnsureCreated()
+
+                ' Apply manual migrations for Purchasing
+                Dim conn = purchasingDb.Database.GetDbConnection()
+                Dim wasClosed = (conn.State = System.Data.ConnectionState.Closed)
+                If wasClosed Then conn.Open()
+                Try
+                    Using cmd = conn.CreateCommand()
+                        ' 20260516140000_AddGoodsReceiptLineVatColumns
+                        cmd.CommandText = "
+                            ALTER TABLE Pur_GoodsReceiptLines
+                            ADD COLUMN IF NOT EXISTS VatClassification INT NOT NULL DEFAULT 0,
+                            ADD COLUMN IF NOT EXISTS VatAmount DECIMAL(18,2) NOT NULL DEFAULT 0.00,
+                            ADD COLUMN IF NOT EXISTS VatableSales DECIMAL(18,2) NOT NULL DEFAULT 0.00;
+                        "
+                        cmd.ExecuteNonQuery()
+                    End Using
+                Finally
+                    If wasClosed Then conn.Close()
+                End Try
 
                 Dim inventoryDb = services.GetRequiredService(Of InventoryDbContext)()
                 inventoryDb.Database.EnsureCreated()

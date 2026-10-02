@@ -55,14 +55,34 @@ Namespace Services
             }
 
             For Each lineDto In dto.Lines
+                Dim lineTotal = lineDto.UnitCost * lineDto.QuantityReceived
+                Dim vatableSales As Decimal
+                Dim vatAmount As Decimal
+
+                If lineDto.VatClassification = VatTreatment.Vatable Then
+                    vatableSales = Math.Round(lineTotal / 1.12D, 2)
+                    vatAmount = lineTotal - vatableSales
+                Else
+                    vatableSales = lineTotal
+                    vatAmount = 0
+                End If
+
                 Dim line = New GoodsReceiptLine With {
                     .ProductId = lineDto.ProductId,
                     .UnitCost = lineDto.UnitCost,
                     .ExpiryDate = lineDto.ExpiryDate,
                     .QuantityReceived = lineDto.QuantityReceived,
                     .DiscrepancyNotes = lineDto.DiscrepancyNotes,
-                    .HasDiscrepancy = (lineDto.QuantityReceived <> lineDto.QuantityOrdered)
+                    .HasDiscrepancy = (lineDto.QuantityReceived <> lineDto.QuantityOrdered),
+                    .VatClassification = lineDto.VatClassification,
+                    .VatableSales = vatableSales,
+                    .VatAmount = vatAmount
                 }
+
+                ' Also update the dto so the calculator uses the server-computed values
+                lineDto.VatableSales = vatableSales
+                lineDto.VatAmount = vatAmount
+
                 receipt.Lines.Add(line)
             Next
 
@@ -92,10 +112,10 @@ Namespace Services
                 .InputVat = breakdown.InputVat
             }
 
-            For Each line In dto.Lines
+            For Each line In receipt.Lines
                 vatEvent.Items.Add(New GoodsReceivedWithVatEvent.GoodsReceivedItemWithVat With {
-                    .Treatment = VatTreatment.Vatable,
-                    .InputVat = Math.Round(((line.UnitCost * line.QuantityReceived) / 1.12D) * 0.12D, 2)
+                    .Treatment = line.VatClassification,
+                    .InputVat = line.VatAmount
                 })
             Next
 
@@ -146,7 +166,7 @@ Namespace Services
                 If receipts.Any() Then
                     Dim receiptIds = String.Join(",", receipts.Select(Function(r) r.Id))
                     Using cmdLines = connection.CreateCommand()
-                        cmdLines.CommandText = $"SELECT Id, GoodsReceiptId, ProductId, UnitCost, ExpiryDate, HasDiscrepancy, QuantityReceived, DiscrepancyNotes FROM Pur_GoodsReceiptLines WHERE GoodsReceiptId IN ({receiptIds})"
+                        cmdLines.CommandText = $"SELECT Id, GoodsReceiptId, ProductId, UnitCost, ExpiryDate, HasDiscrepancy, QuantityReceived, DiscrepancyNotes, VatClassification, VatAmount, VatableSales FROM Pur_GoodsReceiptLines WHERE GoodsReceiptId IN ({receiptIds})"
                         Using readerLines = Await cmdLines.ExecuteReaderAsync()
                             While Await readerLines.ReadAsync()
                                 Dim l = New GoodsReceiptLine()
@@ -165,6 +185,10 @@ Namespace Services
                                 If Not readerLines.IsDBNull(readerLines.GetOrdinal("DiscrepancyNotes")) Then
                                     l.DiscrepancyNotes = Convert.ToString(readerLines("DiscrepancyNotes"))
                                 End If
+
+                                l.VatClassification = DirectCast(Convert.ToInt32(readerLines("VatClassification")), VatTreatment)
+                                l.VatAmount = Convert.ToDecimal(readerLines("VatAmount"))
+                                l.VatableSales = Convert.ToDecimal(readerLines("VatableSales"))
 
                                 Dim parent = receipts.FirstOrDefault(Function(r) r.Id = l.GoodsReceiptId)
                                 If parent IsNot Nothing Then

@@ -149,7 +149,27 @@ Namespace Views
                 .DefaultCellStyle = New DataGridViewCellStyle() With {.BackColor = Color.LightYellow}
             }
 
-            dgvLines.Columns.AddRange(New DataGridViewColumn() {colIndicator, colProduct, colQtyOrdered, colQtyReceived, colUnitCost, colExpiry, colNotes})
+            Dim colVatClass = New DataGridViewComboBoxColumn() With {
+                .Name = "VatClassification",
+                .DataPropertyName = "VatClassification",
+                .HeaderText = "VAT Class",
+                .Width = 100,
+                .DefaultCellStyle = New DataGridViewCellStyle() With {.BackColor = Color.LightYellow}
+            }
+            If _presenter IsNot Nothing Then
+                colVatClass.DataSource = _presenter.VatTreatmentValues
+            End If
+
+            Dim colVatAmt = New DataGridViewTextBoxColumn() With {
+                .Name = "VatAmount",
+                .DataPropertyName = "VatAmount",
+                .HeaderText = "VAT Amount",
+                .Width = 80,
+                .ReadOnly = True,
+                .DefaultCellStyle = New DataGridViewCellStyle() With {.Format = "C2", .BackColor = Color.WhiteSmoke}
+            }
+
+            dgvLines.Columns.AddRange(New DataGridViewColumn() {colIndicator, colProduct, colQtyOrdered, colQtyReceived, colUnitCost, colExpiry, colNotes, colVatClass, colVatAmt})
         End Sub
 
         Private Sub cmbPurchaseOrders_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbPurchaseOrders.SelectedIndexChanged
