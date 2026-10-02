@@ -77,7 +77,7 @@
 - [x] PUR-14
 - [x] PUR-15
 - [x] PUR-16-A
-- [ ] PUR-16-B
+- [x] PUR-16-B
 - [ ] PUR-16-C
 - [ ] PUR-16-D
 
