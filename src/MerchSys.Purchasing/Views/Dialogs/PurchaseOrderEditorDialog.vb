@@ -14,21 +14,55 @@ Namespace Views.Dialogs
         <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
         Public Property OnSubmit As Func(Of Task) Implements IPurchaseOrderEditorView.OnSubmit
         <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
-        Public Property OnAddLine As Func(Of String, Integer, Decimal, Decimal, Task) Implements IPurchaseOrderEditorView.OnAddLine
+        Public Property OnAddLine As Func(Of Integer, String, Integer, Decimal, Decimal, Task) Implements IPurchaseOrderEditorView.OnAddLine
         <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
         Public Property OnRemoveLine As Func(Of Integer, Task) Implements IPurchaseOrderEditorView.OnRemoveLine
         <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
         Public Property OnLoadData As Func(Of Task) Implements IPurchaseOrderEditorView.OnLoadData
+
+        <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
+        Public Property OnVendorChanged As Func(Of Integer, Task) Implements IPurchaseOrderEditorView.OnVendorChanged
+
+        Private _vendorCatalog As System.ComponentModel.BindingList(Of VendorCatalogItem)
+        <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
+        Public Property VendorCatalog As System.ComponentModel.BindingList(Of VendorCatalogItem) Implements IPurchaseOrderEditorView.VendorCatalog
+            Get
+                Return _vendorCatalog
+            End Get
+            Set(value As System.ComponentModel.BindingList(Of VendorCatalogItem))
+                _vendorCatalog = value
+                cmbProduct.DataSource = _vendorCatalog
+                cmbProduct.DisplayMember = "ProductName"
+                cmbProduct.ValueMember = "ProductId"
+
+                Dim col = TryCast(dgvLines.Columns("ProductCol"), DataGridViewComboBoxColumn)
+                If col IsNot Nothing Then
+                    col.DataSource = _vendorCatalog
+                End If
+            End Set
+        End Property
 
         Public Sub New()
             InitializeComponent()
             
             dgvLines.AutoGenerateColumns = False
             dgvLines.Columns.Add(New DataGridViewTextBoxColumn With { .DataPropertyName = "Id", .HeaderText = "ID", .Visible = False })
-            dgvLines.Columns.Add(New DataGridViewTextBoxColumn With { .DataPropertyName = "ProductName", .HeaderText = "Product", .Width = 200 })
+
+            Dim productCol As New DataGridViewComboBoxColumn With {
+                .Name = "ProductCol",
+                .DataPropertyName = "ProductId",
+                .HeaderText = "Product",
+                .Width = 200,
+                .ValueMember = "ProductId",
+                .DisplayMember = "ProductName"
+            }
+            dgvLines.Columns.Add(productCol)
+
             dgvLines.Columns.Add(New DataGridViewTextBoxColumn With { .DataPropertyName = "Quantity", .HeaderText = "Qty", .Width = 80 })
             dgvLines.Columns.Add(New DataGridViewTextBoxColumn With { .DataPropertyName = "UnitCost", .HeaderText = "Unit Cost", .DefaultCellStyle = New DataGridViewCellStyle With { .Format = "₱0.00" } })
             dgvLines.Columns.Add(New DataGridViewTextBoxColumn With { .DataPropertyName = "LineTotal", .HeaderText = "Total", .DefaultCellStyle = New DataGridViewCellStyle With { .Format = "₱0.00" } })
+
+            AddHandler dgvLines.DataError, Sub(s, e) e.ThrowException = False
 
             AddHandler btnSaveDraft.Click, Async Sub(s, e)
                                                If OnSaveDraft IsNot Nothing Then Await OnSaveDraft.Invoke()
@@ -40,6 +74,18 @@ Namespace Views.Dialogs
             AddHandler btnRemoveLine.Click, Async Sub(s, e) Await TriggerRemoveLine()
             AddHandler txtUnitCost.TextChanged, AddressOf CalculateLineTotal
             AddHandler txtQuantity.TextChanged, AddressOf CalculateLineTotal
+
+            AddHandler cmbVendor.SelectedIndexChanged, Async Sub(s, e)
+                                                           If OnVendorChanged IsNot Nothing AndAlso SelectedVendorId > 0 Then
+                                                               Await OnVendorChanged.Invoke(SelectedVendorId)
+                                                           End If
+                                                       End Sub
+            AddHandler cmbProduct.SelectedIndexChanged, Sub(s, e)
+                                                            If cmbProduct.SelectedItem IsNot Nothing Then
+                                                                Dim item = DirectCast(cmbProduct.SelectedItem, VendorCatalogItem)
+                                                                txtUnitCost.Text = item.UnitCost.ToString("0.00")
+                                                            End If
+                                                        End Sub
         End Sub
         
         Private Sub CalculateLineTotal(sender As Object, e As EventArgs)
@@ -64,10 +110,14 @@ Namespace Views.Dialogs
                 Dim cost As Decimal
                 Dim total As Decimal
                 Dim qty As Integer
-                If String.IsNullOrWhiteSpace(txtProductName.Text) Then
-                    ShowError("Please enter a product name.")
+
+                If cmbProduct.SelectedItem Is Nothing Then
+                    ShowError("Please select a product.")
                     Return
                 End If
+
+                Dim selectedItem = DirectCast(cmbProduct.SelectedItem, VendorCatalogItem)
+
                 If Not Integer.TryParse(txtQuantity.Text, qty) OrElse qty <= 0 Then
                     ShowError("Please enter a valid quantity.")
                     Return
@@ -81,8 +131,8 @@ Namespace Views.Dialogs
                     Return
                 End If
                 
-                Await OnAddLine.Invoke(txtProductName.Text, qty, cost, total)
-                txtProductName.Clear()
+                Await OnAddLine.Invoke(selectedItem.ProductId, selectedItem.ProductName, qty, cost, total)
+                cmbProduct.SelectedIndex = -1
                 txtQuantity.Clear()
                 txtUnitCost.Clear()
                 txtLineTotal.Clear()
@@ -169,7 +219,7 @@ Namespace Views.Dialogs
             cmbVendor.Enabled = Not isReadOnly
             txtNotes.ReadOnly = isReadOnly
             dtpDeliveryDate.Enabled = Not isReadOnly
-            txtProductName.Enabled = Not isReadOnly
+            cmbProduct.Enabled = Not isReadOnly
             txtQuantity.Enabled = Not isReadOnly
             txtUnitCost.Enabled = Not isReadOnly
             txtLineTotal.Enabled = Not isReadOnly

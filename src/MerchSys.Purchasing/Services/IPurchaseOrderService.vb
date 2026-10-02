@@ -6,6 +6,7 @@ Imports System.Collections.Generic
 
 Namespace Services
     Public Class CreatePOLineDto
+        Public Property ProductId As Integer
         Public Property ProductName As String
         Public Property UnitCost As Decimal
         Public Property Quantity As Integer

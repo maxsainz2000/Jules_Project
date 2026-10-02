@@ -163,6 +163,7 @@ Namespace Services
 
             Dim newLine As New PurchaseOrderLine With {
                 .PurchaseOrderId = id,
+                .ProductId = line.ProductId,
                 .ProductName = line.ProductName,
                 .Quantity = line.Quantity,
                 .UnitCost = line.UnitCost,

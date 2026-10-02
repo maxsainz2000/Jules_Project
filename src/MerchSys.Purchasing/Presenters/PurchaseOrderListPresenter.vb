@@ -20,6 +20,7 @@ Namespace Presenters
         Private _pageSize As Integer = 50
 
         Public Sub New(view As IPurchaseOrderListView, poService As IPurchaseOrderService, sessionService As ISessionService, serviceProvider As IServiceProvider, vendorService As IVendorService)
+            ' Initialize list presenter
             Me.View = view
             _poService = poService
             _sessionService = sessionService

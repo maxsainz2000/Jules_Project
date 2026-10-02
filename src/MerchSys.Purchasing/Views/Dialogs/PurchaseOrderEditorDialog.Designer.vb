@@ -27,7 +27,7 @@ Namespace Views.Dialogs
         Friend WithEvents lblTotal As System.Windows.Forms.Label
         Friend WithEvents lblStatus As System.Windows.Forms.Label
         
-        Friend WithEvents txtProductName As System.Windows.Forms.TextBox
+        Friend WithEvents cmbProduct As System.Windows.Forms.ComboBox
         Friend WithEvents txtQuantity As System.Windows.Forms.TextBox
         Friend WithEvents txtUnitCost As System.Windows.Forms.TextBox
         Friend WithEvents txtLineTotal As System.Windows.Forms.TextBox
@@ -46,7 +46,7 @@ Namespace Views.Dialogs
             Me.lblTotal = New System.Windows.Forms.Label()
             Me.lblStatus = New System.Windows.Forms.Label()
             
-            Me.txtProductName = New System.Windows.Forms.TextBox()
+            Me.cmbProduct = New System.Windows.Forms.ComboBox()
             Me.txtQuantity = New System.Windows.Forms.TextBox()
             Me.txtUnitCost = New System.Windows.Forms.TextBox()
             Me.txtLineTotal = New System.Windows.Forms.TextBox()
@@ -104,13 +104,13 @@ Namespace Views.Dialogs
             Me.dgvLines.ReadOnly = True
             Me.dgvLines.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect
             '
-            'txtProductName
+            'cmbProduct
             '
-            Me.txtProductName.Location = New System.Drawing.Point(12, 130)
-            Me.txtProductName.Name = "txtProductName"
-            Me.txtProductName.Size = New System.Drawing.Size(150, 20)
-            Me.txtProductName.TabIndex = 5
-            Me.txtProductName.PlaceholderText = "Product Name"
+            Me.cmbProduct.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+            Me.cmbProduct.Location = New System.Drawing.Point(12, 130)
+            Me.cmbProduct.Name = "cmbProduct"
+            Me.cmbProduct.Size = New System.Drawing.Size(150, 21)
+            Me.cmbProduct.TabIndex = 5
             '
             'txtQuantity
             '
@@ -210,7 +210,7 @@ Namespace Views.Dialogs
             Me.Controls.Add(Me.txtLineTotal)
             Me.Controls.Add(Me.txtUnitCost)
             Me.Controls.Add(Me.txtQuantity)
-            Me.Controls.Add(Me.txtProductName)
+            Me.Controls.Add(Me.cmbProduct)
             Me.Controls.Add(Me.dgvLines)
             Me.Controls.Add(Me.txtNotes)
             Me.Controls.Add(Me.lblStatus)
