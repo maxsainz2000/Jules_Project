@@ -13,6 +13,7 @@ Imports MerchSys.SharedKernel.Interfaces
 Imports MerchSys.App.Startup
 Imports MerchSys.App.Views.Shell.Modules
 Imports MerchSys.Purchasing.Startup
+Imports MerchSys.POS.Extensions
 
 
 Friend Module Program
@@ -79,6 +80,7 @@ Friend Module Program
                                   ' Add Purchasing
                                   services.AddPurchasingServices()
                                   services.AddInventoryServices()
+                                  services.AddPOSServices()
 
                                   ' Add Low Stock Notifier
                                   services.AddSingleton(Of ILowStockNotifier, WinFormsLowStockNotifier)()
