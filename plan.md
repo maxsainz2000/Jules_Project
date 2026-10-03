@@ -1,50 +1,17 @@
-1. **Modify `CreditAccount.vb` and `SalesTransactionLine.vb`:**
-   - Add properties `TotalCreditExtended As Decimal` and `LastTransactionDate As DateTime?` to `CreditAccount.vb`.
-   - Add `ProductId As Integer` to `SalesTransactionLine.vb`.
-   - Verify modifications using `read_file`.
-
-2. **Update `DatabaseInitializer.vb`:**
-   - Add manual SQL migrations to `Pos_CreditAccounts` to add `TotalCreditExtended` and `LastTransactionDate`.
-   - Add manual SQL migrations to `Pos_SalesTransactionLines` to add `ProductId`.
-   - Verify the edits to `DatabaseInitializer.vb` were applied correctly using `read_file`.
-
-3. **Define `IPaymentService` Interface:**
-   - Create `src/MerchSys.POS/Services/IPaymentService.vb`
-   - Define `PaymentResultDto` class.
-     - `Success As Boolean`
-     - `TransactionId As Integer`
-     - `ChangeAmount As Decimal`
-     - `ReceiptNumber As String`
-     - `ErrorMessage As String`
-   - Define `IPaymentService` interface with `Function ProcessPaymentAsync(transactionId As Integer, amountTendered As Decimal, method As String, referenceNumber As String) As Task(Of PaymentResultDto)`
-   - Verify the new file's creation and contents using `read_file`.
-
-4. **Implement `PaymentService`:**
-   - Create `src/MerchSys.POS/Services/PaymentService.vb`
-   - Implement `IPaymentService`
-   - Inject `POSDbContext` and `IEventBus`.
-   - `ProcessPaymentAsync`:
-     - Load `SalesTransaction` using EF Core `Include(Function(t) t.Lines)` and `Include(Function(t) t.CreditAccount)`.
-     - Check if transaction exists and is not voided.
-     - Validate amount tendered. For Cash/GCash/BankTransfer, `amountTendered >= TotalAmount`. For Credit, `amountTendered` can be 0 or more.
-     - Calculate `ChangeAmount = amountTendered - TotalAmount`. Set to 0 if negative.
-     - Update payment method on transaction.
-     - If Credit:
-       - Ensure `CreditAccount` is not null and not blocked.
-       - Add `TotalAmount` to `CurrentBalance`.
-       - Add `TotalAmount` to `TotalCreditExtended`.
-       - Set `LastTransactionDate = DateTime.Now`.
-       - If `CurrentBalance > 0`, set `IsBlocked = True`.
-     - Publish `SaleCompletedEvent` via `IEventBus`.
-       - Map `Lines` to `SaleCompletedItem` using `ProductId` and `QuantitySold` based on the confirmed event definition.
-     - Save changes using `POSDbContext`.
-     - Set the `ReceiptNumber` property of `PaymentResultDto` to `transaction.TransactionNumber`.
-     - Return `PaymentResultDto`.
-   - Verify the newly created file using `read_file`.
-
-5. **Testing:**
-   - Run `dotnet test src/MerchSys.slnx` to ensure the changes are correct and have not introduced regressions.
-
-6. **Pre-commit step:**
-   - Complete pre-commit steps to ensure proper testing, verification, review, and reflection are done.
-
+1. **Update `CreditPaymentEvent`:** Edit `src/MerchSys.SharedKernel/Events/CreditPaymentEvent.vb` to include properties like `CreditAccountId` and `Amount` so the event has meaningful data.
+2. **Create `CreditBlockedException`:** Create a new exception class in `src/MerchSys.SharedKernel/Exceptions/CreditBlockedException.vb` (or inside the Services namespace as per requirement). The prompt says `MerchSys.POS/Services/CreditService.vb: implementation including CreditBlockedException` so I will place it in `src/MerchSys.POS/Services/CreditBlockedException.vb`.
+3. **Create `ICreditService.vb`:** Create `src/MerchSys.POS/Services/ICreditService.vb` with methods:
+   - `CreateAccountAsync`
+   - `UpdateAccountAsync`
+   - `GetAccountAsync`
+   - `ListAccountsAsync`
+   - `ChargeAccountAsync` (includes credit extension check)
+   - `RecordPaymentAsync`
+   - `GetAccountHistoryAsync`
+   - `GetTotalsAsync`
+   - `GetOverdueAccountsAsync`
+4. **Create `CreditService.vb`:** Create `src/MerchSys.POS/Services/CreditService.vb` implementing `ICreditService`. Use `POSDbContext` and `IEventBus`.
+   - In `ChargeAccountAsync`, enforce the hard block rule: `If account.IsBlocked OrElse account.CurrentBalance > 0 Then Throw New CreditBlockedException(...)`.
+   - In `RecordPaymentAsync`, deduct from `CurrentBalance`, update `LastTransactionDate`, create a `CreditPayment` record, update `account.IsBlocked` appropriately, save, and publish `CreditPaymentEvent`.
+5. **Run tests/pre-commit steps** to verify.
+6. **Submit.**
