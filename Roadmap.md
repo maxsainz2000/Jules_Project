@@ -83,7 +83,7 @@
 
 ## Phase 5: Point of Sale (POS)
 - [x] POS-01
-- [ ] POS-02
+- [x] POS-02
 - [ ] POS-03
 - [ ] POS-04
 - [ ] POS-05
