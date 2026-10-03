@@ -71,7 +71,7 @@ Implemented sales return and exchange processing for the POS module. Returns are
 
 ### Requirements
 - **Services/ISalesReturnService.vb**: interface defining `ProcessReturnAsync`, `GetReturnsForTransactionAsync`, and `GetReturnHistoryAsync`
-- **Services/SalesReturnService.vb**: full implementation with validation, refund calculation, credit balance adjustment, and restock event publishing
+- **Services/SalesReturnService.vb**: full implementation with validation, refund calculation, credit balance adjustment, and restock event publishing. **CRITICAL:** You must inject and use `IEventBus` to publish the event, not `IMediator` directly.
 - **Events/StockReturnedEvent.vb**: new MediatR notification consumed by the Inventory module to add returned stock back; required for the cross-module restock flow
 
 ## Feature: POS-08
