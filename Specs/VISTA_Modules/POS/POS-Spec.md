@@ -53,7 +53,7 @@ Implemented the Credit (Utang) System for the POS module — digital credit acco
 
 ### Requirements
 - **Services/ICreditService.vb**: interface with 10 methods covering account CRUD, credit extension check, charge, payment recording, history, totals, and overdue accounts
-- **Services/CreditService.vb**: implementation including `CreditBlockedException`, all ICreditService methods, and `CreditPaymentEvent` publishing via IEventBus
+- **Services/CreditService.vb**: implementation including `CreditBlockedException`, all ICreditService methods, and `CreditPaymentEvent` publishing via IEventBus. **CRITICAL:** When evaluating the non-negotiable zero-tolerance hard blocking rule (e.g. before charging an account or extending credit), you MUST explicitly evaluate `If account.IsBlocked OrElse account.CurrentBalance > 0 Then Throw New CreditBlockedException(...)`. Do not solely rely on the `IsBlocked` boolean.
 
 ## Feature: POS-06
 
