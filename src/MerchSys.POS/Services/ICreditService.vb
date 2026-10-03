@@ -9,6 +9,8 @@ Namespace Services
         Function UpdateAccountAsync(account As CreditAccount) As Task
         Function GetAccountAsync(accountId As Integer) As Task(Of CreditAccount)
         Function ListAccountsAsync() As Task(Of List(Of CreditAccount))
+        ' Checks if credit can be extended.
+        Function CheckCreditExtensionAsync(accountId As Integer) As Task
         Function ChargeAccountAsync(accountId As Integer, amount As Decimal) As Task
         Function RecordPaymentAsync(accountId As Integer, amount As Decimal, paymentMethod As String) As Task
         Function GetAccountHistoryAsync(accountId As Integer) As Task(Of List(Of CreditPayment))

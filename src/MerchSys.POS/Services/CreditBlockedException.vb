@@ -2,6 +2,7 @@ Imports System
 
 Namespace Services
 
+    ' Exception thrown when an account is blocked from further credit
     Public Class CreditBlockedException
         Inherits Exception
 
