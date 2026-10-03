@@ -86,7 +86,7 @@
 - [x] POS-02
 - [x] POS-03
 - [x] POS-04
-- [ ] POS-05
+- [x] POS-05
 - [ ] POS-06
 - [ ] POS-07
 - [ ] POS-08
