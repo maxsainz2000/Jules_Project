@@ -89,7 +89,7 @@
 - [x] POS-05
 - [x] POS-06
 - [x] POS-07
-- [ ] POS-08
+- [x] POS-08
 - [ ] POS-09
 - [ ] POS-10
 - [ ] POS-11
