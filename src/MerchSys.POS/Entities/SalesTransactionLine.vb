@@ -8,6 +8,11 @@ Namespace Entities
         Inherits AuditableEntity
 
         ''' <summary>
+        ''' Gets or sets the ID of the product sold.
+        ''' </summary>
+        Public Property ProductId As Integer
+
+        ''' <summary>
         ''' Gets or sets the name of the product at the time of sale (denormalized).
         ''' </summary>
         Public Property ProductName As String

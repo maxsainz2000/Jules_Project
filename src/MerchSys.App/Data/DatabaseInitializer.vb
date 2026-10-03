@@ -52,6 +52,15 @@ Namespace Data
                             ON Pur_VendorProducts (VendorId, ProductId);
                         "
                         cmd.ExecuteNonQuery()
+
+                        cmd.CommandText = "
+                            ALTER TABLE Pos_CreditAccounts
+                            ADD COLUMN IF NOT EXISTS TotalCreditExtended DECIMAL(18,2) NOT NULL DEFAULT 0.00,
+                            ADD COLUMN IF NOT EXISTS LastTransactionDate DATETIME(6) NULL;
+                            ALTER TABLE Pos_SalesTransactionLines
+                            ADD COLUMN IF NOT EXISTS ProductId INT NOT NULL DEFAULT 0;
+                        "
+                        cmd.ExecuteNonQuery()
                     End Using
                 Finally
                     If wasClosed Then conn.Close()

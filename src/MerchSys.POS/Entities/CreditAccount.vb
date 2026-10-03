@@ -22,5 +22,15 @@ Namespace Entities
         ''' Non-negotiable rule: Maintained as True when CurrentBalance > 0.
         ''' </summary>
         Public Property IsBlocked As Boolean
+
+        ''' <summary>
+        ''' Gets or sets the total credit extended.
+        ''' </summary>
+        Public Property TotalCreditExtended As Decimal
+
+        ''' <summary>
+        ''' Gets or sets the last transaction date.
+        ''' </summary>
+        Public Property LastTransactionDate As DateTime?
     End Class
 End Namespace
