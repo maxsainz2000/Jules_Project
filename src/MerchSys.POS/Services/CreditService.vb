@@ -39,12 +39,25 @@ Namespace Services
             Return Await _db.CreditAccounts.ToListAsync()
         End Function
 
+        Public Async Function CheckCreditExtensionAsync(accountId As Integer) As Task Implements ICreditService.CheckCreditExtensionAsync
+            ' Implementation for credit extension check
+            Dim account = Await _db.CreditAccounts.FindAsync(accountId)
+            If account Is Nothing Then
+                Throw New ArgumentException("Account not found.")
+            End If
+
+            If account.IsBlocked OrElse account.CurrentBalance > 0 Then
+                Throw New CreditBlockedException($"Account for {account.CustomerName} is blocked from further credit until outstanding balance is settled.")
+            End If
+        End Function
+
         Public Async Function ChargeAccountAsync(accountId As Integer, amount As Decimal) As Task Implements ICreditService.ChargeAccountAsync
             Dim account = Await _db.CreditAccounts.FindAsync(accountId)
             If account Is Nothing Then
                 Throw New ArgumentException("Account not found.")
             End If
 
+            ' Evaluate zero-tolerance hard blocking rule
             If account.IsBlocked OrElse account.CurrentBalance > 0 Then
                 Throw New CreditBlockedException($"Account for {account.CustomerName} is blocked from further credit until outstanding balance is settled.")
             End If
@@ -95,6 +108,7 @@ Namespace Services
             _db.CreditPayments.Add(payment)
             Await _db.SaveChangesAsync()
 
+            ' Publish CreditPaymentEvent via IEventBus
             Await _eventBus.PublishAsync(New CreditPaymentEvent(accountId, amount))
         End Function
 
@@ -103,8 +117,8 @@ Namespace Services
         End Function
 
         Public Async Function GetTotalsAsync() As Task(Of (TotalCreditExtended As Decimal, TotalOutstandingBalance As Decimal)) Implements ICreditService.GetTotalsAsync
-            Dim totalCredit = Await _db.CreditAccounts.SumAsync(Function(a) a.TotalCreditExtended)
-            Dim totalBalance = Await _db.CreditAccounts.SumAsync(Function(a) a.CurrentBalance)
+            Dim totalCredit = If(Await _db.CreditAccounts.SumAsync(Function(a) CType(a.TotalCreditExtended, Decimal?)), 0D)
+            Dim totalBalance = If(Await _db.CreditAccounts.SumAsync(Function(a) CType(a.CurrentBalance, Decimal?)), 0D)
             Return (totalCredit, totalBalance)
         End Function
 
