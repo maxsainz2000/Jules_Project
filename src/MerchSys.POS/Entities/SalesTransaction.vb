@@ -8,6 +8,16 @@ Namespace Entities
         Inherits SoftDeletableEntity
 
         ''' <summary>
+        ''' Gets or sets the transaction number.
+        ''' </summary>
+        Public Property TransactionNumber As String
+
+        ''' <summary>
+        ''' Gets or sets the transaction date.
+        ''' </summary>
+        Public Property TransactionDate As DateTime
+
+        ''' <summary>
         ''' Gets or sets the total amount of the transaction.
         ''' </summary>
         Public Property TotalAmount As Decimal
