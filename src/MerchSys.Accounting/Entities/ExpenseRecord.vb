@@ -1,0 +1,14 @@
+Imports MerchSys.SharedKernel.Entities
+
+Namespace Entities
+    Public Class ExpenseRecord
+        Inherits AuditableEntity
+
+        Public Property ExpenseDate As DateTime
+        Public Property Category As String
+        Public Property Description As String
+        Public Property Amount As Decimal
+        Public Property SourceModule As String
+        Public Property SourceReferenceId As Integer?
+    End Class
+End Namespace
