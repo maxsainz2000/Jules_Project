@@ -25,10 +25,12 @@ Namespace Extensions
             services.AddScoped(Of IReceiptService, VatAwareReceiptService)()
             services.AddScoped(Of IVatCalculator, VatCalculator)()
             services.AddSingleton(Of VatConfigurationLoader)()
+            services.AddScoped(Of IVatConfigurationWriter, VatConfigurationWriter)()
 
             services.AddTransient(Of CreditManagementPresenter)()
             services.AddTransient(Of TransactionHistoryPresenter)()
             services.AddTransient(Of DailySummaryPresenter)()
+            services.AddTransient(Of VatSettingsPresenter)()
         End Sub
     End Module
 End Namespace
