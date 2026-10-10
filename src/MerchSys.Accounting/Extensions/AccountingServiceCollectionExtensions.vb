@@ -9,6 +9,7 @@ Namespace Extensions
         <Extension()>
         Public Sub AddAccountingServices(services As IServiceCollection)
             services.AddScoped(Of IFinancialOverviewService, FinancialOverviewService)()
+            services.AddScoped(Of IIncomeStatementService, IncomeStatementService)()
         End Sub
 
     End Module
