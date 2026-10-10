@@ -9,6 +9,8 @@ Namespace Data.Interceptors
     Public Class ImmutableReceiptInterceptor
         Inherits SaveChangesInterceptor
 
+        Public Shared Property ArchivalBypass As New AsyncLocal(Of Boolean)
+
         Public Overrides Function SavingChanges(eventData As DbContextEventData, result As InterceptionResult(Of Integer)) As InterceptionResult(Of Integer)
             CheckImmutability(eventData.Context)
             Return MyBase.SavingChanges(eventData, result)
@@ -21,6 +23,7 @@ Namespace Data.Interceptors
 
         Private Sub CheckImmutability(context As DbContext)
             If context Is Nothing Then Return
+            If ArchivalBypass.Value Then Return
 
             For Each dbEntry In context.ChangeTracker.Entries()
                 If (TypeOf dbEntry.Entity Is OfficialReceipt OrElse TypeOf dbEntry.Entity Is ReceiptIntegrity) AndAlso
