@@ -33,6 +33,10 @@ Namespace Events
         ''' </summary>
         Public Property InputVat As Decimal
 
+        Public Property PurchaseOrderId As Integer
+
+        Public Property ReceivedAt As DateTime
+
         ''' <summary>
         ''' Gets or sets the list of received items with their respective VAT details.
         ''' </summary>
@@ -42,6 +46,18 @@ Namespace Events
         ''' Represents a single received item with VAT details.
         ''' </summary>
         Public Class GoodsReceivedItemWithVat
+
+            Public Property TotalAmount As Decimal
+
+            Public Property VatableAmount As Decimal
+
+            Public Property VatExemptAmount As Decimal
+
+            Public Property ZeroRatedAmount As Decimal
+
+            Public Property VatAmount As Decimal
+
+            Public Property VatTreatment As VatTreatment
 
             ''' <summary>
             ''' Gets or sets the VAT treatment for this received item.

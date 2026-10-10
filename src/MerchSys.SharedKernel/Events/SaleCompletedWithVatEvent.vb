@@ -38,6 +38,10 @@ Namespace Events
         ''' </summary>
         Public Property IsVatRegistered As Boolean
 
+        Public Property SaleId As Integer
+
+        Public Property CompletedAt As DateTime
+
         ''' <summary>
         ''' Gets or sets the list of items with their respective VAT details.
         ''' </summary>
@@ -47,6 +51,12 @@ Namespace Events
         ''' Represents a single sale item with VAT details.
         ''' </summary>
         Public Class SaleItemWithVat
+
+            Public Property ProductId As Integer
+
+            Public Property TotalAmount As Decimal
+
+            Public Property VatAmount As Decimal
 
             ''' <summary>
             ''' Gets or sets the VAT treatment for this item.
