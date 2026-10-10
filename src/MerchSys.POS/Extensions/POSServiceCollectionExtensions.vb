@@ -2,6 +2,7 @@ Imports Microsoft.Extensions.DependencyInjection
 Imports MerchSys.POS.Services
 Imports MerchSys.POS.Presenters
 Imports MerchSys.POS.Services.Archival
+Imports MerchSys.POS.Services.ReceiptFormatting
 Imports Microsoft.Extensions.Configuration
 
 Namespace Extensions
@@ -20,6 +21,7 @@ Namespace Extensions
             services.AddScoped(Of IDailySummaryService, DailySummaryService)()
             services.AddScoped(Of ICreditService, CreditService)()
             services.AddScoped(Of IReceiptIntegrityService, ReceiptIntegrityService)()
+            services.AddScoped(Of IReceiptBodyComposer, BirCompliantReceiptBodyComposer)()
 
             services.AddScoped(Of ReceiptService)()
             services.AddScoped(Of IReceiptService, VatAwareReceiptService)()
