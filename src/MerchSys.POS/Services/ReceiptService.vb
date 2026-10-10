@@ -7,15 +7,28 @@ Imports MerchSys.POS.Entities
 
 Namespace Services
 
+    ''' <summary>
+    ''' Core service for handling receipt generation and formatting.
+    ''' Interacts with POSDbContext for persistence and IReceiptIntegrityService for sequential receipt numbering.
+    ''' </summary>
     Public Class ReceiptService
         Implements IReceiptService
 
         Private ReadOnly _dbContext As POSDbContext
+        Private ReadOnly _receiptIntegrity As IReceiptIntegrityService
 
-        Public Sub New(dbContext As POSDbContext)
+        ''' <summary>
+        ''' Initializes a new instance of the ReceiptService.
+        ''' </summary>
+        Public Sub New(dbContext As POSDbContext, receiptIntegrity As IReceiptIntegrityService)
             _dbContext = dbContext
+            _receiptIntegrity = receiptIntegrity
         End Sub
 
+        ''' <summary>
+        ''' Generates an official receipt for a given sales transaction.
+        ''' Uses IReceiptIntegrityService to fetch the next contiguous receipt number safely.
+        ''' </summary>
         Public Async Function GenerateReceiptAsync(transactionId As Integer) As Task(Of OfficialReceipt) Implements IReceiptService.GenerateReceiptAsync
             Dim transaction = Await _dbContext.SalesTransactions _
                 .Include(Function(t) t.Lines) _
@@ -31,21 +44,9 @@ Namespace Services
             End If
 
             Dim currentYear = DateTime.UtcNow.Year
-            Dim yearPrefix = $"OR-{currentYear}-"
 
-            ' Fetch latest receipt number for the current year
-            Dim maxReceiptString = Await _dbContext.OfficialReceipts _
-                .Where(Function(r) r.ReceiptNumber.StartsWith(yearPrefix)) _
-                .Select(Function(r) r.ReceiptNumber) _
-                .MaxAsync()
-
-            Dim nextNumber = 1
-            If maxReceiptString IsNot Nothing Then
-                Dim maxNum = Integer.Parse(maxReceiptString.Substring(yearPrefix.Length))
-                nextNumber = maxNum + 1
-            End If
-
-            Dim receiptNumber = $"{yearPrefix}{nextNumber.ToString("D4")}"
+            ' Delegate sequential number generation to integrity service
+            Dim receiptNumber = Await _receiptIntegrity.GetNextReceiptNumberAsync(currentYear)
 
             Dim receipt = New OfficialReceipt With {
                 .ReceiptNumber = receiptNumber,

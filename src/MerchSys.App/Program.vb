@@ -80,7 +80,7 @@ Friend Module Program
                                   ' Add Purchasing
                                   services.AddPurchasingServices()
                                   services.AddInventoryServices()
-                                  services.AddPOSServices()
+                                  services.AddPosModule()
 
                                   ' Add Low Stock Notifier
                                   services.AddSingleton(Of ILowStockNotifier, WinFormsLowStockNotifier)()
