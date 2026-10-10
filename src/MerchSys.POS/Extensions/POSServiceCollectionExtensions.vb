@@ -9,6 +9,7 @@ Namespace Extensions
             services.AddScoped(Of ISalesReturnService, SalesReturnService)()
             services.AddScoped(Of IDailySummaryService, DailySummaryService)()
             services.AddScoped(Of ICreditService, CreditService)()
+            services.AddScoped(Of IReceiptIntegrityService, ReceiptIntegrityService)()
             services.AddTransient(Of CreditManagementPresenter)()
             services.AddTransient(Of TransactionHistoryPresenter)()
             services.AddTransient(Of DailySummaryPresenter)()

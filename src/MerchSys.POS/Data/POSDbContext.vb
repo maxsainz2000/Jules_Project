@@ -12,9 +12,20 @@ Namespace Data
         Public Property CreditAccounts As DbSet(Of Entities.CreditAccount)
         Public Property CreditPayments As DbSet(Of Entities.CreditPayment)
         Public Property SalesReturns As DbSet(Of Entities.SalesReturn)
+        Public Property ReceiptIntegrities As DbSet(Of Entities.ReceiptIntegrity)
+        Public Property ReceiptSequences As DbSet(Of Entities.ReceiptSequence)
+        Public Property OfficialReceiptArchives As DbSet(Of Entities.OfficialReceiptArchive)
 
         Public Sub New(options As DbContextOptions(Of POSDbContext))
             MyBase.New(options)
+        End Sub
+
+        Protected Overrides Sub OnConfiguring(optionsBuilder As DbContextOptionsBuilder)
+            MyBase.OnConfiguring(optionsBuilder)
+            If Not optionsBuilder.IsConfigured Then
+                ' Used mostly for design time or fallback
+            End If
+            optionsBuilder.AddInterceptors(New Interceptors.ImmutableReceiptInterceptor())
         End Sub
 
         Protected Overrides Sub OnModelCreating(modelBuilder As ModelBuilder)
