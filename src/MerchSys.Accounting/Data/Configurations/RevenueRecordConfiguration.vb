@@ -15,6 +15,11 @@ Namespace Data.Configurations
             builder.Property(Function(x) x.TotalCogs).HasPrecision(18, 2)
             builder.Property(Function(x) x.GrossProfit).HasPrecision(18, 2)
             builder.Property(Function(x) x.QuantitySold).HasPrecision(18, 2)
+            builder.Property(Function(x) x.VatableAmount).HasPrecision(18, 2)
+            builder.Property(Function(x) x.VatExemptAmount).HasPrecision(18, 2)
+            builder.Property(Function(x) x.ZeroRatedAmount).HasPrecision(18, 2)
+            builder.Property(Function(x) x.OutputVat).HasPrecision(18, 2)
+            builder.Property(Function(x) x.InputVat).HasPrecision(18, 2)
 
             builder.HasIndex(Function(x) x.RecordDate)
             builder.HasIndex(Function(x) x.ProductId)

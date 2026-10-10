@@ -1,7 +1,7 @@
 Imports MerchSys.SharedKernel.Entities
 
 Namespace Entities
-    Public Class ExpenseRecord
+    Partial Public Class ExpenseRecord
         Inherits AuditableEntity
 
         Public Property ExpenseDate As DateTime

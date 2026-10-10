@@ -2,7 +2,7 @@ Imports MerchSys.SharedKernel.Entities
 Imports MerchSys.SharedKernel.Enums
 
 Namespace Entities
-    Public Class RevenueRecord
+    Partial Public Class RevenueRecord
         Inherits AuditableEntity
 
         Public Property RecordDate As DateTime

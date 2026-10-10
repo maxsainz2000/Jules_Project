@@ -14,6 +14,8 @@ Namespace Data
         Public Property RevenueRecords As DbSet(Of Entities.RevenueRecord)
         Public Property ExpenseRecords As DbSet(Of Entities.ExpenseRecord)
         Public Property FinancialSnapshots As DbSet(Of Entities.FinancialSnapshot)
+        Public Property VatReturns As DbSet(Of Entities.VatReturn)
+        Public Property VatReturnLines As DbSet(Of Entities.VatReturnLine)
 
         Protected Overrides Sub OnModelCreating(modelBuilder As ModelBuilder)
             MyBase.OnModelCreating(modelBuilder)

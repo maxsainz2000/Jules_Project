@@ -74,6 +74,81 @@ Namespace Data
 
                 Dim accountingDb = services.GetRequiredService(Of AccountingDbContext)()
                 accountingDb.Database.EnsureCreated()
+
+                Dim accConn = accountingDb.Database.GetDbConnection()
+                Dim accWasClosed = (accConn.State = System.Data.ConnectionState.Closed)
+                If accWasClosed Then accConn.Open()
+                Try
+                    Using cmd = accConn.CreateCommand()
+                        cmd.CommandText = "
+                            ALTER TABLE Acc_RevenueRecords
+                            ADD COLUMN IF NOT EXISTS VatableAmount DECIMAL(18,2) DEFAULT 0,
+                            ADD COLUMN IF NOT EXISTS VatExemptAmount DECIMAL(18,2) DEFAULT 0,
+                            ADD COLUMN IF NOT EXISTS ZeroRatedAmount DECIMAL(18,2) DEFAULT 0,
+                            ADD COLUMN IF NOT EXISTS OutputVat DECIMAL(18,2) DEFAULT 0,
+                            ADD COLUMN IF NOT EXISTS InputVat DECIMAL(18,2) DEFAULT 0,
+                            ADD COLUMN IF NOT EXISTS VatTreatment VARCHAR(50) NULL;
+
+                            ALTER TABLE Acc_ExpenseRecords
+                            ADD COLUMN IF NOT EXISTS VatableAmount DECIMAL(18,2) DEFAULT 0,
+                            ADD COLUMN IF NOT EXISTS VatExemptAmount DECIMAL(18,2) DEFAULT 0,
+                            ADD COLUMN IF NOT EXISTS ZeroRatedAmount DECIMAL(18,2) DEFAULT 0,
+                            ADD COLUMN IF NOT EXISTS OutputVat DECIMAL(18,2) DEFAULT 0,
+                            ADD COLUMN IF NOT EXISTS InputVat DECIMAL(18,2) DEFAULT 0,
+                            ADD COLUMN IF NOT EXISTS VatTreatment VARCHAR(50) NULL;
+
+                            CREATE TABLE IF NOT EXISTS Acc_VatReturns (
+                                Id INT AUTO_INCREMENT PRIMARY KEY,
+                                Year INT NOT NULL,
+                                Period INT NOT NULL,
+                                PeriodType INT NOT NULL,
+                                FormType INT NOT NULL,
+                                FilingStatus INT NOT NULL,
+                                PeriodStart DATETIME(6) NOT NULL,
+                                PeriodEnd DATETIME(6) NOT NULL,
+                                TotalSales DECIMAL(18,2) NOT NULL DEFAULT 0,
+                                TotalPurchases DECIMAL(18,2) NOT NULL DEFAULT 0,
+                                OutputVatTotal DECIMAL(18,2) NOT NULL DEFAULT 0,
+                                InputVatTotal DECIMAL(18,2) NOT NULL DEFAULT 0,
+                                NetVatPayable DECIMAL(18,2) NOT NULL DEFAULT 0,
+                                FiledAt DATETIME(6) NULL,
+                                FiledBy LONGTEXT NULL,
+                                CreatedAt DATETIME(6) NOT NULL,
+                                CreatedBy LONGTEXT NULL,
+                                ModifiedAt DATETIME(6) NULL,
+                                ModifiedBy LONGTEXT NULL,
+                                IsDeleted TINYINT(1) NOT NULL DEFAULT 0,
+                                RowVersion TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)
+                            );
+
+                            CREATE UNIQUE INDEX IF NOT EXISTS IX_Acc_VatReturns_Year_Period_PeriodType_FormType
+                            ON Acc_VatReturns(Year, Period, PeriodType, FormType);
+
+                            CREATE TABLE IF NOT EXISTS Acc_VatReturnLines (
+                                Id INT AUTO_INCREMENT PRIMARY KEY,
+                                VatReturnId INT NOT NULL,
+                                LineNumber INT NOT NULL,
+                                LineCode LONGTEXT NULL,
+                                Description LONGTEXT NULL,
+                                Amount DECIMAL(18,2) NOT NULL DEFAULT 0,
+                                TaxRate DECIMAL(6,4) NOT NULL DEFAULT 0,
+                                TaxAmount DECIMAL(18,2) NOT NULL DEFAULT 0,
+                                CreatedAt DATETIME(6) NOT NULL,
+                                CreatedBy LONGTEXT NULL,
+                                ModifiedAt DATETIME(6) NULL,
+                                ModifiedBy LONGTEXT NULL,
+                                IsDeleted TINYINT(1) NOT NULL DEFAULT 0,
+                                CONSTRAINT FK_Acc_VatReturnLines_Acc_VatReturns_VatReturnId FOREIGN KEY (VatReturnId) REFERENCES Acc_VatReturns (Id) ON DELETE CASCADE
+                            );
+
+                            CREATE INDEX IF NOT EXISTS IX_Acc_VatReturnLines_VatReturnId ON Acc_VatReturnLines(VatReturnId);
+                            CREATE INDEX IF NOT EXISTS IX_Acc_VatReturnLines_LineNumber ON Acc_VatReturnLines(LineNumber);
+                        "
+                        cmd.ExecuteNonQuery()
+                    End Using
+                Finally
+                    If accWasClosed Then accConn.Close()
+                End Try
             End Using
         End Sub
 

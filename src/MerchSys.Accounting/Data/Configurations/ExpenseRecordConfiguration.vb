@@ -10,6 +10,11 @@ Namespace Data.Configurations
             builder.ToTable("Acc_ExpenseRecords")
 
             builder.Property(Function(x) x.Amount).HasPrecision(18, 2)
+            builder.Property(Function(x) x.VatableAmount).HasPrecision(18, 2)
+            builder.Property(Function(x) x.VatExemptAmount).HasPrecision(18, 2)
+            builder.Property(Function(x) x.ZeroRatedAmount).HasPrecision(18, 2)
+            builder.Property(Function(x) x.OutputVat).HasPrecision(18, 2)
+            builder.Property(Function(x) x.InputVat).HasPrecision(18, 2)
 
             builder.Property(Function(x) x.Category).IsRequired().HasMaxLength(50)
             builder.Property(Function(x) x.Description).HasMaxLength(500)
