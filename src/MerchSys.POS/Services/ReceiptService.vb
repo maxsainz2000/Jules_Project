@@ -4,6 +4,7 @@ Imports System.Threading.Tasks
 Imports Microsoft.EntityFrameworkCore
 Imports MerchSys.POS.Data
 Imports MerchSys.POS.Entities
+Imports MerchSys.POS.Services.ReceiptFormatting
 
 Namespace Services
 
@@ -16,13 +17,15 @@ Namespace Services
 
         Private ReadOnly _dbContext As POSDbContext
         Private ReadOnly _receiptIntegrity As IReceiptIntegrityService
+        Private ReadOnly _bodyComposer As IReceiptBodyComposer
 
         ''' <summary>
         ''' Initializes a new instance of the ReceiptService.
         ''' </summary>
-        Public Sub New(dbContext As POSDbContext, receiptIntegrity As IReceiptIntegrityService)
+        Public Sub New(dbContext As POSDbContext, receiptIntegrity As IReceiptIntegrityService, bodyComposer As IReceiptBodyComposer)
             _dbContext = dbContext
             _receiptIntegrity = receiptIntegrity
+            _bodyComposer = bodyComposer
         End Sub
 
         ''' <summary>
@@ -83,67 +86,18 @@ Namespace Services
                 Throw New ArgumentException($"Receipt with ID {receiptId} not found or has no associated transaction.")
             End If
 
-            Dim sb As New StringBuilder()
-
-            ' 40-character width formatter
-            ' Header
-            sb.AppendLine(CenterText("VISTA POS MERCHANDISING"))
-            sb.AppendLine(CenterText("VAT REG TIN: 123-456-789-000"))
-            sb.AppendLine(CenterText("MIN: 123456789"))
-            sb.AppendLine(CenterText("PTU: 987654321"))
-            sb.AppendLine(StrDup(40, "-"c))
-
-            ' Receipt Info
-            sb.AppendLine(PadRightLeft("OR #:", transaction.Receipt.ReceiptNumber, 40))
-            sb.AppendLine(PadRightLeft("DATE:", transaction.TransactionDate.ToString("yyyy-MM-dd HH:mm"), 40))
-            sb.AppendLine(StrDup(40, "-"c))
-
-            ' Items
-            For Each line In transaction.Lines
-                sb.AppendLine(PadRightLeft(line.ProductName, "", 40))
-                Dim qtyPrice = $"{line.Quantity} x {line.UnitPrice:N2}"
-                sb.AppendLine(PadRightLeft("  " & qtyPrice, line.LineTotal.ToString("N2"), 40))
-            Next
-
-            sb.AppendLine(StrDup(40, "-"c))
-
-            ' VAT Computation
-            Dim totalAmount = transaction.TotalAmount
-            Dim vatableSales = Math.Round(totalAmount / 1.12D, 2)
-            Dim vatAmount = totalAmount - vatableSales
-
-            sb.AppendLine(PadRightLeft("TOTAL:", totalAmount.ToString("N2"), 40))
-            sb.AppendLine(PadRightLeft("VATABLE SALES:", vatableSales.ToString("N2"), 40))
-            sb.AppendLine(PadRightLeft("VAT AMOUNT:", vatAmount.ToString("N2"), 40))
-            sb.AppendLine(PadRightLeft("VAT EXEMPT:", "0.00", 40))
-            sb.AppendLine(PadRightLeft("ZERO RATED:", "0.00", 40))
-
-            sb.AppendLine(StrDup(40, "="c))
-            sb.AppendLine(CenterText("THIS DOCUMENT IS NOT VALID FOR"))
-            sb.AppendLine(CenterText("CLAIM OF INPUT TAX"))
-            sb.AppendLine(CenterText("THANK YOU FOR SHOPPING!"))
-
-            Return sb.ToString()
-        End Function
-
-        Private Function CenterText(text As String) As String
-            If text.Length >= 40 Then Return text.Substring(0, 40)
-            Dim padLeft = (40 + text.Length) \ 2
-            Return text.PadLeft(padLeft).PadRight(40)
-        End Function
-
-        Private Function PadRightLeft(leftText As String, rightText As String, totalWidth As Integer) As String
-            If leftText.Length + rightText.Length >= totalWidth Then
-                ' Truncate left text if too long
-                Dim availableSpace = totalWidth - rightText.Length - 1
-                If availableSpace > 0 Then
-                    Return leftText.Substring(0, availableSpace) & " " & rightText
-                Else
-                    Return (leftText & rightText).Substring(0, totalWidth)
-                End If
+            Dim vatConfig = Await _dbContext.VatConfigurations.FirstOrDefaultAsync(Function(c) c.Id = 1)
+            If vatConfig Is Nothing Then
+                vatConfig = New VatConfiguration() With {
+                    .IsVatRegistered = False,
+                    .VatRate = 0.12D,
+                    .BusinessName = "VISTA POS MERCHANDISING",
+                    .Tin = "123-456-789-000"
+                }
             End If
-            Dim spaces = totalWidth - leftText.Length - rightText.Length
-            Return leftText & StrDup(spaces, " "c) & rightText
+
+            Dim body = _bodyComposer.Compose(transaction.Receipt, transaction, vatConfig)
+            Return body.ToString()
         End Function
 
     End Class
