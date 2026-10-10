@@ -5,6 +5,11 @@ Imports MerchSys.POS.Presenters
 Namespace Extensions
     Public Module POSServiceCollectionExtensions
         <System.Runtime.CompilerServices.Extension>
+        Public Sub AddPosModule(services As IServiceCollection)
+            AddPOSServices(services)
+        End Sub
+
+        <System.Runtime.CompilerServices.Extension>
         Public Sub AddPOSServices(services As IServiceCollection)
             services.AddScoped(Of ISalesReturnService, SalesReturnService)()
             services.AddScoped(Of IDailySummaryService, DailySummaryService)()
