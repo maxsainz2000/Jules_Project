@@ -103,7 +103,7 @@
 - [x] POS-19
 
 ## Phase 6: Accounting & Reporting
-- [ ] ACC-01
+- [x] ACC-01
 - [ ] ACC-02
 - [ ] ACC-03
 - [ ] ACC-04
