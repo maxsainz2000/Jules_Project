@@ -68,6 +68,7 @@ Namespace Presenters
             accountingGroup.Items.Add(New NavigationItem With { .Name = "Accounting Panel", .ViewType = GetType(AccountingPanel), .NavigationGroup = "Accounting" })
             accountingGroup.Items.Add(New NavigationItem With { .Name = "Financial Overview", .ViewType = GetType(MerchSys.App.Views.Accounting.FinancialOverviewView), .NavigationGroup = "Accounting" })
             accountingGroup.Items.Add(New NavigationItem With { .Name = "Income Statement", .ViewType = GetType(MerchSys.App.Views.Accounting.IncomeStatementView), .NavigationGroup = "Accounting" })
+            accountingGroup.Items.Add(New NavigationItem With { .Name = "Sales Summary", .ViewType = GetType(MerchSys.App.Views.Accounting.SalesSummaryView), .NavigationGroup = "Accounting" })
 
             NavigationGroups.Add(purchasingGroup)
             NavigationGroups.Add(inventoryGroup)
