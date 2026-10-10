@@ -102,6 +102,8 @@ Friend Module Program
                                   services.AddTransient(Of MerchSys.Accounting.Views.IIncomeStatementView)(Function(sp) sp.GetRequiredService(Of MerchSys.App.Views.Accounting.IncomeStatementView)())
                                   services.AddTransient(Of MerchSys.App.Views.Accounting.SalesSummaryView)()
                                   services.AddTransient(Of MerchSys.Accounting.Views.ISalesSummaryView)(Function(sp) sp.GetRequiredService(Of MerchSys.App.Views.Accounting.SalesSummaryView)())
+                                  services.AddTransient(Of MerchSys.App.Views.Accounting.VatReturnView)()
+                                  services.AddTransient(Of MerchSys.Accounting.Views.IVatReturnView)(Function(sp) sp.GetRequiredService(Of MerchSys.App.Views.Accounting.VatReturnView)())
 
                               End Sub).
             Build()

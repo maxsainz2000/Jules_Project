@@ -13,9 +13,12 @@ Namespace Extensions
             services.AddScoped(Of IIncomeStatementService, IncomeStatementService)()
             services.AddScoped(Of ISalesSummaryService, SalesSummaryService)()
             services.AddScoped(Of IWhatThisMeansService, WhatThisMeansService)()
+            services.AddScoped(Of IVatReportingService, VatReportingService)()
+            services.AddScoped(Of IVatReturnExporter, VatReturnExporter)()
             services.AddTransient(Of FinancialOverviewPresenter)()
             services.AddTransient(Of IncomeStatementPresenter)()
             services.AddTransient(Of SalesSummaryPresenter)()
+            services.AddTransient(Of VatReturnPresenter)()
         End Sub
 
     End Module
