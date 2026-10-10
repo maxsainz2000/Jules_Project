@@ -1,6 +1,8 @@
 Imports Microsoft.Extensions.DependencyInjection
 Imports MerchSys.POS.Services
 Imports MerchSys.POS.Presenters
+Imports MerchSys.POS.Services.Archival
+Imports Microsoft.Extensions.Configuration
 
 Namespace Extensions
     Public Module POSServiceCollectionExtensions
@@ -11,6 +13,9 @@ Namespace Extensions
 
         <System.Runtime.CompilerServices.Extension>
         Public Sub AddPOSServices(services As IServiceCollection)
+            services.AddOptions(Of ReceiptArchivalOptions)().BindConfiguration("Receipts:Archival")
+            services.AddScoped(Of IReceiptArchivalService, ReceiptArchivalService)()
+            services.AddHostedService(Of ReceiptArchivalService)()
             services.AddScoped(Of ISalesReturnService, SalesReturnService)()
             services.AddScoped(Of IDailySummaryService, DailySummaryService)()
             services.AddScoped(Of ICreditService, CreditService)()
