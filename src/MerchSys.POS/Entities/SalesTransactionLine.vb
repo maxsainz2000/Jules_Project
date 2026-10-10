@@ -1,10 +1,11 @@
 Imports MerchSys.SharedKernel.Entities
+Imports MerchSys.SharedKernel.Enums
 
 Namespace Entities
     ''' <summary>
     ''' Represents a per-product line item in a sales transaction.
     ''' </summary>
-    Public Class SalesTransactionLine
+    Public Partial Class SalesTransactionLine
         Inherits AuditableEntity
 
         ''' <summary>
@@ -31,5 +32,11 @@ Namespace Entities
         ''' Gets or sets the total line amount (UnitPrice * Quantity).
         ''' </summary>
         Public Property LineTotal As Decimal
+
+        Public Property Treatment As VatTreatment
+        Public Property VatableAmount As Decimal
+        Public Property VatExemptAmount As Decimal
+        Public Property ZeroRatedAmount As Decimal
+        Public Property OutputVat As Decimal
     End Class
 End Namespace
