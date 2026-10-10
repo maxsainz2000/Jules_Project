@@ -14,6 +14,7 @@ Namespace Extensions
             services.AddScoped(Of ISalesSummaryService, SalesSummaryService)()
             services.AddScoped(Of IWhatThisMeansService, WhatThisMeansService)()
             services.AddTransient(Of FinancialOverviewPresenter)()
+            services.AddTransient(Of IncomeStatementPresenter)()
         End Sub
 
     End Module

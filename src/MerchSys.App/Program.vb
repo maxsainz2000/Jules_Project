@@ -98,6 +98,8 @@ Friend Module Program
                                   services.AddTransient(Of MerchSys.POS.Views.IVatSettingsView)(Function(sp) sp.GetRequiredService(Of MerchSys.App.Views.POS.VatSettingsView)())
                                   services.AddTransient(Of MerchSys.App.Views.Accounting.FinancialOverviewView)()
                                   services.AddTransient(Of MerchSys.Accounting.Views.IFinancialOverviewView)(Function(sp) sp.GetRequiredService(Of MerchSys.App.Views.Accounting.FinancialOverviewView)())
+                                  services.AddTransient(Of MerchSys.App.Views.Accounting.IncomeStatementView)()
+                                  services.AddTransient(Of MerchSys.Accounting.Views.IIncomeStatementView)(Function(sp) sp.GetRequiredService(Of MerchSys.App.Views.Accounting.IncomeStatementView)())
 
                               End Sub).
             Build()
