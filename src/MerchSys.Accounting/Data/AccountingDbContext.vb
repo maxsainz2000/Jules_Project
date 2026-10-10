@@ -10,12 +10,20 @@ Namespace Data
             MyBase.New(options)
         End Sub
 
+        Public Property FinancialPeriods As DbSet(Of Entities.FinancialPeriod)
+        Public Property RevenueRecords As DbSet(Of Entities.RevenueRecord)
+        Public Property ExpenseRecords As DbSet(Of Entities.ExpenseRecord)
+        Public Property FinancialSnapshots As DbSet(Of Entities.FinancialSnapshot)
+
         Protected Overrides Sub OnModelCreating(modelBuilder As ModelBuilder)
             MyBase.OnModelCreating(modelBuilder)
             modelBuilder.ApplyConfigurationsFromAssembly(GetType(AccountingDbContext).Assembly)
 
             For Each entityType In modelBuilder.Model.GetEntityTypes()
-                entityType.SetTableName("Acc_" & entityType.GetTableName())
+                Dim currentName = entityType.GetTableName()
+                If Not currentName.StartsWith("Acc_") Then
+                    entityType.SetTableName("Acc_" & currentName)
+                End If
             Next
         End Sub
 
