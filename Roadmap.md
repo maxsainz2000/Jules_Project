@@ -99,7 +99,7 @@
 - [x] POS-15
 - [x] POS-16
 - [x] POS-17
-- [ ] POS-18
+- [x] POS-18
 - [ ] POS-19
 
 ## Phase 6: Accounting & Reporting
