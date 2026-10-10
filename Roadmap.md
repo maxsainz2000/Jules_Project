@@ -91,7 +91,7 @@
 - [x] POS-07
 - [x] POS-08
 - [x] POS-09
-- [ ] POS-10
+- [x] POS-10
 - [ ] POS-11
 - [ ] POS-12
 - [ ] POS-13
