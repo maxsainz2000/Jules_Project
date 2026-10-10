@@ -25,6 +25,8 @@ Namespace Data.Configurations
             builder.Property(Function(e) e.LineTotal) _
                 .HasPrecision(18, 2)
 
+            builder.Property(Function(e) e.Treatment).HasConversion(Of Integer)()
+
         End Sub
     End Class
 

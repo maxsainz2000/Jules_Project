@@ -4,7 +4,7 @@ Namespace Entities
     ''' <summary>
     ''' Represents a core sales transaction in the POS system.
     ''' </summary>
-    Public Class SalesTransaction
+    Public Partial Class SalesTransaction
         Inherits SoftDeletableEntity
 
         ''' <summary>
@@ -46,5 +46,11 @@ Namespace Entities
         ''' Gets or sets the credit account associated with this transaction, if applicable.
         ''' </summary>
         Public Property CreditAccount As CreditAccount
+
+        Public Property VatableSales As Decimal
+        Public Property VatExemptSales As Decimal
+        Public Property ZeroRatedSales As Decimal
+        Public Property VatRateSnapshot As Decimal
+        Public Property IsVatRegisteredSnapshot As Boolean
     End Class
 End Namespace
