@@ -97,7 +97,7 @@
 - [x] POS-13
 - [x] POS-14
 - [x] POS-15
-- [ ] POS-16
+- [x] POS-16
 - [ ] POS-17
 - [ ] POS-18
 - [ ] POS-19
