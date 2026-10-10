@@ -70,6 +70,10 @@ Namespace Presenters
             accountingGroup.Items.Add(New NavigationItem With { .Name = "Income Statement", .ViewType = GetType(MerchSys.App.Views.Accounting.IncomeStatementView), .NavigationGroup = "Accounting" })
             accountingGroup.Items.Add(New NavigationItem With { .Name = "Sales Summary", .ViewType = GetType(MerchSys.App.Views.Accounting.SalesSummaryView), .NavigationGroup = "Accounting" })
 
+            If _sessionService.CurrentUserRole = UserRole.Manager OrElse _sessionService.CurrentUserRole = UserRole.Developer Then
+                accountingGroup.Items.Add(New NavigationItem With { .Name = "VAT Returns", .ViewType = GetType(MerchSys.App.Views.Accounting.VatReturnView), .NavigationGroup = "Accounting" })
+            End If
+
             NavigationGroups.Add(purchasingGroup)
             NavigationGroups.Add(inventoryGroup)
             NavigationGroups.Add(posGroup)
