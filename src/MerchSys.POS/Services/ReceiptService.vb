@@ -5,6 +5,7 @@ Imports Microsoft.EntityFrameworkCore
 Imports MerchSys.POS.Data
 Imports MerchSys.POS.Entities
 Imports MerchSys.POS.Services.ReceiptFormatting
+Imports MerchSys.POS.Services.ReceiptRendering
 
 Namespace Services
 
@@ -18,14 +19,16 @@ Namespace Services
         Private ReadOnly _dbContext As POSDbContext
         Private ReadOnly _receiptIntegrity As IReceiptIntegrityService
         Private ReadOnly _bodyComposer As IReceiptBodyComposer
+        Private ReadOnly _receiptRenderer As IReceiptRenderer
 
         ''' <summary>
         ''' Initializes a new instance of the ReceiptService.
         ''' </summary>
-        Public Sub New(dbContext As POSDbContext, receiptIntegrity As IReceiptIntegrityService, bodyComposer As IReceiptBodyComposer)
+        Public Sub New(dbContext As POSDbContext, receiptIntegrity As IReceiptIntegrityService, bodyComposer As IReceiptBodyComposer, receiptRenderer As IReceiptRenderer)
             _dbContext = dbContext
             _receiptIntegrity = receiptIntegrity
             _bodyComposer = bodyComposer
+            _receiptRenderer = receiptRenderer
         End Sub
 
         ''' <summary>
@@ -97,7 +100,7 @@ Namespace Services
             End If
 
             Dim body = _bodyComposer.Compose(transaction.Receipt, transaction, vatConfig)
-            Return body.ToString()
+            Return Await _receiptRenderer.RenderAsync(body, transaction.Receipt?.ReceiptNumber)
         End Function
 
     End Class
