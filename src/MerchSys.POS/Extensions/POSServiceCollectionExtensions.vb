@@ -10,6 +10,7 @@ Namespace Extensions
             services.AddScoped(Of IDailySummaryService, DailySummaryService)()
             services.AddScoped(Of ICreditService, CreditService)()
             services.AddTransient(Of CreditManagementPresenter)()
+            services.AddTransient(Of TransactionHistoryPresenter)()
         End Sub
     End Module
 End Namespace
