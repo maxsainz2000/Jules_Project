@@ -60,6 +60,11 @@ Namespace Presenters
             purchasingGroup.Items.Add(New NavigationItem With { .Name = "Vendor Product Catalog", .ViewType = GetType(MerchSys.Purchasing.Views.Purchasing.VendorCatalogView), .NavigationGroup = "Purchasing" })
             inventoryGroup.Items.Add(New NavigationItem With { .Name = "Inventory Panel", .ViewType = GetType(InventoryPanel), .NavigationGroup = "Inventory" })
             posGroup.Items.Add(New NavigationItem With { .Name = "POS Panel", .ViewType = GetType(PosPanel), .NavigationGroup = "POS" })
+
+            If _sessionService.CurrentUserRole = UserRole.Manager OrElse _sessionService.CurrentUserRole = UserRole.Developer Then
+                posGroup.Items.Add(New NavigationItem With { .Name = "VAT Settings", .ViewType = GetType(MerchSys.App.Views.POS.VatSettingsView), .NavigationGroup = "POS" })
+            End If
+
             accountingGroup.Items.Add(New NavigationItem With { .Name = "Accounting Panel", .ViewType = GetType(AccountingPanel), .NavigationGroup = "Accounting" })
 
             NavigationGroups.Add(purchasingGroup)

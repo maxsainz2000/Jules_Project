@@ -92,6 +92,10 @@ Friend Module Program
                                   services.AddTransient(Of AccountingPanel)()
                                   services.AddTransient(Of DeveloperToolsPanel)()
 
+                                  services.AddSingleton(Of MerchSys.SharedKernel.Interfaces.INotificationService, MerchSys.App.Services.DefaultNotificationService)()
+                                  services.AddTransient(Of MerchSys.App.Views.POS.VatSettingsView)()
+                                  services.AddTransient(Of MerchSys.POS.Views.IVatSettingsView)(Function(sp) sp.GetRequiredService(Of MerchSys.App.Views.POS.VatSettingsView)())
+
                               End Sub).
             Build()
 
