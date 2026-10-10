@@ -105,7 +105,7 @@
 ## Phase 6: Accounting & Reporting
 - [x] ACC-01
 - [x] ACC-02
-- [ ] ACC-03
+- [x] ACC-03
 - [ ] ACC-04
 - [ ] ACC-05
 - [ ] ACC-06
