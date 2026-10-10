@@ -1,5 +1,6 @@
 Imports Microsoft.Extensions.DependencyInjection
 Imports MerchSys.Accounting.Services
+Imports MerchSys.Accounting.Presenters
 Imports System.Runtime.CompilerServices
 
 Namespace Extensions
@@ -12,6 +13,7 @@ Namespace Extensions
             services.AddScoped(Of IIncomeStatementService, IncomeStatementService)()
             services.AddScoped(Of ISalesSummaryService, SalesSummaryService)()
             services.AddScoped(Of IWhatThisMeansService, WhatThisMeansService)()
+            services.AddTransient(Of FinancialOverviewPresenter)()
         End Sub
 
     End Module
