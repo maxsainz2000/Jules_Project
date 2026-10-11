@@ -3,6 +3,7 @@ Imports System.Windows.Forms
 Imports Microsoft.Extensions.DependencyInjection
 Imports Microsoft.Extensions.Hosting
 Imports Microsoft.Extensions.Configuration
+Imports Microsoft.Extensions.Logging
 Imports MerchSys.App.Configuration
 Imports MerchSys.App.Services
 Imports MerchSys.App.Views
@@ -71,8 +72,10 @@ Friend Module Program
 
                                   services.AddConnectionHealthMonitor()
 
-                                  ' Add database contexts
-                                  services.AddModuleDbContexts(config.GetSection("Sync")("MariaDbConnection"))
+                                  ' Add database contexts — one resolved, pooling-enabled connection
+                                  ' string is used for EF contexts AND the raw-ADO services, so the
+                                  ' whole application always targets the same database.
+                                  services.AddModuleDbContexts(ConnectionStringLoader.GetMariaDbConnectionString(config, Nothing))
 
                                   ' Add MediatR
                                   services.AddMediatRServices()
@@ -111,19 +114,31 @@ Friend Module Program
         _serviceProvider = host.Services
 
         Dim configService = host.Services.GetRequiredService(Of IConfiguration)()
-        Dim connString = configService.GetSection("Sync")("MariaDbConnection")
-        If Not String.IsNullOrWhiteSpace(connString) Then
-            Try
-                Dim logger = host.Services.GetService(Of Microsoft.Extensions.Logging.ILogger(Of MariaDbSchemaInitializer))()
-                MariaDbSchemaInitializer.Initialize(connString, logger)
+        Dim loggerFactory = host.Services.GetRequiredService(Of Microsoft.Extensions.Logging.ILoggerFactory)()
+        Dim startupLogger = loggerFactory.CreateLogger(Of MariaDbSchemaInitializer)()
+        Dim connString = ConnectionStringLoader.GetMariaDbConnectionString(configService, startupLogger)
 
-                ' Initialize module databases
-                DatabaseInitializer.Initialize(_serviceProvider)
-            Catch ex As Exception
-                MessageBox.Show("Failed to initialize central database schema or module databases:" & Environment.NewLine & ex.Message, "Startup Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
-                Environment.Exit(1)
-            End Try
+        ' Fail loudly rather than silently continuing to a login that cannot possibly work.
+        If String.IsNullOrWhiteSpace(connString) Then
+            Dim expectedPath = ConnectionStringLoader.GetProductionConfigPath()
+            startupLogger.LogError("Production configuration is missing: no MariaDB connection string was resolved.")
+            MessageBox.Show(
+                "The production database configuration could not be found." & Environment.NewLine & Environment.NewLine &
+                "Expected a configuration file at:" & Environment.NewLine &
+                expectedPath & Environment.NewLine & Environment.NewLine &
+                "Copy appsettings.Production.template.json to that location, fill in the real " &
+                "server host and credentials, then start the application again.",
+                "Production Configuration Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Environment.Exit(1)
         End If
+
+        Try
+            ' Single schema-bootstrap entry point: central versioned SQL + EF-model module schemas.
+            DatabaseBootstrapper.Initialize(connString, _serviceProvider, startupLogger)
+        Catch ex As Exception
+            MessageBox.Show("Failed to initialize central database schema or module databases:" & Environment.NewLine & ex.Message, "Startup Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Environment.Exit(1)
+        End Try
 
         Dim healthMonitor = _serviceProvider.GetRequiredService(Of IConnectionHealthMonitor)()
         ConnectionHealthMonitorLocator.Current = healthMonitor

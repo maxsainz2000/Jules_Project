@@ -52,5 +52,10 @@ Namespace Entities
         Public Property ZeroRatedSales As Decimal
         Public Property VatRateSnapshot As Decimal
         Public Property IsVatRegisteredSnapshot As Boolean
+
+        ''' <summary>
+        ''' Optimistic concurrency token (mapped to MariaDB <c>TIMESTAMP(6)</c>).
+        ''' </summary>
+        Public Property RowVersion As DateTime
     End Class
 End Namespace

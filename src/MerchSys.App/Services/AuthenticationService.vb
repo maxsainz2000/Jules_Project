@@ -16,7 +16,9 @@ Namespace Services
         Private ReadOnly _writeContextScope As IWriteContextScope
 
         Public Sub New(configuration As IConfiguration, logger As ILogger(Of AuthenticationService), sessionService As ISessionService, writeContextScope As IWriteContextScope)
-            _connectionString = configuration.GetSection("Sync")("MariaDbConnection")
+            ' Use the single resolved, pooling-enabled connection string so authentication
+            ' hits exactly the same database as the EF contexts.
+            _connectionString = MerchSys.App.Configuration.ConnectionStringLoader.GetMariaDbConnectionString(configuration, logger)
             _logger = logger
             _sessionService = sessionService
             _writeContextScope = writeContextScope

@@ -11,6 +11,11 @@ Namespace Data.Configurations
 
             builder.Property(Function(e) e.UnitCost).HasPrecision(18, 4)
 
+            ' Optimistic concurrency token on the mutable stock quantity (AGENTS.md).
+            builder.Property(Function(e) e.RowVersion) _
+                .IsRowVersion() _
+                .HasColumnType("TIMESTAMP(6)")
+
             builder.HasIndex(Function(e) New With {e.ProductId, e.ReceiptDate})
 
             builder.Ignore(Function(e) e.IsExpired)

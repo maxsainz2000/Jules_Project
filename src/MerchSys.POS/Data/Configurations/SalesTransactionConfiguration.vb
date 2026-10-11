@@ -27,6 +27,11 @@ Namespace Data.Configurations
             builder.Property(Function(e) e.TotalAmount) _
                 .HasPrecision(18, 2)
 
+            ' Optimistic concurrency token (AGENTS.md).
+            builder.Property(Function(e) e.RowVersion) _
+                .IsRowVersion() _
+                .HasColumnType("TIMESTAMP(6)")
+
             builder.HasMany(Function(e) e.Lines) _
                 .WithOne() _
                 .HasForeignKey("SalesTransactionId") _
