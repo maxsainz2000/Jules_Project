@@ -13,7 +13,7 @@ Namespace Services
     ''' old <c>Base64(salt ‖ hash)</c> format are still verified for backwards
     ''' compatibility (they are silently upgraded on the next password change).
     ''' </summary>
-    Friend Module PasswordHashHelper
+    Public Module PasswordHashHelper
 
         Private Const SaltSize As Integer = 16
         Private Const DegreeOfParallelism As Integer = 1

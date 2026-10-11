@@ -126,7 +126,7 @@ Namespace Data
         ''' statement. The <c>DELIMITER</c> directive (used to wrap trigger/procedure bodies) is
         ''' honoured and may appear on its own line anywhere in the script.
         ''' </summary>
-        Private Shared Function SplitSqlStatements(sql As String) As List(Of String)
+        Friend Shared Function SplitSqlStatements(sql As String) As List(Of String)
             Dim statements As New List(Of String)()
             Dim sb As New StringBuilder()
             Dim delimiter As String = ";"
