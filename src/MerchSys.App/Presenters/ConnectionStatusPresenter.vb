@@ -1,14 +1,15 @@
 Imports System
 Imports System.Drawing
+Imports System.Windows.Forms
 Imports MerchSys.App.Services
 Imports MerchSys.App.Views
 
 Namespace Presenters
     Public Class ConnectionStatusPresenter
         Private ReadOnly _monitor As IConnectionHealthMonitor
-        Private ReadOnly _view As ConnectionStatusIndicator
+        Private ReadOnly _view As IConnectionStatusView
 
-        Public Sub New(monitor As IConnectionHealthMonitor, view As ConnectionStatusIndicator)
+        Public Sub New(monitor As IConnectionHealthMonitor, view As IConnectionStatusView)
             _monitor = monitor
             _view = view
 
@@ -19,9 +20,10 @@ Namespace Presenters
             UpdateViewState(_monitor.CurrentState)
         End Sub
 
-        Public ReadOnly Property View As ConnectionStatusIndicator
+        ''' <summary>The hostable control for the shell to place in the sidebar.</summary>
+        Public ReadOnly Property ViewControl As Control
             Get
-                Return _view
+                Return _view.Control
             End Get
         End Property
 

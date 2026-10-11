@@ -8,7 +8,9 @@ Namespace Startup
         <System.Runtime.CompilerServices.Extension>
         Public Function AddConnectionHealthMonitor(services As IServiceCollection) As IServiceCollection
             services.AddSingleton(Of IConnectionHealthMonitor, ConnectionHealthMonitor)()
-            services.AddTransient(Of ConnectionStatusIndicator)()
+            ' Register the view through its interface so the presenter does not depend on
+            ' the concrete control (M11).
+            services.AddTransient(Of IConnectionStatusView, ConnectionStatusIndicator)()
             services.AddTransient(Of ConnectionStatusPresenter)()
             Return services
         End Function

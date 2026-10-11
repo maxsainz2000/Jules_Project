@@ -62,10 +62,11 @@ Friend Module Program
                                   services.AddScoped(Of ILoginView, LoginView)()
                                   services.AddScoped(Of LoginPresenter)()
                                   
-                                  ' Shell infrastructure
-                                  services.AddSingleton(Of MainWindow)()
-                                  services.AddSingleton(Of IMainWindowView)(Function(sp) sp.GetRequiredService(Of MainWindow)())
-                                  services.AddSingleton(Of MainWindowPresenter)()
+                                  ' Shell infrastructure — scoped per login session so a re-login
+                                  ' after logout or an idle timeout gets a fresh, undisposed shell.
+                                  services.AddScoped(Of MainWindow)()
+                                  services.AddScoped(Of IMainWindowView)(Function(sp) sp.GetRequiredService(Of MainWindow)())
+                                  services.AddScoped(Of MainWindowPresenter)()
 
                                   services.AddScoped(Of IOwnerDashboardView, OwnerDashboardView)()
                                   services.AddScoped(Of OwnerDashboardPresenter)()
@@ -159,15 +160,12 @@ Friend Module Program
         End If
     End Sub
 
-    Private _forceLogoutRequested As Boolean = False
     Private _mainWindowForm As Form
 
     Private Sub RunApplicationFlow()
         Dim continueRunning As Boolean = True
 
         While continueRunning
-            _forceLogoutRequested = False
-
             ' Create a scope for the login flow
             Dim loggedIn As Boolean = False
             Using loginScope = _serviceProvider.CreateScope()
@@ -179,34 +177,33 @@ Friend Module Program
                 End If
             End Using
 
-            If loggedIn Then
-                _idleMonitor.Start()
+            If Not loggedIn Then
+                continueRunning = False
+                Continue While
+            End If
 
-                ' Resolve main window and presenter (singletons)
-                Dim mainWindow = _serviceProvider.GetRequiredService(Of MainWindow)()
+            _idleMonitor.Start()
+
+            ' A fresh shell is created for every login session. Previously MainWindow and
+            ' its presenter were singletons, so re-login after an idle timeout reused a
+            ' window that Close() had already disposed (H7).
+            Dim sessionScope = _serviceProvider.CreateScope()
+            Try
+                Dim mainWindow = sessionScope.ServiceProvider.GetRequiredService(Of MainWindow)()
                 _mainWindowForm = mainWindow
-                Dim mainPresenter = _serviceProvider.GetRequiredService(Of MainWindowPresenter)()
+                sessionScope.ServiceProvider.GetRequiredService(Of MainWindowPresenter)()
 
                 Application.Run(mainWindow)
-
-                _idleMonitor.Stop()
+            Finally
                 _mainWindowForm = Nothing
+                _idleMonitor.Stop()
+                sessionScope.Dispose()
+            End Try
 
-                If _forceLogoutRequested Then
-                    continueRunning = True
-                Else
-                    Dim sessionService = _serviceProvider.GetRequiredService(Of LoginSessionService)()
-                    If sessionService.IsAuthenticated Then
-                        ' Main window closed but user wasn't logged out explicitly via flow, just exit
-                        continueRunning = False
-                    Else
-                        ' Logged out properly
-                        continueRunning = True
-                    End If
-                End If
-            Else
-                continueRunning = False
-            End If
+            ' Logout or idle timeout clears the session -> loop back to the login screen.
+            ' The user closing the window while still signed in exits the application.
+            Dim sessionService = _serviceProvider.GetRequiredService(Of LoginSessionService)()
+            continueRunning = Not sessionService.IsAuthenticated
         End While
     End Sub
 
@@ -270,7 +267,6 @@ Friend Module Program
         Dim sessionService = _serviceProvider.GetRequiredService(Of LoginSessionService)()
         sessionService.ClearUser()
 
-        _forceLogoutRequested = True
         If _mainWindowForm IsNot Nothing Then
             ' Safely close the main window on the UI thread
             If _mainWindowForm.InvokeRequired Then
