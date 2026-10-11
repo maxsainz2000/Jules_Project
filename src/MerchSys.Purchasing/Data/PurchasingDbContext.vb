@@ -19,8 +19,8 @@ Namespace Data
         Public Property PriceChangeAlerts As DbSet(Of PriceChangeAlert)
         Public Property VendorProducts As DbSet(Of VendorProduct)
 
-        Public Sub New(options As DbContextOptions(Of PurchasingDbContext))
-            MyBase.New(options)
+        Public Sub New(options As DbContextOptions(Of PurchasingDbContext), Optional currentUserProvider As MerchSys.SharedKernel.Interfaces.ICurrentUserProvider = Nothing)
+            MyBase.New(options, currentUserProvider)
         End Sub
 
         Protected Overrides Sub OnModelCreating(modelBuilder As ModelBuilder)

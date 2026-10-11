@@ -17,7 +17,7 @@ Namespace Handlers
 
         Public Async Function Handle(notification As GoodsReceivedWithVatEvent, cancellationToken As CancellationToken) As Task Implements INotificationHandler(Of GoodsReceivedWithVatEvent).Handle
             Dim record = Await _dbContext.ExpenseRecords.FirstOrDefaultAsync(
-                Function(r) r.Category = "Purchase" AndAlso r.SourceModule = "Purchasing" AndAlso r.SourceReferenceId = notification.SourcePurchaseOrderId,
+                Function(r) r.Category = "Purchase" AndAlso r.SourceModule = "Purchasing" AndAlso r.SourceReferenceId.HasValue AndAlso r.SourceReferenceId.Value = notification.SourcePurchaseOrderId,
                 cancellationToken)
 
             If record IsNot Nothing Then

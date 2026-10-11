@@ -22,6 +22,7 @@ Namespace Services
         Private ReadOnly _retryBackoffSeconds As Integer()
         Private ReadOnly _maxRetries As Integer
         Private ReadOnly _connectionString As String
+        Private _uiContext As System.Threading.SynchronizationContext
 
         Public Event StateChanged As EventHandler(Of ConnectionStateChangedEventArgs) Implements IConnectionHealthMonitor.StateChanged
 
@@ -56,6 +57,9 @@ Namespace Services
 
         Public Sub Start() Implements IConnectionHealthMonitor.Start
             _logger.LogInformation("Starting ConnectionHealthMonitor.")
+            ' Capture the UI synchronisation context so StateChanged is always raised on the
+            ' UI thread, even when the probe is triggered from a thread-pool thread (M7).
+            _uiContext = System.Threading.SynchronizationContext.Current
             ChangeState(ConnectionState.Reconnecting)
             _timer.Start()
 
@@ -148,12 +152,15 @@ Namespace Services
         End Sub
 
         Private Sub ChangeState(newState As ConnectionState)
-            If _currentState <> newState Then
-                _currentState = newState
-                ' Events raised by Windows.Forms.Timer tick are already on the UI thread,
-                ' but if we called this from Task.Run, we need to ensure subscribers handle UI updates safely
-                ' or dispatch it. Since we will dispatch in the Presenter or Extender if needed, we just raise.
-                RaiseEvent StateChanged(Me, New ConnectionStateChangedEventArgs(_currentState))
+            If _currentState = newState Then Return
+
+            _currentState = newState
+            Dim args = New ConnectionStateChangedEventArgs(_currentState)
+
+            If _uiContext IsNot Nothing AndAlso Not Object.ReferenceEquals(_uiContext, System.Threading.SynchronizationContext.Current) Then
+                _uiContext.Post(Sub() RaiseEvent StateChanged(Me, args), Nothing)
+            Else
+                RaiseEvent StateChanged(Me, args)
             End If
         End Sub
 

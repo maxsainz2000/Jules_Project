@@ -4,6 +4,7 @@ Imports MerchSys.SharedKernel.Enums
 Namespace Entities
     Public Class PurchaseOrder
         Inherits SoftDeletableEntity
+        Implements MerchSys.SharedKernel.Interfaces.IPaginatedEntity
 
         Public Property OrderNumber As String
         Public Property VendorId As Integer

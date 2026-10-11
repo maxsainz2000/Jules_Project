@@ -4,6 +4,7 @@ Imports MerchSys.Accounting.Enums
 Namespace Entities
     Public Class VatReturn
         Inherits AuditableEntity
+        Implements MerchSys.SharedKernel.Interfaces.IPaginatedEntity
         Public Property Year As Integer
         Public Property Period As Integer
         Public Property PeriodType As VatReturnPeriodType

@@ -6,8 +6,8 @@ Namespace Data
     Public Class AccountingDbContext
         Inherits BaseDbContext
 
-        Public Sub New(options As DbContextOptions(Of AccountingDbContext))
-            MyBase.New(options)
+        Public Sub New(options As DbContextOptions(Of AccountingDbContext), Optional currentUserProvider As MerchSys.SharedKernel.Interfaces.ICurrentUserProvider = Nothing)
+            MyBase.New(options, currentUserProvider)
         End Sub
 
         Public Property FinancialPeriods As DbSet(Of Entities.FinancialPeriod)

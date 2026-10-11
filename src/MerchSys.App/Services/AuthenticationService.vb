@@ -1,4 +1,5 @@
 Imports System.Data
+Imports MerchSys.SharedKernel.Data
 Imports MerchSys.SharedKernel.Entities
 Imports MerchSys.SharedKernel.Enums
 Imports MerchSys.SharedKernel.Interfaces
@@ -82,6 +83,7 @@ Namespace Services
                         End If
 
                         Using scope = _writeContextScope.Enter(WriteContextKind.System)
+                            DataWriteGuard.EnsureCanWrite(_sessionService, _writeContextScope, "failed login attempt counter")
                             Using updateCmd As New MySqlCommand("UPDATE UserAccounts SET FailedLoginAttempts = @attempts, LockedUntil = @lockedUntil WHERE Id = @id", conn)
                                 updateCmd.Parameters.AddWithValue("@attempts", attempts)
                                 updateCmd.Parameters.AddWithValue("@lockedUntil", If(lockedUntil.HasValue, lockedUntil.Value, CObj(DBNull.Value)))
@@ -104,6 +106,7 @@ Namespace Services
 
                     If user.FailedLoginAttempts > 0 OrElse user.LockedUntil.HasValue Then
                         Using scope = _writeContextScope.Enter(WriteContextKind.System)
+                            DataWriteGuard.EnsureCanWrite(_sessionService, _writeContextScope, "login attempt counter reset")
                             Using updateCmd As New MySqlCommand("UPDATE UserAccounts SET FailedLoginAttempts = 0, LockedUntil = NULL WHERE Id = @id", conn)
                                 updateCmd.Parameters.AddWithValue("@id", user.Id)
                                 Await updateCmd.ExecuteNonQueryAsync()
@@ -154,6 +157,7 @@ Namespace Services
 
                 Dim hash = PasswordHashHelper.HashPassword(newPassword)
                 Using scope = _writeContextScope.Enter(WriteContextKind.AuthSelfService)
+                    DataWriteGuard.EnsureCanWrite(_sessionService, _writeContextScope, "password change")
                     Using conn As New MySqlConnection(_connectionString)
                         Await conn.OpenAsync()
                         Using cmd As New MySqlCommand("UPDATE UserAccounts SET PasswordHash = @hash, LastPasswordChangeAt = @now, ModifiedAt = @now WHERE Id = @id", conn)

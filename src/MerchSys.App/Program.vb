@@ -52,6 +52,8 @@ Friend Module Program
 
                                   services.AddSingleton(Of LoginSessionService)()
                                   services.AddSingleton(Of ISessionService)(Function(sp) sp.GetRequiredService(Of LoginSessionService)())
+                                  ' Supplies the audit identity to the data layer (H4).
+                                  services.AddSingleton(Of ICurrentUserProvider, SessionCurrentUserProvider)()
 
                                   services.AddSingleton(Of IWriteContextScope, MerchSys.SharedKernel.Data.WriteContextScope)()
                                   services.AddScoped(Of MerchSys.SharedKernel.Data.RoleGuardInterceptor)()
@@ -151,12 +153,17 @@ Friend Module Program
 
         RunApplicationFlow()
 
+        ' Dispose the long-lived monitors so their timers are released at shutdown (L6).
         If _idleMonitor IsNot Nothing Then
             _idleMonitor.Stop()
+            Dim disposableIdle = TryCast(_idleMonitor, IDisposable)
+            If disposableIdle IsNot Nothing Then disposableIdle.Dispose()
         End If
 
         If ConnectionHealthMonitorLocator.Current IsNot Nothing Then
             ConnectionHealthMonitorLocator.Current.Stop()
+            Dim disposableMonitor = TryCast(ConnectionHealthMonitorLocator.Current, IDisposable)
+            If disposableMonitor IsNot Nothing Then disposableMonitor.Dispose()
         End If
     End Sub
 

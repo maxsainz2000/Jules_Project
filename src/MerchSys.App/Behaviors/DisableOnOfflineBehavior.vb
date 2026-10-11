@@ -88,7 +88,19 @@ Namespace Behaviors
                     ' Ignore if control is disposed while invoking
                 End Try
             Else
-                control.Enabled = isOnline
+                Dim wrapper As BooleanWrapper = Nothing
+                If _controls.TryGetValue(control, wrapper) Then
+                    If isOnline Then
+                        ' Restore the state the control had before we disabled it, so a
+                        ' control disabled for role reasons is not silently re-enabled (M8).
+                        control.Enabled = wrapper.OriginalEnabled
+                    Else
+                        wrapper.OriginalEnabled = control.Enabled
+                        control.Enabled = False
+                    End If
+                Else
+                    control.Enabled = isOnline
+                End If
             End If
         End Sub
 
@@ -105,6 +117,8 @@ Namespace Behaviors
 
         Private Class BooleanWrapper
             Public Property Value As Boolean
+            ''' <summary>The control's Enabled state before the behaviour disabled it (M8).</summary>
+            Public Property OriginalEnabled As Boolean = True
             Public Sub New(val As Boolean)
                 Value = val
             End Sub

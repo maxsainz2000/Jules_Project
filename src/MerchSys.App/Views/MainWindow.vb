@@ -18,7 +18,7 @@ Namespace Views
         ''' Uses the Custom Event pattern (as OwnerDashboardView does) instead of
         ''' shadowing the inherited WinForms <c>Form.Load</c> member (L7).
         ''' </summary>
-        Public Custom Event Load As EventHandler Implements IMainWindowView.Load
+        Public Shadows Custom Event Load As EventHandler Implements IMainWindowView.Load
             AddHandler(value As EventHandler)
                 AddHandler MyBase.Load, value
             End AddHandler
