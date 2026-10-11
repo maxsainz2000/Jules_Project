@@ -118,40 +118,181 @@ Namespace Data
             End Using
         End Sub
 
+        ''' <summary>
+        ''' Splits a migration script into individual statements.
+        ''' Quote- and comment-aware: a delimiter that appears inside a string literal
+        ''' (<c>'...'</c>), a quoted identifier (<c>"..."</c> or <c>`...`</c>), a line comment
+        ''' (<c>--</c>, <c>#</c>) or a block comment (<c>/* ... */</c>) does NOT terminate a
+        ''' statement. The <c>DELIMITER</c> directive (used to wrap trigger/procedure bodies) is
+        ''' honoured and may appear on its own line anywhere in the script.
+        ''' </summary>
         Private Shared Function SplitSqlStatements(sql As String) As List(Of String)
             Dim statements As New List(Of String)()
-            Dim currentDelimiter As String = ";"
-            Dim lines = sql.Split(New String() {Environment.NewLine, vbLf, vbCr}, StringSplitOptions.None)
-            Dim currentStatement As New StringBuilder()
+            Dim sb As New StringBuilder()
+            Dim delimiter As String = ";"
 
-            For Each line In lines
-                Dim trimmedLine = line.Trim()
+            Dim i As Integer = 0
+            Dim n As Integer = sql.Length
+            Dim inSingle As Boolean = False
+            Dim inDouble As Boolean = False
+            Dim inBacktick As Boolean = False
+            Dim inLineComment As Boolean = False
+            Dim inBlockComment As Boolean = False
+            Dim atLineStart As Boolean = True
 
-                If trimmedLine.StartsWith("DELIMITER ", StringComparison.OrdinalIgnoreCase) Then
-                    currentDelimiter = trimmedLine.Substring(10).Trim()
-                    Continue For
-                End If
+            While i < n
+                Dim c As Char = sql(i)
 
-                If trimmedLine.EndsWith(currentDelimiter, StringComparison.OrdinalIgnoreCase) Then
-                    Dim withoutDelimiter = line.Substring(0, line.LastIndexOf(currentDelimiter))
-                    currentStatement.AppendLine(withoutDelimiter)
-
-                    Dim finalStmt = currentStatement.ToString().Trim()
-                    If Not String.IsNullOrEmpty(finalStmt) Then
-                        statements.Add(finalStmt)
+                ' --- DELIMITER directive (line-level, outside literals/comments) ---
+                If atLineStart AndAlso Not inSingle AndAlso Not inDouble AndAlso Not inBacktick AndAlso Not inLineComment AndAlso Not inBlockComment Then
+                    Dim lineEndIdx = sql.IndexOfAny(New Char() {ChrW(10), ChrW(13)}, i)
+                    Dim lineText = If(lineEndIdx < 0, sql.Substring(i), sql.Substring(i, lineEndIdx - i))
+                    Dim trimmedLine = lineText.Trim()
+                    If trimmedLine.StartsWith("DELIMITER ", StringComparison.OrdinalIgnoreCase) Then
+                        delimiter = trimmedLine.Substring(10).Trim()
+                        i = If(lineEndIdx < 0, n, lineEndIdx)
+                        Continue While
                     End If
-                    currentStatement.Clear()
-                Else
-                    currentStatement.AppendLine(line)
                 End If
-            Next
 
-            Dim remainingStmt = currentStatement.ToString().Trim()
-            If Not String.IsNullOrEmpty(remainingStmt) Then
-                statements.Add(remainingStmt)
-            End If
+                ' --- newline: ends any line comment ---
+                If c = ChrW(10) OrElse c = ChrW(13) Then
+                    inLineComment = False
+                    sb.Append(c)
+                    i += 1
+                    atLineStart = True
+                    Continue While
+                End If
+
+                ' --- inside a line comment ---
+                If inLineComment Then
+                    sb.Append(c)
+                    i += 1
+                    atLineStart = False
+                    Continue While
+                End If
+
+                ' --- inside a block comment ---
+                If inBlockComment Then
+                    If c = "*"c AndAlso i + 1 < n AndAlso sql(i + 1) = "/"c Then
+                        inBlockComment = False
+                        sb.Append("*/")
+                        i += 2
+                    Else
+                        sb.Append(c)
+                        i += 1
+                    End If
+                    atLineStart = False
+                    Continue While
+                End If
+
+                ' --- inside a single-quoted string literal ---
+                If inSingle Then
+                    sb.Append(c)
+                    If c = "\"c AndAlso i + 1 < n Then
+                        sb.Append(sql(i + 1))
+                        i += 2
+                    ElseIf c = "'"c Then
+                        If i + 1 < n AndAlso sql(i + 1) = "'"c Then
+                            sb.Append("'")
+                            i += 2
+                        Else
+                            inSingle = False
+                            i += 1
+                        End If
+                    Else
+                        i += 1
+                    End If
+                    atLineStart = False
+                    Continue While
+                End If
+
+                ' --- inside a double-quoted identifier ---
+                If inDouble Then
+                    sb.Append(c)
+                    i += 1
+                    If c = """"c Then inDouble = False
+                    atLineStart = False
+                    Continue While
+                End If
+
+                ' --- inside a backtick identifier ---
+                If inBacktick Then
+                    sb.Append(c)
+                    i += 1
+                    If c = "`"c Then inBacktick = False
+                    atLineStart = False
+                    Continue While
+                End If
+
+                ' --- normal context: detect comment/literal openers ---
+                If c = "-"c AndAlso i + 1 < n AndAlso sql(i + 1) = "-"c Then
+                    inLineComment = True
+                    sb.Append("--")
+                    i += 2
+                    atLineStart = False
+                    Continue While
+                End If
+                If c = "#"c Then
+                    inLineComment = True
+                    sb.Append(c)
+                    i += 1
+                    atLineStart = False
+                    Continue While
+                End If
+                If c = "/"c AndAlso i + 1 < n AndAlso sql(i + 1) = "*"c Then
+                    inBlockComment = True
+                    sb.Append("/*")
+                    i += 2
+                    atLineStart = False
+                    Continue While
+                End If
+                If c = "'"c Then
+                    inSingle = True
+                    sb.Append(c)
+                    i += 1
+                    atLineStart = False
+                    Continue While
+                End If
+                If c = """"c Then
+                    inDouble = True
+                    sb.Append(c)
+                    i += 1
+                    atLineStart = False
+                    Continue While
+                End If
+                If c = "`"c Then
+                    inBacktick = True
+                    sb.Append(c)
+                    i += 1
+                    atLineStart = False
+                    Continue While
+                End If
+
+                ' --- delimiter check (only reached outside literals/comments) ---
+                If delimiter.Length > 0 AndAlso MatchesAt(sql, i, delimiter) Then
+                    Dim stmt = sb.ToString().Trim()
+                    If stmt.Length > 0 Then statements.Add(stmt)
+                    sb.Clear()
+                    i += delimiter.Length
+                    atLineStart = False
+                    Continue While
+                End If
+
+                sb.Append(c)
+                If c <> " "c AndAlso c <> ChrW(9) Then atLineStart = False
+                i += 1
+            End While
+
+            Dim remaining = sb.ToString().Trim()
+            If remaining.Length > 0 Then statements.Add(remaining)
 
             Return statements
+        End Function
+
+        Private Shared Function MatchesAt(text As String, index As Integer, token As String) As Boolean
+            If token.Length = 0 OrElse index + token.Length > text.Length Then Return False
+            Return String.Compare(text, index, token, 0, token.Length, StringComparison.Ordinal) = 0
         End Function
 
         Private Shared Function ComputeSha256(input As String) As String
@@ -163,24 +304,17 @@ Namespace Data
         End Function
 
         Private Shared Sub EnsureDeveloperAccount(conn As MySqlConnection)
-            ' Ensure the Developer role exists (Id 3 per UserRole enum)
-            Dim checkSql = "SELECT COUNT(*) FROM `UserAccounts` WHERE `Username` = 'developer'"
-            Dim count As Integer
-            Using cmd = New MySqlCommand(checkSql, conn)
-                count = Convert.ToInt32(cmd.ExecuteScalar())
+            ' Idempotent: INSERT IGNORE means two clients starting simultaneously cannot
+            ' raise a duplicate-key error and abort startup (M14).
+            Dim hash = PasswordHashHelper.HashPassword("VistaDeveloper2026!")
+            Dim insertSql = "
+                INSERT IGNORE INTO `UserAccounts` (`Username`, `PasswordHash`, `Role`, `CreatedAt`, `IsActive`)
+                VALUES ('developer', @hash, 3, @now, 1);"
+            Using cmd = New MySqlCommand(insertSql, conn)
+                cmd.Parameters.AddWithValue("@hash", hash)
+                cmd.Parameters.AddWithValue("@now", DateTime.UtcNow)
+                cmd.ExecuteNonQuery()
             End Using
-
-            If count = 0 Then
-                Dim hash = PasswordHashHelper.HashPassword("VistaDeveloper2026!")
-                Dim insertSql = "
-                    INSERT INTO `UserAccounts` (`Username`, `PasswordHash`, `Role`, `CreatedAt`, `IsActive`)
-                    VALUES ('developer', @hash, 3, @now, 1);"
-                Using cmd = New MySqlCommand(insertSql, conn)
-                    cmd.Parameters.AddWithValue("@hash", hash)
-                    cmd.Parameters.AddWithValue("@now", DateTime.UtcNow)
-                    cmd.ExecuteNonQuery()
-                End Using
-            End If
         End Sub
 
         Private Shared Sub EnsureDefaultAccounts(conn As MySqlConnection)
@@ -191,13 +325,16 @@ Namespace Data
             End Using
 
             If count < 2 Then
-                Dim hash = PasswordHashHelper.HashPassword("Vista2026!")
+                ' Each account gets its own salt: hashing once and reusing the value would
+                ' give manager and owner identical stored hashes (H8).
+                Dim managerHash = PasswordHashHelper.HashPassword("Vista2026!")
+                Dim ownerHash = PasswordHashHelper.HashPassword("Vista2026!")
 
                 Dim insertSqlManager = "
                     INSERT IGNORE INTO `UserAccounts` (`Username`, `PasswordHash`, `Role`, `CreatedAt`, `IsActive`)
                     VALUES ('manager', @hash, 1, @now, 1);"
                 Using cmd = New MySqlCommand(insertSqlManager, conn)
-                    cmd.Parameters.AddWithValue("@hash", hash)
+                    cmd.Parameters.AddWithValue("@hash", managerHash)
                     cmd.Parameters.AddWithValue("@now", DateTime.UtcNow)
                     cmd.ExecuteNonQuery()
                 End Using
@@ -206,7 +343,7 @@ Namespace Data
                     INSERT IGNORE INTO `UserAccounts` (`Username`, `PasswordHash`, `Role`, `CreatedAt`, `IsActive`)
                     VALUES ('owner', @hash, 2, @now, 1);"
                 Using cmd = New MySqlCommand(insertSqlOwner, conn)
-                    cmd.Parameters.AddWithValue("@hash", hash)
+                    cmd.Parameters.AddWithValue("@hash", ownerHash)
                     cmd.Parameters.AddWithValue("@now", DateTime.UtcNow)
                     cmd.ExecuteNonQuery()
                 End Using
