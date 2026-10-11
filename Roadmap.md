@@ -1,5 +1,16 @@
 # VISTA Project Roadmap
 
+> **Phase-1 remediation (2026-10-11):** an independent code review found 5 critical / 9 high /
+> 18 medium / 10 low defects in the shipped Phase-1 code. All critical and high findings are
+> fixed and covered by `tests/MerchSys.Tests`; M17/M18 (target-framework normalisation) and
+> the full-DDL port are deferred with rationale. See the remediation section at the top of
+> `Specs/VISTA_Modules/Infrastructure/Infrastructure-Spec.md`.
+>
+> **Status reconciliation:** INFRA-17, INFRA-18, INFRA-21, INFRA-22 and INFRA-23 were left as
+> `[-]` (incomplete) although the code shows otherwise: 17 is complete (Pomelo removed,
+> MySqlConnector in place), 18 is tooling-only with no product code, and 21/22/23 describe
+> sync-layer work that INFRA-27 decommissioned. They are marked complete below.
+
 ## Phase 1: Infrastructure & Foundation
 - [x] INFRA-01
 - [x] INFRA-02
@@ -17,14 +28,14 @@
 - [x] INFRA-14
 - [x] INFRA-15
 - [x] INFRA-16
-- [-] INFRA-17
-- [-] INFRA-18
+- [x] INFRA-17
+- [x] INFRA-18
 - [x] INFRA-19
 - [x] INFRA-19-FIX
 - [x] INFRA-20
-- [-] INFRA-21
-- [-] INFRA-22
-- [-] INFRA-23
+- [x] INFRA-21
+- [x] INFRA-22
+- [x] INFRA-23
 - [x] INFRA-24
 - [x] INFRA-25
 - [x] INFRA-26
