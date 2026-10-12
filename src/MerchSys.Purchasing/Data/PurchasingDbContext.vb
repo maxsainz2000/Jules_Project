@@ -27,9 +27,7 @@ Namespace Data
             MyBase.OnModelCreating(modelBuilder)
             modelBuilder.ApplyConfigurationsFromAssembly(GetType(PurchasingDbContext).Assembly)
 
-            For Each entityType In modelBuilder.Model.GetEntityTypes()
-                entityType.SetTableName("Pur_" & entityType.GetTableName())
-            Next
+            ApplyTablePrefix(modelBuilder, "Pur_")
 
             PurchasingSeedData.Seed(modelBuilder)
         End Sub

@@ -21,9 +21,7 @@ Namespace Data
             MyBase.OnModelCreating(modelBuilder)
             modelBuilder.ApplyConfigurationsFromAssembly(GetType(InventoryDbContext).Assembly)
 
-            For Each entityType In modelBuilder.Model.GetEntityTypes()
-                entityType.SetTableName("Inv_" & entityType.GetTableName())
-            Next
+            ApplyTablePrefix(modelBuilder, "Inv_")
 
             SeedData.InventorySeedData.Seed(modelBuilder)
         End Sub

@@ -47,6 +47,29 @@ Namespace Data
             ApplySecondaryIndexes(modelBuilder)
         End Sub
 
+        ''' <summary>
+        ''' Applies the module table prefix to every mapped entity, skipping any entity whose
+        ''' table name already carries the prefix. Call this from <c>OnModelCreating</c>
+        ''' <b>after</b> <c>ApplyConfigurationsFromAssembly</c>, because the configurations are
+        ''' what declare the base table names.
+        '''
+        ''' The idempotence matters: a blanket prefix turns a configuration that already declares
+        ''' <c>ToTable("Pos_SalesTransactions")</c> into <c>Pos_Pos_SalesTransactions</c>, which no
+        ''' longer matches the names the raw-ADO queries and the operator runbooks use.
+        ''' </summary>
+        Protected Shared Sub ApplyTablePrefix(modelBuilder As ModelBuilder, prefix As String)
+            For Each entityType In modelBuilder.Model.GetEntityTypes()
+                Dim currentName = entityType.GetTableName()
+
+                ' Owned, view-mapped and keyless types have no table name of their own.
+                If currentName Is Nothing Then Continue For
+
+                If Not currentName.StartsWith(prefix, StringComparison.Ordinal) Then
+                    entityType.SetTableName(prefix & currentName)
+                End If
+            Next
+        End Sub
+
         Private Sub ApplySecondaryIndexes(modelBuilder As ModelBuilder)
             For Each entityType In modelBuilder.Model.GetEntityTypes()
                 ' Only large, paginated transactional tables need the (CreatedAt, Id) seek

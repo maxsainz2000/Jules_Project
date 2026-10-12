@@ -34,9 +34,7 @@ Namespace Data
             MyBase.OnModelCreating(modelBuilder)
             modelBuilder.ApplyConfigurationsFromAssembly(GetType(POSDbContext).Assembly)
 
-            For Each entityType In modelBuilder.Model.GetEntityTypes()
-                entityType.SetTableName("Pos_" & entityType.GetTableName())
-            Next
+            ApplyTablePrefix(modelBuilder, "Pos_")
         End Sub
 
     End Class

@@ -34,7 +34,7 @@ Four client laptops are the target deployment for testing — exercising true mu
 
 ## Concurrency Control
 
-- Optimistic concurrency tokens (`TIMESTAMP(6) ON UPDATE` or equivalent `RowVersion`) on mutable rows: `Inv_StockBatches.QuantityRemaining`, `Pur_AccountsPayable.OutstandingBalance`, `Pos_CreditAccounts.OutstandingBalance`.
+- Optimistic concurrency tokens (`TIMESTAMP(6) ON UPDATE` or equivalent `RowVersion`) on mutable rows: `Inv_StockBatches.QuantityRemaining`, `Pur_AccountsPayable.AmountPaid`, `Pos_CreditAccounts.CurrentBalance`.
 - Inventory decrement paths (POS sale, shrinkage, return) execute inside a single MariaDB transaction:
   1. `SELECT ... FOR UPDATE` on the FIFO batch row(s)
   2. Decrement `QuantityRemaining`

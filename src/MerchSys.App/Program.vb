@@ -28,6 +28,25 @@ Friend Module Program
         Application.EnableVisualStyles()
         Application.SetCompatibleTextRenderingDefault(False)
 
+        ' Resolve and validate the production connection string BEFORE the host is built.
+        ' ConfigureServices runs inside Build(), and AddModuleDbContexts rejects an empty
+        ' connection string — so validating only afterwards would surface a raw
+        ' ArgumentException instead of the operator dialog (C4/M15).
+        Dim bootstrapConfig = New ConfigurationBuilder().
+            SetBasePath(AppContext.BaseDirectory).
+            AddJsonFile("appsettings.json", optional:=True, reloadOnChange:=False).
+            AddEnvironmentVariables().
+            AddCommandLine(args).
+            AddProductionOverlay().
+            Build()
+
+        Dim connString = ConnectionStringLoader.GetMariaDbConnectionString(bootstrapConfig, Nothing)
+        Dim configError = StartupConfigValidator.ValidateConnectionString(connString)
+        If configError IsNot Nothing Then
+            MessageBox.Show(configError, "Production Configuration Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Environment.Exit(1)
+        End If
+
         Dim host As IHost = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args).
             ConfigureAppConfiguration(Sub(context, builder)
                                           builder.AddProductionOverlay()
@@ -78,7 +97,9 @@ Friend Module Program
                                   ' Add database contexts — one resolved, pooling-enabled connection
                                   ' string is used for EF contexts AND the raw-ADO services, so the
                                   ' whole application always targets the same database.
-                                  services.AddModuleDbContexts(ConnectionStringLoader.GetMariaDbConnectionString(config, Nothing))
+                                  ' One resolved value is shared by the EF contexts and the
+                                  ' raw-ADO services, so they always target the same database.
+                                  services.AddModuleDbContexts(connString)
 
                                   ' Add MediatR
                                   services.AddMediatRServices()
@@ -116,24 +137,8 @@ Friend Module Program
 
         _serviceProvider = host.Services
 
-        Dim configService = host.Services.GetRequiredService(Of IConfiguration)()
         Dim loggerFactory = host.Services.GetRequiredService(Of Microsoft.Extensions.Logging.ILoggerFactory)()
         Dim startupLogger = loggerFactory.CreateLogger(Of MariaDbSchemaInitializer)()
-        Dim connString = ConnectionStringLoader.GetMariaDbConnectionString(configService, startupLogger)
-
-        ' Fail loudly rather than silently continuing to a login that cannot possibly work.
-        If String.IsNullOrWhiteSpace(connString) Then
-            Dim expectedPath = ConnectionStringLoader.GetProductionConfigPath()
-            startupLogger.LogError("Production configuration is missing: no MariaDB connection string was resolved.")
-            MessageBox.Show(
-                "The production database configuration could not be found." & Environment.NewLine & Environment.NewLine &
-                "Expected a configuration file at:" & Environment.NewLine &
-                expectedPath & Environment.NewLine & Environment.NewLine &
-                "Copy appsettings.Production.template.json to that location, fill in the real " &
-                "server host and credentials, then start the application again.",
-                "Production Configuration Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error)
-            Environment.Exit(1)
-        End If
 
         Try
             ' Single schema-bootstrap entry point: central versioned SQL + EF-model module schemas.

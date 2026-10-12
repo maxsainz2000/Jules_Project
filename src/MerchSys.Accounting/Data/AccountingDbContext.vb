@@ -21,12 +21,7 @@ Namespace Data
             MyBase.OnModelCreating(modelBuilder)
             modelBuilder.ApplyConfigurationsFromAssembly(GetType(AccountingDbContext).Assembly)
 
-            For Each entityType In modelBuilder.Model.GetEntityTypes()
-                Dim currentName = entityType.GetTableName()
-                If Not currentName.StartsWith("Acc_") Then
-                    entityType.SetTableName("Acc_" & currentName)
-                End If
-            Next
+            ApplyTablePrefix(modelBuilder, "Acc_")
         End Sub
 
     End Class

@@ -17,7 +17,7 @@
 |---|---------|-----------|
 | **C1** | `AddModuleDbContexts` ignored its `connectionString` argument and hardcoded `Database=villon_farm_supply` (no credentials, no pooling) while raw-ADO services read `Sync:MariaDbConnection` → the two halves targeted different databases | The hardcoded literal is gone; the method requires and uses the caller-supplied string, and every ADO service resolves through `ConnectionStringLoader` |
 | **C2** | `IEventBus` had no implementation and no DI registration; four POS services depend on it | Added `MediatREventBus` and registered it in `AddMediatRServices` |
-| **C3** | No concurrency token on `Inv_StockBatches`, `Pos_CreditAccounts`, `Pos_SalesTransactions`; `ConcurrencyAwareEntity` did not exist | `RowVersion` added to the three entities and mapped `IsRowVersion()` / `TIMESTAMP(6)` |
+| **C3** | No concurrency token on `Inv_StockBatches`, `Pos_CreditAccounts`, `Pos_SalesTransactions`; `ConcurrencyAwareEntity` did not exist | `RowVersion` added to those three entities and mapped `IsRowVersion()` / `TIMESTAMP(6)`. **Corrected 2026-10-12:** `AGENTS.md` also mandates `Pur_AccountsPayable`, which this row omitted; it has since been added — see the follow-up section below. |
 | **C4** | `GetProductionConfigPath` returned `AppContext.BaseDirectory` but the runbook documents `%LOCALAPPDATA%\VISTA`; overlay was optional → silent failure | Canonical path is now `%LOCALAPPDATA%\VISTA\appsettings.Production.json` with a documented developer fallback |
 | **C5** | `Program.Main` ran two competing schema mechanisms and duplicated DDL | Consolidated into a single `DatabaseBootstrapper`; `DatabaseInitializer` and the inline DDL deleted |
 | **H1** | Owner Dashboard rendered hardcoded USD mock figures | Replaced with live aggregates from the four module DbContexts |
@@ -40,6 +40,26 @@
 | **L1** | `Program` is a `Module` holding mutable process state | Partially improved (the `_forceLogoutRequested` flag was removed). Extracting an `ApplicationHost`/`ShellCoordinator` is a follow-up. |
 | **L2** | `ConnectionHealthMonitorLocator` static service locator | Still present; replacing it with constructor injection touches the extender-provider behaviour. |
 | **C5 (partial)** | Porting the full original DDL and BIR receipt triggers into the versioned migration set | **The original DDL is not in this repository.** `mariadb-init.sql` is 15 lines / 1 table and `0001_initial_schema.sql` creates only `UserAccounts`. The module schema is derived from the EF model, which is the single source of truth here. Inventing a 40-table DDL script is not possible. |
+
+### Follow-up remediation — 2026-10-12
+
+A verification pass over PR #116 reproduced the review's three blockers and found three further
+defects. All six are fixed. Build gate: `dotnet build src/MerchSys.slnx` → 0 errors.
+Test gate: `dotnet test` → 34 passed, 0 failed (the original 20 plus 14 new regression tests).
+
+| # | Defect | Resolution |
+|---|--------|-----------|
+| **F1** | The connection string was resolved inside `ConfigureServices`, which runs during `Build()`. With no `Sync:MariaDbConnection`, `AddModuleDbContexts` threw before the operator dialog at the end of `Main` could ever run — so the C4/M15 dialog was dead code and the app died with a raw `ArgumentException`. | `StartupConfigValidator` now resolves and validates the string **before** the host is built; the resolved value is passed into `ConfigureServices`. |
+| **F2** | Module tables were never created on a clean database. `Database.EnsureCreated()` short-circuits when the database already contains any table, and Layer 1 always creates `UserAccounts` first — so it reported success while creating nothing. The C5 consolidation was therefore inert. | `EnsureModuleSchemas` uses a presence-guarded `IRelationalDatabaseCreator.CreateTables()` per context. EF migrations were deliberately not introduced — see the C5 (partial) deferred row. |
+| **F3** | The module table prefix was applied twice: every POS table and two Purchasing configurations became `Pos_Pos_*` / `Pur_Pur_*`, names that the raw-ADO queries (`FROM Pur_VendorProducts`) and the runbooks do not use. | Prefixing moved into an idempotent `BaseDbContext.ApplyTablePrefix`, used by all four module contexts. |
+| **F4** | `Pur_AccountsPayable` had no concurrency token, although `AGENTS.md` requires one (the C3 row above omitted it). | `RowVersion` added to `AccountsPayableEntry` and mapped; `APLedgerPresenter` surfaces the mandated "Data changed elsewhere — refresh and retry" message instead of overwriting. |
+| **F5** | `PurchaseOrderLine` declared `RowVersion As Byte()` with no fluent mapping, so the **entire Purchasing model failed validation and could not be built** — every Purchasing query would throw. Masked by F2: `EnsureCreated()` short-circuited, so the model was never built at startup. | Explicit `IsRowVersion().IsConcurrencyToken()` mapping added, matching the other seven `Byte()` entities. |
+
+**Raised separately (out of scope for this change set):** the EF provider is Oracle's
+`MySql.EntityFrameworkCore`, which depends on `MySql.Data` — but five sites cast
+`Database.GetDbConnection()` to `MySqlConnector.MySqlConnection` and would throw
+`InvalidCastException` at runtime (`PurchaseOrderService`, `VendorProductService`,
+`VendorService`, `ShrinkagePresenter`, `ProductManagementPresenter`).
 
 ### Corrections to this document
 

@@ -1,7 +1,12 @@
 Imports System
+Imports System.Collections.Generic
+Imports System.Linq
 Imports Microsoft.EntityFrameworkCore
+Imports Microsoft.EntityFrameworkCore.Infrastructure
+Imports Microsoft.EntityFrameworkCore.Storage
 Imports Microsoft.Extensions.DependencyInjection
 Imports Microsoft.Extensions.Logging
+Imports MySqlConnector
 Imports MerchSys.Accounting.Data
 Imports MerchSys.Inventory.Data
 Imports MerchSys.POS.Data
@@ -21,8 +26,8 @@ Namespace Data
     ''' <list type="number">
     '''   <item>Central reference schema (versioned, hash-checked embedded SQL) via
     '''     <see cref="MariaDbSchemaInitializer"/> — owns the central auth tables and seeding.</item>
-    '''   <item>Module schemas, derived from the EF model via <c>EnsureCreated</c>, which is the
-    '''     single source of truth for the <c>Pur_/Inv_/Pos_/Acc_</c> tables.</item>
+    '''   <item>Module schemas, derived from the EF model, which is the single source of truth
+    '''     for the <c>Pur_/Inv_/Pos_/Acc_</c> tables.</item>
     ''' </list>
     ''' </summary>
     Public NotInheritable Class DatabaseBootstrapper
@@ -39,25 +44,94 @@ Namespace Data
             MariaDbSchemaInitializer.Initialize(connectionString, logger)
 
             ' Layer 2 — module schemas from the EF model.
-            EnsureModuleSchemas(serviceProvider, logger)
+            EnsureModuleSchemas(connectionString, serviceProvider, logger)
         End Sub
 
         ''' <summary>
-        ''' Creates the module tables from the EF model. This replaces the former
-        ''' <c>DatabaseInitializer</c>, which additionally ran duplicated inline ALTER/DDL
-        ''' statements that shadowed the EF model as a second source of truth.
+        ''' Creates the module tables from the EF model.
+        '''
+        ''' <c>Database.EnsureCreated()</c> cannot be used for this. It only calls
+        ''' <c>CreateTables()</c> when the database contains no tables at all, and Layer 1 always
+        ''' creates the central tables first — so <c>EnsureCreated()</c> reported success while
+        ''' silently creating nothing. Each context is therefore materialised through
+        ''' <see cref="IRelationalDatabaseCreator.CreateTables()"/>, which has no such
+        ''' short-circuit, guarded by a check that none of that context's tables exist yet.
         ''' </summary>
-        Private Shared Sub EnsureModuleSchemas(serviceProvider As IServiceProvider, logger As ILogger)
+        Private Shared Sub EnsureModuleSchemas(connectionString As String, serviceProvider As IServiceProvider, logger As ILogger)
+            Dim existing = ReadExistingTableNames(connectionString)
+
             Using scope = serviceProvider.CreateScope()
                 Dim services = scope.ServiceProvider
 
                 If logger IsNot Nothing Then logger.LogInformation("Ensuring module database schemas from the EF model.")
-                services.GetRequiredService(Of PurchasingDbContext)().Database.EnsureCreated()
-                services.GetRequiredService(Of InventoryDbContext)().Database.EnsureCreated()
-                services.GetRequiredService(Of POSDbContext)().Database.EnsureCreated()
-                services.GetRequiredService(Of AccountingDbContext)().Database.EnsureCreated()
+                EnsureContextTables(services.GetRequiredService(Of PurchasingDbContext)(), existing, logger)
+                EnsureContextTables(services.GetRequiredService(Of InventoryDbContext)(), existing, logger)
+                EnsureContextTables(services.GetRequiredService(Of POSDbContext)(), existing, logger)
+                EnsureContextTables(services.GetRequiredService(Of AccountingDbContext)(), existing, logger)
             End Using
         End Sub
+
+        ''' <summary>
+        ''' Returns True when none of <paramref name="modelTables"/> already exists, i.e. the
+        ''' context's schema has not been created yet. <c>CreateTables()</c> is not idempotent —
+        ''' it aborts on the first table that already exists — so it must only be called then.
+        ''' </summary>
+        Friend Shared Function ShouldCreateTables(existing As HashSet(Of String), modelTables As IEnumerable(Of String)) As Boolean
+            Return Not modelTables.Any(Function(t) existing.Contains(t))
+        End Function
+
+        Private Shared Sub EnsureContextTables(db As DbContext, existing As HashSet(Of String), logger As ILogger)
+            Dim modelTables = db.Model.GetEntityTypes().
+                Select(Function(et) et.GetTableName()).
+                Where(Function(n) n IsNot Nothing).
+                Distinct(StringComparer.OrdinalIgnoreCase).
+                ToList()
+
+            If modelTables.Count = 0 Then Return
+
+            If Not ShouldCreateTables(existing, modelTables) Then
+                ' A partially-present schema cannot be reconciled without migrations, which this
+                ' deployment deliberately does not use. Surface it rather than guess.
+                If logger IsNot Nothing Then
+                    logger.LogWarning("Module schema for {Context} is partially present; skipping table creation.", db.GetType().Name)
+                End If
+                Return
+            End If
+
+            db.Database.GetService(Of IRelationalDatabaseCreator)().CreateTables()
+
+            For Each tableName In modelTables
+                existing.Add(tableName)
+            Next
+        End Sub
+
+        ''' <summary>
+        ''' Reads the base table names of the current database.
+        '''
+        ''' Uses its own <see cref="MySqlConnection"/> rather than the EF connection: the EF
+        ''' provider is Oracle's MySql.EntityFrameworkCore, whose connection is a
+        ''' <c>MySql.Data</c> connection, not a <c>MySqlConnector</c> one.
+        ''' </summary>
+        Private Shared Function ReadExistingTableNames(connectionString As String) As HashSet(Of String)
+            Dim names As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+
+            Using conn As New MySqlConnection(connectionString)
+                conn.Open()
+
+                Using cmd = conn.CreateCommand()
+                    cmd.CommandText = "SELECT TABLE_NAME FROM information_schema.TABLES " &
+                                      "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_TYPE = 'BASE TABLE'"
+
+                    Using reader = cmd.ExecuteReader()
+                        While reader.Read()
+                            names.Add(reader.GetString(0))
+                        End While
+                    End Using
+                End Using
+            End Using
+
+            Return names
+        End Function
 
     End Class
 

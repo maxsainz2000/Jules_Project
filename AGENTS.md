@@ -41,7 +41,7 @@
 - Up to 4 concurrent client laptops connect directly via TCP 3306.
 - Table prefixes: `Pur_`, `Inv_`, `Pos_`, `Acc_` — no cross-module foreign keys at DB level
 - All tables in 3NF; audit columns (`CreatedBy`, `CreatedAt`, `ModifiedBy`, `ModifiedAt`) on every table; soft deletes (`IsDeleted`) on all financial/inventory records
-- **Optimistic concurrency tokens** (`TIMESTAMP(6) ON UPDATE` or `RowVersion`) on all mutable rows (`Inv_StockBatches.QuantityRemaining`, `Pur_AccountsPayable.OutstandingBalance`, `Pos_CreditAccounts.OutstandingBalance`).
+- **Optimistic concurrency tokens** (`TIMESTAMP(6) ON UPDATE` or `RowVersion`) on all mutable rows (`Inv_StockBatches.QuantityRemaining`, `Pur_AccountsPayable.AmountPaid`, `Pos_CreditAccounts.CurrentBalance`).
 - **`SELECT ... FOR UPDATE`** inside the FIFO inventory decrement transaction to serialize concurrent client writes.
 - On `DbUpdateConcurrencyException`, surface "Data changed elsewhere — refresh and retry" in the UI. **Never silently overwrite.**
 
