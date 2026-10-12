@@ -19,34 +19,31 @@ Namespace Services
 
         Public Async Function GetHistoryAsync(request As MerchSys.SharedKernel.Paging.PageRequest) As Task(Of MerchSys.SharedKernel.Paging.PagedResult(Of Vendor)) Implements IVendorService.GetHistoryAsync
             Dim result As New MerchSys.SharedKernel.Paging.PagedResult(Of Vendor)()
-            ' Provider-agnostic on purpose: EF's connection is a MySql.Data connection, so
-            ' casting it to MySqlConnector.MySqlConnection throws InvalidCastException.
-            Dim conn = _dbContext.Database.GetDbConnection()
-            Await _dbContext.Database.OpenConnectionAsync()
 
-            Using cmd = conn.CreateCommand()
-                cmd.CommandText = "SELECT Id, Name, CreatedAt, CreatedBy, ModifiedAt, ModifiedBy, IsDeleted FROM Pur_Vendors WHERE @IsFirstPage = 1 OR (CreatedAt < @CursorDate OR (CreatedAt = @CursorDate AND Id < @CursorId)) ORDER BY CreatedAt DESC, Id DESC LIMIT @PageSizePlusOne"
+            ' Plain EF query. The raw SQL this replaced existed only for the "EF Core ToListAsync
+            ' returns an empty list" workaround, which was retested against MariaDB on 2026-10-12
+            ' and did not reproduce (see AGENTS.md). Soft-deleted rows are now excluded by
+            ' BaseDbContext's global query filter, which the raw SQL did not do.
+            Dim query = _dbContext.Vendors.AsQueryable()
 
-                cmd.AddParameter("@IsFirstPage", request.IsFirstPage)
-                cmd.AddParameter("@CursorDate", request.CursorDate)
-                cmd.AddParameter("@CursorId", request.CursorId)
-                cmd.AddParameter("@PageSizePlusOne", request.PageSize + 1)
+            If Not request.IsFirstPage Then
+                If Not request.CursorDate.HasValue OrElse Not request.CursorId.HasValue Then
+                    ' No cursor to page from; the raw SQL matched no rows in this case either.
+                    result.HasMore = False
+                    Return result
+                End If
 
-                Using reader = Await cmd.ExecuteReaderAsync()
-                    While Await reader.ReadAsync()
-                        Dim v As New Vendor With {
-                            .Id = reader.GetInt32(0),
-                            .Name = If(reader.IsDBNull(1), Nothing, reader.GetString(1)),
-                            .CreatedAt = reader.GetDateTime(2),
-                            .CreatedBy = If(reader.IsDBNull(3), Nothing, reader.GetString(3)),
-                            .ModifiedAt = If(reader.IsDBNull(4), CType(Nothing, DateTime?), reader.GetDateTime(4)),
-                            .ModifiedBy = If(reader.IsDBNull(5), Nothing, reader.GetString(5)),
-                            .IsDeleted = reader.GetBoolean(6)
-                        }
-                        result.Items.Add(v)
-                    End While
-                End Using
-            End Using
+                Dim cursorDate = request.CursorDate.Value
+                Dim cursorId = request.CursorId.Value
+                query = query.Where(Function(x) x.CreatedAt < cursorDate OrElse
+                                             (x.CreatedAt = cursorDate AndAlso x.Id < cursorId))
+            End If
+
+            result.Items = Await query.
+                OrderByDescending(Function(x) x.CreatedAt).
+                ThenByDescending(Function(x) x.Id).
+                Take(request.PageSize + 1).
+                ToListAsync()
 
             If result.Items.Count > request.PageSize Then
                 result.HasMore = True

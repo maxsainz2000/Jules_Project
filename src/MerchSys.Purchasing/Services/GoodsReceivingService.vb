@@ -133,78 +133,14 @@ Namespace Services
         End Function
 
         Public Async Function GetReceiptsForPOAsync(purchaseOrderId As Integer) As Task(Of List(Of GoodsReceipt)) Implements IGoodsReceivingService.GetReceiptsForPOAsync
-            Dim receipts = New List(Of GoodsReceipt)()
-            Dim receiptLines = New List(Of GoodsReceiptLine)()
-
-            Dim connection = _db.Database.GetDbConnection()
-            Dim wasClosed = (connection.State = System.Data.ConnectionState.Closed)
-
-            If wasClosed Then
-                Await connection.OpenAsync()
-            End If
-
-            Try
-                Using cmd = connection.CreateCommand()
-                    cmd.CommandText = "SELECT Id, ReceiptNumber, PurchaseOrderId FROM Pur_GoodsReceipts WHERE PurchaseOrderId = @poId"
-                    Dim p = cmd.CreateParameter()
-                    p.ParameterName = "@poId"
-                    p.Value = purchaseOrderId
-                    cmd.Parameters.Add(p)
-
-                    Using reader = Await cmd.ExecuteReaderAsync()
-                        While Await reader.ReadAsync()
-                            Dim r = New GoodsReceipt()
-                            r.Id = Convert.ToInt32(reader("Id"))
-                            r.ReceiptNumber = Convert.ToString(reader("ReceiptNumber"))
-                            r.PurchaseOrderId = Convert.ToInt32(reader("PurchaseOrderId"))
-                            r.Lines = New List(Of GoodsReceiptLine)()
-                            receipts.Add(r)
-                        End While
-                    End Using
-                End Using
-
-                If receipts.Any() Then
-                    Dim receiptIds = String.Join(",", receipts.Select(Function(r) r.Id))
-                    Using cmdLines = connection.CreateCommand()
-                        cmdLines.CommandText = $"SELECT Id, GoodsReceiptId, ProductId, UnitCost, ExpiryDate, HasDiscrepancy, QuantityReceived, DiscrepancyNotes, VatClassification, VatAmount, VatableSales FROM Pur_GoodsReceiptLines WHERE GoodsReceiptId IN ({receiptIds})"
-                        Using readerLines = Await cmdLines.ExecuteReaderAsync()
-                            While Await readerLines.ReadAsync()
-                                Dim l = New GoodsReceiptLine()
-                                l.Id = Convert.ToInt32(readerLines("Id"))
-                                l.GoodsReceiptId = Convert.ToInt32(readerLines("GoodsReceiptId"))
-                                l.ProductId = Convert.ToInt32(readerLines("ProductId"))
-                                l.UnitCost = Convert.ToDecimal(readerLines("UnitCost"))
-
-                                If Not readerLines.IsDBNull(readerLines.GetOrdinal("ExpiryDate")) Then
-                                    l.ExpiryDate = Convert.ToDateTime(readerLines("ExpiryDate"))
-                                End If
-
-                                l.HasDiscrepancy = Convert.ToBoolean(readerLines("HasDiscrepancy"))
-                                l.QuantityReceived = Convert.ToInt32(readerLines("QuantityReceived"))
-
-                                If Not readerLines.IsDBNull(readerLines.GetOrdinal("DiscrepancyNotes")) Then
-                                    l.DiscrepancyNotes = Convert.ToString(readerLines("DiscrepancyNotes"))
-                                End If
-
-                                l.VatClassification = DirectCast(Convert.ToInt32(readerLines("VatClassification")), VatTreatment)
-                                l.VatAmount = Convert.ToDecimal(readerLines("VatAmount"))
-                                l.VatableSales = Convert.ToDecimal(readerLines("VatableSales"))
-
-                                Dim parent = receipts.FirstOrDefault(Function(r) r.Id = l.GoodsReceiptId)
-                                If parent IsNot Nothing Then
-                                    parent.Lines.Add(l)
-                                End If
-                            End While
-                        End Using
-                    End Using
-                End If
-            Finally
-                If wasClosed Then
-                    connection.Close()
-                End If
-            End Try
-
-            Return receipts
+            ' Plain EF query. The manual parent/child join this replaced existed only because
+            ' GoodsReceiptConfiguration mapped the relationship without a navigation, which made
+            ' Include(Function(r) r.Lines) join on a shadow GoodsReceiptId1 key. That mapping is
+            ' fixed, so the include now resolves on GoodsReceiptId.
+            Return Await _db.GoodsReceipts.
+                Include(Function(r) r.Lines).
+                Where(Function(r) r.PurchaseOrderId = purchaseOrderId).
+                ToListAsync()
         End Function
     End Class
 

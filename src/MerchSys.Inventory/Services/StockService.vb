@@ -1,7 +1,4 @@
-Imports System.Data
 Imports Microsoft.EntityFrameworkCore
-Imports Microsoft.Extensions.Configuration
-Imports MySqlConnector
 Imports MerchSys.Inventory.Data
 Imports MerchSys.Inventory.Entities
 
@@ -11,11 +8,9 @@ Namespace Services
         Implements IStockService
 
         Private ReadOnly _dbContext As InventoryDbContext
-        Private ReadOnly _configuration As IConfiguration
 
-        Public Sub New(dbContext As InventoryDbContext, configuration As IConfiguration)
+        Public Sub New(dbContext As InventoryDbContext)
             _dbContext = dbContext
-            _configuration = configuration
         End Sub
 
         Public Async Function AddStockBatchAsync(productId As Integer, quantity As Integer, unitCost As Decimal, receiptDate As DateTime, sourcePurchaseOrderId As Integer, expiryDate As DateTime?) As Task Implements IStockService.AddStockBatchAsync
@@ -68,44 +63,28 @@ Namespace Services
         End Function
 
         Public Async Function GetCurrentStockLevelsAsync() As Task(Of List(Of StockLevelDto)) Implements IStockService.GetCurrentStockLevelsAsync
-            Dim resultList = New List(Of StockLevelDto)()
+            ' Plain EF query. The raw SQL this replaced existed only for the "EF Core ToListAsync
+            ' returns an empty list" workaround, retested against MariaDB on 2026-10-12 and not
+            ' reproducible (see AGENTS.md). Soft-deleted rows are excluded by BaseDbContext's
+            ' global query filter, which the raw SQL did by hand.
+            ' The sum is taken over a nullable projection so an empty batch set yields NULL, which
+            ' is then coalesced to zero — a plain Sum over Integer would fault on NULL.
+            Dim rows = Await _dbContext.Products.
+                Select(Function(p) New With {
+                    .ProductId = p.Id,
+                    .ThresholdQuantity = p.MinimumThreshold,
+                    .CurrentQuantity = _dbContext.StockBatches.
+                        Where(Function(b) b.ProductId = p.Id AndAlso b.QuantityRemaining > 0).
+                        Sum(Function(b) CType(b.QuantityRemaining, Integer?))
+                }).
+                ToListAsync()
 
-            Dim connectionString = _configuration.GetSection("Sync")("MariaDbConnection")
-            If String.IsNullOrWhiteSpace(connectionString) Then
-                Throw New InvalidOperationException("MariaDbConnection string is not configured.")
-            End If
-
-            Dim query = "
-                SELECT
-                    p.Id AS ProductId,
-                    COALESCE(SUM(b.QuantityRemaining), 0) AS CurrentQuantity,
-                    p.MinimumThreshold
-                FROM Inv_Products p
-                LEFT JOIN Inv_StockBatches b ON p.Id = b.ProductId AND b.QuantityRemaining > 0 AND b.IsDeleted = 0
-                WHERE p.IsDeleted = 0
-                GROUP BY p.Id, p.MinimumThreshold"
-
-            Using connection = New MySqlConnection(connectionString)
-                Await connection.OpenAsync()
-                Using command = New MySqlCommand(query, connection)
-                    Using reader = Await command.ExecuteReaderAsync()
-                        While Await reader.ReadAsync()
-                            Dim productId = reader.GetInt32("ProductId")
-                            Dim currentQuantity = reader.GetInt32("CurrentQuantity")
-                            Dim minimumThreshold = reader.GetInt32("MinimumThreshold")
-
-                            resultList.Add(New StockLevelDto With {
-                                .ProductId = productId,
-                                .CurrentQuantity = currentQuantity,
-                                .ThresholdQuantity = minimumThreshold,
-                                .IsBelowThreshold = currentQuantity < minimumThreshold
-                            })
-                        End While
-                    End Using
-                End Using
-            End Using
-
-            Return resultList
+            Return rows.Select(Function(r) New StockLevelDto With {
+                    .ProductId = r.ProductId,
+                    .CurrentQuantity = If(r.CurrentQuantity, 0),
+                    .ThresholdQuantity = r.ThresholdQuantity,
+                    .IsBelowThreshold = If(r.CurrentQuantity, 0) < r.ThresholdQuantity
+                }).ToList()
         End Function
     End Class
 

@@ -65,40 +65,17 @@ Namespace Presenters
         End Function
 
         Private Async Function LoadCategoriesAsync() As Task
-            ' Use raw reader for EF Core ToListAsync bug workaround on full entities
-            Dim categories = New List(Of CategoryManagementItem)()
-            ' Provider-agnostic on purpose: EF's connection is a MySql.Data connection, so
-            ' casting it to MySqlConnector's MySqlConnection throws InvalidCastException.
-            Dim connection = _db.Database.GetDbConnection()
-            Dim wasClosed = connection.State = System.Data.ConnectionState.Closed
-            If wasClosed Then
-                Await connection.OpenAsync()
-            End If
-
-            Dim savedEx As Exception = Nothing
-            Try
-                Using cmd = connection.CreateCommand()
-                    cmd.CommandText = "SELECT Id, Name FROM Inv_ProductCategories WHERE IsDeleted = 0"
-                    Using reader = Await cmd.ExecuteReaderAsync()
-                        While Await reader.ReadAsync()
-                            categories.Add(New CategoryManagementItem With {
-                                .Id = reader.GetInt32(0),
-                                .Name = reader.GetString(1)
-                            })
-                        End While
-                    End Using
-                End Using
-            Catch ex As Exception
-                savedEx = ex
-            End Try
-
-            If wasClosed Then
-                Await connection.CloseAsync()
-            End If
-
-            If savedEx IsNot Nothing Then
-                Throw savedEx
-            End If
+            ' Plain EF query. The raw reader this replaced existed only for the
+            ' "EF Core ToListAsync returns an empty list" workaround, which was retested
+            ' against MariaDB on 2026-10-12 and did not reproduce (see AGENTS.md).
+            ' Soft-deleted rows are excluded by BaseDbContext's global query filter, which is
+            ' what the raw query's "WHERE IsDeleted = 0" was doing by hand.
+            Dim categories = Await _db.ProductCategories.
+                Select(Function(c) New CategoryManagementItem With {
+                    .Id = c.Id,
+                    .Name = c.Name
+                }).
+                ToListAsync()
 
             _view.Categories = categories
         End Function
