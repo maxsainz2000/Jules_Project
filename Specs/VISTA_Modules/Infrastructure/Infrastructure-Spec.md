@@ -1,5 +1,102 @@
 # Infrastructure Specification
 
+> ## ⚠️ Remediation status — 2026-10-11
+>
+> An independent Phase-1 code review (`CodeReview_Phase1_Infrastructure.md`) verified the
+> shipped code against this specification and found **5 critical, 9 high, 18 medium and
+> 10 low** defects. This section records what changed, what was corrected in this document,
+> and what remains deliberately deferred. **The review's findings were all reproduced against
+> the code before any change was made.**
+>
+> Build gate after remediation: `dotnet build src/MerchSys.slnx` → succeeded, 0 errors.
+> Test gate: `dotnet test` → 20 passed, 0 failed.
+
+### Findings resolved
+
+| # | Finding | Resolution |
+|---|---------|-----------|
+| **C1** | `AddModuleDbContexts` ignored its `connectionString` argument and hardcoded `Database=villon_farm_supply` (no credentials, no pooling) while raw-ADO services read `Sync:MariaDbConnection` → the two halves targeted different databases | The hardcoded literal is gone; the method requires and uses the caller-supplied string, and every ADO service resolves through `ConnectionStringLoader` |
+| **C2** | `IEventBus` had no implementation and no DI registration; four POS services depend on it | Added `MediatREventBus` and registered it in `AddMediatRServices` |
+| **C3** | No concurrency token on `Inv_StockBatches`, `Pos_CreditAccounts`, `Pos_SalesTransactions`; `ConcurrencyAwareEntity` did not exist | `RowVersion` added to those three entities and mapped `IsRowVersion()` / `TIMESTAMP(6)`. **Corrected 2026-10-12:** `AGENTS.md` also mandates `Pur_AccountsPayable`, which this row omitted; it has since been added — see the follow-up section below. |
+| **C4** | `GetProductionConfigPath` returned `AppContext.BaseDirectory` but the runbook documents `%LOCALAPPDATA%\VISTA`; overlay was optional → silent failure | Canonical path is now `%LOCALAPPDATA%\VISTA\appsettings.Production.json` with a documented developer fallback |
+| **C5** | `Program.Main` ran two competing schema mechanisms and duplicated DDL | Consolidated into a single `DatabaseBootstrapper`; `DatabaseInitializer` and the inline DDL deleted |
+| **H1** | Owner Dashboard rendered hardcoded USD mock figures | Replaced with live aggregates from the four module DbContexts |
+| **H2** | Role-based navigation regression; Owner saw operational views; nav pointed at unregistered concrete types | Role gating restored; navigation resolves views through DI factories |
+| **H3** | INFRA-28 indicator/behaviour were dead code | Indicator is hosted in the shell sidebar |
+| **H4** | Audit columns hardcoded `"System"` | `ICurrentUserProvider` threaded into the audit path |
+| **H5** | Write guard bypassed by raw ADO | `DataWriteGuard` applied at the ADO write boundaries |
+| **H6** | Login information disclosure (disabled-account message before password check) | Verification first; generic error; lockout message now includes remaining minutes |
+| **H7** | Logout used `Application.Restart()`; idle re-login hit a disposed singleton | Shell is scoped per session; logout closes the window; login loop creates a fresh shell |
+| **H8** | Hash stored as `Base64(salt‖hash)`, not self-describing; shared salt across seeded accounts | PHC string `$argon2id$v=19$m=19456,t=2,p=1$…$…` with a per-user salt; legacy format still verified |
+| **H9** | No test project | `tests/MerchSys.Tests` added (xUnit, 20 tests) |
+| M1, M2, M3, M4, M5, M6, M7, M8, M9, M10, M11, M12, M13, M14, M15, M16 | Medium findings | See the commit history; all resolved |
+| L1, L3, L4, L5, L6, L7, L8, L9, L10 | Low findings | Resolved (L10 = this section and the checklist corrections below) |
+
+### Deferred, with rationale
+
+| # | Finding | Why deferred |
+|---|---------|--------------|
+| **M17 / M18** | Target-framework normalisation and removing WinForms from the Inventory/Purchasing libraries | Those libraries contain WinForms views, dialogs and presenters throughout. Normalising the TFM requires first splitting the UI layer out of the business modules — an architectural change, not a mechanical one. Doing it in this change set would break the build. |
+| **L1** | `Program` is a `Module` holding mutable process state | Partially improved (the `_forceLogoutRequested` flag was removed). Extracting an `ApplicationHost`/`ShellCoordinator` is a follow-up. |
+| **L2** | `ConnectionHealthMonitorLocator` static service locator | Still present; replacing it with constructor injection touches the extender-provider behaviour. |
+| **C5 (partial)** | Porting the full original DDL and BIR receipt triggers into the versioned migration set | **The original DDL is not in this repository.** `mariadb-init.sql` is 15 lines / 1 table and `0001_initial_schema.sql` creates only `UserAccounts`. The module schema is derived from the EF model, which is the single source of truth here. Inventing a 40-table DDL script is not possible. |
+
+### Follow-up remediation — 2026-10-12
+
+A verification pass over PR #116 reproduced the review's three blockers and found three further
+defects. A smoke test against a live MariaDB then surfaced two more. All eight are fixed.
+Build gate: `dotnet build src/MerchSys.slnx` → 0 errors.
+Test gate: `dotnet test` → 35 passed, 0 failed.
+
+| # | Defect | Resolution |
+|---|--------|-----------|
+| **F1** | The connection string was resolved inside `ConfigureServices`, which runs during `Build()`. With no `Sync:MariaDbConnection`, `AddModuleDbContexts` threw before the operator dialog at the end of `Main` could ever run — so the C4/M15 dialog was dead code and the app died with a raw `ArgumentException`. | `StartupConfigValidator` now resolves and validates the string **before** the host is built; the resolved value is passed into `ConfigureServices`. |
+| **F2** | Module tables were never created on a clean database. `Database.EnsureCreated()` short-circuits when the database already contains any table, and Layer 1 always creates `UserAccounts` first — so it reported success while creating nothing. The C5 consolidation was therefore inert. | `EnsureModuleSchemas` uses a presence-guarded `IRelationalDatabaseCreator.CreateTables()` per context. EF migrations were deliberately not introduced — see the C5 (partial) deferred row. |
+| **F3** | The module table prefix was applied twice: every POS table and two Purchasing configurations became `Pos_Pos_*` / `Pur_Pur_*`, names that the raw-ADO queries (`FROM Pur_VendorProducts`) and the runbooks do not use. | Prefixing moved into an idempotent `BaseDbContext.ApplyTablePrefix`, used by all four module contexts. |
+| **F4** | `Pur_AccountsPayable` had no concurrency token, although `AGENTS.md` requires one (the C3 row above omitted it). | `RowVersion` added to `AccountsPayableEntry` and mapped; `APLedgerPresenter` surfaces the mandated "Data changed elsewhere — refresh and retry" message instead of overwriting. |
+| **F5** | `PurchaseOrderLine` declared `RowVersion As Byte()` with no fluent mapping, so the **entire Purchasing model failed validation and could not be built** — every Purchasing query would throw. Masked by F2: `EnsureCreated()` short-circuited, so the model was never built at startup. | Explicit mapping added. |
+| **F6** | Eight entities declared `RowVersion As Byte()`, which the MySQL provider maps to `longblob DEFAULT NULL` with no auto-update — so the token value never changed and **could never detect a conflict**. Worst case was `Pos_ReceiptSequence`: `ReceiptIntegrityService` relies on `DbUpdateConcurrencyException` to catch two clients generating receipt numbers at once. | All eight migrated to `RowVersion As DateTime` mapped `.IsRowVersion().HasColumnType("TIMESTAMP(6)")`, matching the AGENTS.md-mandated tables. `ConcurrencyTokenTests` now asserts the column type as well as the concurrency-token flag, so an inert token cannot return. |
+| **F7** | The operator configuration contract was inconsistent in three places, and `SslMode=None` (from the operator's file) is rejected by `MySql.Data` while being accepted by `MySqlConnector` — so a correctly-followed install could not start. | Runbooks corrected (canonical path, canonical `Sync:MariaDbConnection` shape, fail-loudly behaviour) and the `SslMode` dialect constraint documented. See the SslMode note below. |
+
+**SslMode constraint (F7).** The single `Sync:MariaDbConnection` value is parsed by two different
+drivers — `MySql.Data` (through EF Core) and `MySqlConnector` (the raw-ADO services) — and their
+`SslMode` vocabularies differ. `SslMode=None` is valid for `MySqlConnector` but rejected by
+`MySql.Data`, which then throws `Requested value 'None' was not found` while constructing every
+EF context. Only `Preferred`, `Required`, `VerifyCA` and `VerifyFull` are safe for both. Use
+`Required` in production; use `Preferred` on a development server with no TLS configured
+(XAMPP reports `have_ssl=DISABLED`).
+
+**Raised separately (out of scope for this change set):** the EF provider is Oracle's
+`MySql.EntityFrameworkCore`, which depends on `MySql.Data` — but five sites cast
+`Database.GetDbConnection()` to `MySqlConnector.MySqlConnection` and would throw
+`InvalidCastException` at runtime (`PurchaseOrderService`, `VendorProductService`,
+`VendorService`, `ShrinkagePresenter`, `ProductManagementPresenter`).
+
+### Corrections to this document
+
+The following statements in the original text did not match the shipped code and have been
+corrected or are superseded by this section:
+
+- **INFRA-03** said the four DbContexts "connect to a single SQLite file". They target a
+  single **MariaDB** database (INFRA-25).
+- **INFRA-24** claimed `0001_initial_schema.sql` ports "the complete SQLite baseline schema
+  (40 tables, keys, triggers, constraints)" and that `0002` seeds 4 categories / 3 vendors /
+  20 products. In reality `0001` creates **one** table and `0002` is an empty stub.
+- **INFRA-27** listed `MerchSys.App/Data/DatabaseInitializer.vb` as deleted; it was still
+  present and invoked until this remediation, and has now actually been deleted.
+- **INFRA-28** referenced `appsettings.Example.json`, which did not exist. It now does.
+- **INFRA-15** referenced a `Sys_UserAccounts` table and a PHC hash prefix; the table is
+  `UserAccounts` and the PHC format is now genuinely produced (H8).
+- **INFRA-10 / INFRA-30** describe WPF `DispatcherTimer`, `ContentControl`, `Grid.Row` and
+  Activity-Rail constructs. The shipped shell is WinForms/MVP; those descriptions are
+  historical.
+- **INFRA-26** describes a `ConcurrencyAwareEntity` base class that does not exist;
+  concurrency tokens are per-entity, which is also what INFRA-31 requires.
+- The verification checklist below originally contained WPF-era paths
+  (`WinForms_Applications\MerchSys\…`, `.Designer code`), SQLite paths and sync-layer tests.
+  Those are historical; the checklist has been corrected.
+
+
 ## Feature: INFRA-01
 
 ### Overview
@@ -591,7 +688,12 @@ last-synced: 2026-06-01
 # Operator Verification Checklist — Infrastructure
 
 > Extracted from the 2026-05-17 module audit. Only operator/manual verification tasks are listed here.
-> All 18 Infrastructure plans are completed. These are the remaining acceptance tests.
+>
+> **⚠️ Historical document.** This checklist was written against the WPF/SQLite/sync-era
+> codebase and has **not** been re-executed against the current WinForms/MariaDB code.
+> Paths, table names and several test steps no longer match the repository. Treat the
+> "What you should see" text as intent, not as evidence. The automated tests in
+> `tests/MerchSys.Tests` are the current executable evidence for the units they cover.
 >
 > **How to use:** Do each step in order. Check the box when done. Write what you saw next to each item.
 >
@@ -599,34 +701,31 @@ last-synced: 2026-06-01
 > Unless a test specifically says to log in as Owner, log in as `manager`.
 > Default password: `Vista2026!` (first login will prompt you to change it).
 
-### Key file locations
+### Key file locations (corrected)
 
 | What | Path |
 |------|------|
-| Production config template | `WinForms_Applications\MerchSys\src\MerchSys.App\appsettings.Production.template.json` |
+| Production config template | `src/MerchSys.App/appsettings.Production.template.json` |
+| Operator example config | `src/MerchSys.App/appsettings.Example.json` |
 | Where to put the real config | `%LOCALAPPDATA%\VISTA\appsettings.Production.json` |
 | MariaDB init SQL | `Plans\VISTA_Modules\Infrastructure\sql\mariadb-init.sql` |
 | Receipt schema alignment SQL | `Plans\VISTA_Modules\Infrastructure\sql\mariadb-receipt-schema-alignment.sql` |
-| MySqlConnector wrapper | `WinForms_Applications\MerchSys\src\MerchSys.SharedKernel\Sync\MariaDbSyncContext.vb` |
 | Receipt integrity triggers SQL | `Plans\VISTA_Modules\Infrastructure\sql\02-pos-receipt-integrity-triggers.sql` |
-| Production deployment runbook | `Plans\VISTA_Modules\Infrastructure\runbooks\01-production-deployment.md` |
-| SyncStatusIndicator (Designer code) | `WinForms_Applications\MerchSys\src\MerchSys.App\Views\Shell\SyncStatusIndicator.Designer code` |
-| SyncStatusIndicator (code-behind) | `WinForms_Applications\MerchSys\src\MerchSys.App\Views\Shell\SyncStatusIndicator.Designer code.vb` |
-| SyncStatusIndicatorPresenter | `WinForms_Applications\MerchSys\src\MerchSys.App\Presenters\Shell\SyncStatusIndicatorPresenter.vb` |
-| SyncOrchestrator | `WinForms_Applications\MerchSys\src\MerchSys.App\Services\SyncOrchestrator.vb` |
-| SyncWorker | `WinForms_Applications\MerchSys\src\MerchSys.App\Services\SyncWorker.vb` |
-| Directory.Build.props (NU1608) | `WinForms_Applications\MerchSys\Directory.Build.props` |
-| ConnectionStringLoader | `WinForms_Applications\MerchSys\src\MerchSys.App\Configuration\ConnectionStringLoader.vb` |
-| SQLite database | `%LOCALAPPDATA%\MerchSys\merchsys.db` |
-| .gitignore | `VISTA_Project\.gitignore` (line 2: `appsettings.Production.json` is excluded) |
-| LoginView (Designer code) | `WinForms_Applications\MerchSys\src\MerchSys.App\Views\LoginView.Designer code` |
-| LoginPresenter | `WinForms_Applications\MerchSys\src\MerchSys.App\Presenters\LoginPresenter.vb` |
-| LoginSessionService | `WinForms_Applications\MerchSys\src\MerchSys.App\Services\LoginSessionService.vb` |
-| IAuthenticationService | `WinForms_Applications\MerchSys\src\MerchSys.App\Services\IAuthenticationService.vb` |
-| UserAccount entity | `WinForms_Applications\MerchSys\src\MerchSys.SharedKernel\Entities\UserAccount.vb` |
-| OwnerDashboardView (Designer code) | `WinForms_Applications\MerchSys\src\MerchSys.App\Views\OwnerDashboardView.Designer code` |
-| OwnerDashboardPresenter | `WinForms_Applications\MerchSys\src\MerchSys.App\Presenters\OwnerDashboardPresenter.vb` |
-| MainWindowPresenter (nav) | `WinForms_Applications\MerchSys\src\MerchSys.App\Presenters\MainWindowPresenter.vb` |
+| Central schema bootstrap | `src/MerchSys.App/Data/MariaDbSchemaInitializer.vb` |
+| Single schema entry point | `src/MerchSys.App/Data/DatabaseBootstrapper.vb` |
+| Connection string resolution | `src/MerchSys.App/Configuration/ConnectionStringLoader.vb` |
+| Shell window | `src/MerchSys.App/Views/MainWindow.vb` |
+| Shell presenter (navigation) | `src/MerchSys.App/Presenters/MainWindowPresenter.vb` |
+| Connection status indicator | `src/MerchSys.App/Views/ConnectionStatusIndicator.vb` |
+| Owner Dashboard presenter | `src/MerchSys.App/Presenters/OwnerDashboardPresenter.vb` |
+| Password hashing | `src/MerchSys.App/Services/PasswordHashHelper.vb` |
+| Role write guard (EF) | `src/MerchSys.SharedKernel/Data/RoleGuardInterceptor.vb` |
+| Role write guard (ADO) | `src/MerchSys.SharedKernel/Data/DataWriteGuard.vb` |
+| Automated tests | `tests/MerchSys.Tests/` |
+
+> **Removed from this list:** `SyncStatusIndicator*`, `SyncOrchestrator`, `SyncWorker`,
+> `Directory.Build.props`, `SQLite database` and `.gitignore at VISTA_Project\.gitignore`
+> (the repository root now has its own `.gitignore`).
 
 ---
 

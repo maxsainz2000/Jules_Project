@@ -3,6 +3,7 @@
   <PropertyGroup>
     <RootNamespace>MerchSys.SharedKernel</RootNamespace>
     <TargetFramework>net10.0</TargetFramework>
+    <OptionStrict>On</OptionStrict>
   </PropertyGroup>
 
   <ItemGroup>

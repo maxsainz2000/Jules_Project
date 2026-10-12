@@ -1,19 +1,22 @@
 Imports MerchSys.SharedKernel.Interfaces
 Imports MerchSys.App.Views
 Imports MerchSys.App.Services
+Imports Microsoft.Extensions.Logging
 
 Namespace Presenters
     Public Class LoginPresenter
         Private ReadOnly _view As ILoginView
         Private ReadOnly _authService As IAuthenticationService
         Private ReadOnly _sessionService As LoginSessionService
+        Private ReadOnly _logger As ILogger(Of LoginPresenter)
 
         Public Event LoginSucceeded As EventHandler
 
-        Public Sub New(view As ILoginView, authService As IAuthenticationService, sessionService As LoginSessionService)
+        Public Sub New(view As ILoginView, authService As IAuthenticationService, sessionService As LoginSessionService, logger As ILogger(Of LoginPresenter))
             _view = view
             _authService = authService
             _sessionService = sessionService
+            _logger = logger
 
             AddHandler _view.LoginClicked, AddressOf OnLoginClicked
             AddHandler _view.ChangePasswordClicked, AddressOf OnChangePasswordClicked
@@ -38,6 +41,7 @@ Namespace Presenters
                     _view.ShowError(result.ErrorMessage)
                 End If
             Catch ex As Exception
+                _logger.LogError(ex, "Unexpected error during login.")
                 _view.ShowError("An unexpected error occurred during login.")
             Finally
                 _view.EnableControls(True)
@@ -76,6 +80,7 @@ Namespace Presenters
                     _view.ShowError(result.ErrorMessage)
                 End If
             Catch ex As Exception
+                _logger.LogError(ex, "Unexpected error while changing password.")
                 _view.ShowError("An unexpected error occurred while changing password.")
             Finally
                 _view.EnableControls(True)

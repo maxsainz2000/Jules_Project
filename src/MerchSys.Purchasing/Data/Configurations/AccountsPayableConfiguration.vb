@@ -12,6 +12,11 @@ Namespace Data.Configurations
             builder.Property(Function(e) e.TotalAmount).HasPrecision(18, 2)
             builder.Property(Function(e) e.AmountPaid).HasPrecision(18, 2)
 
+            ' Optimistic concurrency token on the mutable paid amount (AGENTS.md).
+            builder.Property(Function(e) e.RowVersion) _
+                .IsRowVersion() _
+                .HasColumnType("TIMESTAMP(6)")
+
             builder.HasIndex(Function(e) New With { e.VendorId, e.IsPaid })
         End Sub
     End Class

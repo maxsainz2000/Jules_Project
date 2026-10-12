@@ -10,6 +10,6 @@ Namespace Entities
         Public Property Quantity As Integer
         Public Property UnitCost As Decimal
         Public Property LineTotal As Decimal
-        Public Property RowVersion As Byte()
+        Public Property RowVersion As DateTime
     End Class
 End Namespace

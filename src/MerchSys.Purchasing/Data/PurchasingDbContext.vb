@@ -19,17 +19,15 @@ Namespace Data
         Public Property PriceChangeAlerts As DbSet(Of PriceChangeAlert)
         Public Property VendorProducts As DbSet(Of VendorProduct)
 
-        Public Sub New(options As DbContextOptions(Of PurchasingDbContext))
-            MyBase.New(options)
+        Public Sub New(options As DbContextOptions(Of PurchasingDbContext), Optional currentUserProvider As MerchSys.SharedKernel.Interfaces.ICurrentUserProvider = Nothing)
+            MyBase.New(options, currentUserProvider)
         End Sub
 
         Protected Overrides Sub OnModelCreating(modelBuilder As ModelBuilder)
             MyBase.OnModelCreating(modelBuilder)
             modelBuilder.ApplyConfigurationsFromAssembly(GetType(PurchasingDbContext).Assembly)
 
-            For Each entityType In modelBuilder.Model.GetEntityTypes()
-                entityType.SetTableName("Pur_" & entityType.GetTableName())
-            Next
+            ApplyTablePrefix(modelBuilder, "Pur_")
 
             PurchasingSeedData.Seed(modelBuilder)
         End Sub

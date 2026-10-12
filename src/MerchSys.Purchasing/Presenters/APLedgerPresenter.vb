@@ -9,6 +9,7 @@ Imports MerchSys.Purchasing.Views.Dialogs
 Imports MerchSys.SharedKernel.Interfaces
 Imports MerchSys.SharedKernel.Enums
 Imports Microsoft.Extensions.DependencyInjection
+Imports Microsoft.EntityFrameworkCore
 
 Namespace Presenters
     Public Class APLedgerRow
@@ -154,7 +155,20 @@ Namespace Presenters
                         Return
                     End If
 
-                    Await _apService.RecordPaymentAsync(selectedId, amount)
+                    Dim concurrencyConflict As Boolean = False
+                    Try
+                        Await _apService.RecordPaymentAsync(selectedId, amount)
+                    Catch ex As DbUpdateConcurrencyException
+                        concurrencyConflict = True
+                    End Try
+
+                    ' Never silently overwrite: the balance changed on another client between
+                    ' load and save, so the user must refresh and retry (AGENTS.md).
+                    If concurrencyConflict Then
+                        MessageBox.Show("Data changed elsewhere — refresh and retry.",
+                                        "Concurrency Conflict", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                    End If
+
                     Await LoadDataAsync()
                 End If
             End Using

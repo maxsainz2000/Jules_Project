@@ -1,4 +1,5 @@
 Imports System.Data
+Imports MerchSys.SharedKernel.Data
 Imports MerchSys.SharedKernel.Entities
 Imports MerchSys.SharedKernel.Enums
 Imports MerchSys.SharedKernel.Interfaces
@@ -16,7 +17,9 @@ Namespace Services
         Private ReadOnly _writeContextScope As IWriteContextScope
 
         Public Sub New(configuration As IConfiguration, logger As ILogger(Of AuthenticationService), sessionService As ISessionService, writeContextScope As IWriteContextScope)
-            _connectionString = configuration.GetSection("Sync")("MariaDbConnection")
+            ' Use the single resolved, pooling-enabled connection string so authentication
+            ' hits exactly the same database as the EF contexts.
+            _connectionString = MerchSys.App.Configuration.ConnectionStringLoader.GetMariaDbConnectionString(configuration, logger)
             _logger = logger
             _sessionService = sessionService
             _writeContextScope = writeContextScope
@@ -37,6 +40,10 @@ Namespace Services
             }
         End Function
 
+        Private Const GenericCredentialsError As String = "Invalid username or password."
+        Private Const MaxFailedAttempts As Integer = 5
+        Private Const LockoutMinutes As Integer = 15
+
         Public Async Function AuthenticateAsync(username As String, password As String) As Task(Of AuthenticationResult) Implements IAuthenticationService.AuthenticateAsync
             If String.IsNullOrWhiteSpace(username) OrElse String.IsNullOrWhiteSpace(password) Then
                 Return New AuthenticationResult With {.Success = False, .ErrorMessage = "Username and password are required."}
@@ -56,42 +63,27 @@ Namespace Services
                         End Using
                     End Using
 
+                    ' Never reveal whether an account exists (OWASP DA2 / verification Test 15).
                     If user Is Nothing Then
-                        Return New AuthenticationResult With {.Success = False, .ErrorMessage = "Invalid username or password."}
+                        Return New AuthenticationResult With {.Success = False, .ErrorMessage = GenericCredentialsError}
                     End If
 
-                    If Not user.IsActive Then
-                        Return New AuthenticationResult With {.Success = False, .ErrorMessage = "Account is disabled."}
-                    End If
-
+                    ' Lockout is evaluated before password verification so that even a correct
+                    ' password during lockout reports the remaining time (verification Test 13).
                     If user.LockedUntil.HasValue AndAlso user.LockedUntil.Value > DateTime.UtcNow Then
-                        Return New AuthenticationResult With {.Success = False, .ErrorMessage = "Account is locked. Please try again later."}
+                        Dim minutesLeft = Math.Max(1, CInt(Math.Ceiling((user.LockedUntil.Value - DateTime.UtcNow).TotalMinutes)))
+                        Return New AuthenticationResult With {.Success = False, .ErrorMessage = $"Account locked. Try again in {minutesLeft} minute(s)."}
                     End If
 
-                    If PasswordHashHelper.VerifyPassword(password, user.PasswordHash) Then
-                        If user.FailedLoginAttempts > 0 OrElse user.LockedUntil.HasValue Then
-                            Using scope = _writeContextScope.Enter(WriteContextKind.System)
-                                Using updateCmd As New MySqlCommand("UPDATE UserAccounts SET FailedLoginAttempts = 0, LockedUntil = NULL WHERE Id = @id", conn)
-                                    updateCmd.Parameters.AddWithValue("@id", user.Id)
-                                    Await updateCmd.ExecuteNonQueryAsync()
-                                End Using
-                            End Using
-                        End If
-
-                        Dim requiresChange = Not user.LastPasswordChangeAt.HasValue
-                        Return New AuthenticationResult With {
-                            .Success = True,
-                            .User = user,
-                            .RequiresPasswordChange = requiresChange
-                        }
-                    Else
+                    If Not PasswordHashHelper.VerifyPassword(password, user.PasswordHash) Then
                         Dim attempts = user.FailedLoginAttempts + 1
                         Dim lockedUntil As DateTime? = Nothing
-                        If attempts >= 5 Then
-                            lockedUntil = DateTime.UtcNow.AddMinutes(15)
+                        If attempts >= MaxFailedAttempts Then
+                            lockedUntil = DateTime.UtcNow.AddMinutes(LockoutMinutes)
                         End If
 
                         Using scope = _writeContextScope.Enter(WriteContextKind.System)
+                            DataWriteGuard.EnsureCanWrite(_sessionService, _writeContextScope, "failed login attempt counter")
                             Using updateCmd As New MySqlCommand("UPDATE UserAccounts SET FailedLoginAttempts = @attempts, LockedUntil = @lockedUntil WHERE Id = @id", conn)
                                 updateCmd.Parameters.AddWithValue("@attempts", attempts)
                                 updateCmd.Parameters.AddWithValue("@lockedUntil", If(lockedUntil.HasValue, lockedUntil.Value, CObj(DBNull.Value)))
@@ -100,8 +92,34 @@ Namespace Services
                             End Using
                         End Using
 
-                        Return New AuthenticationResult With {.Success = False, .ErrorMessage = "Invalid username or password."}
+                        If lockedUntil.HasValue Then
+                            Return New AuthenticationResult With {.Success = False, .ErrorMessage = $"Account locked. Try again in {LockoutMinutes} minute(s)."}
+                        End If
+                        Return New AuthenticationResult With {.Success = False, .ErrorMessage = GenericCredentialsError}
                     End If
+
+                    ' Password is correct. Only now is it safe to reject a disabled account
+                    ' without leaking that the account is disabled (verification Test 15).
+                    If Not user.IsActive Then
+                        Return New AuthenticationResult With {.Success = False, .ErrorMessage = GenericCredentialsError}
+                    End If
+
+                    If user.FailedLoginAttempts > 0 OrElse user.LockedUntil.HasValue Then
+                        Using scope = _writeContextScope.Enter(WriteContextKind.System)
+                            DataWriteGuard.EnsureCanWrite(_sessionService, _writeContextScope, "login attempt counter reset")
+                            Using updateCmd As New MySqlCommand("UPDATE UserAccounts SET FailedLoginAttempts = 0, LockedUntil = NULL WHERE Id = @id", conn)
+                                updateCmd.Parameters.AddWithValue("@id", user.Id)
+                                Await updateCmd.ExecuteNonQueryAsync()
+                            End Using
+                        End Using
+                    End If
+
+                    Dim requiresChange = Not user.LastPasswordChangeAt.HasValue
+                    Return New AuthenticationResult With {
+                        .Success = True,
+                        .User = user,
+                        .RequiresPasswordChange = requiresChange
+                    }
                 End Using
             Catch ex As MySqlException
                 _logger.LogError(ex, "Database connection error during authentication")
@@ -139,6 +157,7 @@ Namespace Services
 
                 Dim hash = PasswordHashHelper.HashPassword(newPassword)
                 Using scope = _writeContextScope.Enter(WriteContextKind.AuthSelfService)
+                    DataWriteGuard.EnsureCanWrite(_sessionService, _writeContextScope, "password change")
                     Using conn As New MySqlConnection(_connectionString)
                         Await conn.OpenAsync()
                         Using cmd As New MySqlCommand("UPDATE UserAccounts SET PasswordHash = @hash, LastPasswordChangeAt = @now, ModifiedAt = @now WHERE Id = @id", conn)

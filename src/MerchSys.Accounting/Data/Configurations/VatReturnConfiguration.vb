@@ -15,7 +15,7 @@ Namespace Data.Configurations
             builder.Property(Function(x) x.InputVatTotal).HasPrecision(18, 2)
             builder.Property(Function(x) x.NetVatPayable).HasPrecision(18, 2)
 
-            builder.Property(Function(x) x.RowVersion).IsRowVersion()
+            builder.Property(Function(x) x.RowVersion).IsRowVersion().HasColumnType("TIMESTAMP(6)")
 
             builder.HasMany(Function(x) x.Lines).
                     WithOne(Function(x) x.VatReturn).

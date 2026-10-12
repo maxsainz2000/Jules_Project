@@ -10,9 +10,22 @@ Namespace Data
     Public MustInherit Class BaseDbContext
         Inherits DbContext
 
-        Public Sub New(options As DbContextOptions)
+        Private ReadOnly _currentUserProvider As ICurrentUserProvider
+
+        Public Sub New(options As DbContextOptions, Optional currentUserProvider As ICurrentUserProvider = Nothing)
             MyBase.New(options)
+            _currentUserProvider = currentUserProvider
         End Sub
+
+        ''' <summary>
+        ''' Identity stamped into audit columns. Falls back to "System" only when there is no
+        ''' active session (e.g. startup seeding), so real user changes record who made them (H4).
+        ''' </summary>
+        Private Function ResolveActor() As String
+            Dim name = If(_currentUserProvider IsNot Nothing, _currentUserProvider.Username, Nothing)
+            If String.IsNullOrWhiteSpace(name) Then Return "System"
+            Return name
+        End Function
 
         Protected Overrides Sub ConfigureConventions(configurationBuilder As ModelConfigurationBuilder)
             MyBase.ConfigureConventions(configurationBuilder)
@@ -34,15 +47,51 @@ Namespace Data
             ApplySecondaryIndexes(modelBuilder)
         End Sub
 
+        ''' <summary>
+        ''' Applies the module table prefix to every mapped entity, skipping any entity whose
+        ''' table name already carries the prefix. Call this from <c>OnModelCreating</c>
+        ''' <b>after</b> <c>ApplyConfigurationsFromAssembly</c>, because the configurations are
+        ''' what declare the base table names.
+        '''
+        ''' The idempotence matters: a blanket prefix turns a configuration that already declares
+        ''' <c>ToTable("Pos_SalesTransactions")</c> into <c>Pos_Pos_SalesTransactions</c>, which no
+        ''' longer matches the names the raw-ADO queries and the operator runbooks use.
+        ''' </summary>
+        Protected Shared Sub ApplyTablePrefix(modelBuilder As ModelBuilder, prefix As String)
+            For Each entityType In modelBuilder.Model.GetEntityTypes()
+                Dim currentName = entityType.GetTableName()
+
+                ' Owned, view-mapped and keyless types have no table name of their own.
+                If currentName Is Nothing Then Continue For
+
+                If Not currentName.StartsWith(prefix, StringComparison.Ordinal) Then
+                    entityType.SetTableName(prefix & currentName)
+                End If
+            Next
+        End Sub
+
         Private Sub ApplySecondaryIndexes(modelBuilder As ModelBuilder)
             For Each entityType In modelBuilder.Model.GetEntityTypes()
-                If GetType(IAuditable).IsAssignableFrom(entityType.ClrType) Then
-                    Dim idProp = entityType.FindProperty("Id")
-                    Dim createdAtProp = entityType.FindProperty(NameOf(IAuditable.CreatedAt))
-                    If idProp IsNot Nothing AndAlso createdAtProp IsNot Nothing Then
-                        entityType.AddIndex({createdAtProp, idProp})
-                    End If
-                End If
+                ' Only large, paginated transactional tables need the (CreatedAt, Id) seek
+                ' index. Applying it to every auditable entity (including lookup tables)
+                ' wasted space and could duplicate configured indexes (M12).
+                If Not GetType(IPaginatedEntity).IsAssignableFrom(entityType.ClrType) Then Continue For
+
+                Dim idProp = entityType.FindProperty("Id")
+                Dim createdAtProp = entityType.FindProperty(NameOf(IAuditable.CreatedAt))
+                If idProp Is Nothing OrElse createdAtProp Is Nothing Then Continue For
+
+                ' Skip if an index covering (CreatedAt, Id) is already declared.
+                Dim alreadyIndexed = entityType.GetIndexes().Any(
+                    Function(ix)
+                        Dim props = ix.Properties
+                        Return props.Count = 2 AndAlso
+                               props(0).Name = NameOf(IAuditable.CreatedAt) AndAlso
+                               props(1).Name = "Id"
+                    End Function)
+                If alreadyIndexed Then Continue For
+
+                entityType.AddIndex({createdAtProp, idProp})
             Next
         End Sub
 
@@ -60,16 +109,17 @@ Namespace Data
 
         Public Overrides Function SaveChangesAsync(Optional cancellationToken As CancellationToken = Nothing) As Task(Of Integer)
             Dim entries = ChangeTracker.Entries()
+            Dim actor = ResolveActor()
 
             For Each dbEntry In entries
                 If TypeOf dbEntry.Entity Is IAuditable Then
                     Dim auditable = DirectCast(dbEntry.Entity, IAuditable)
                     If dbEntry.State = EntityState.Added Then
                         auditable.CreatedAt = DateTime.UtcNow
-                        auditable.CreatedBy = "System" ' Or fetch from some current user service
+                        auditable.CreatedBy = actor
                     ElseIf dbEntry.State = EntityState.Modified Then
                         auditable.ModifiedAt = DateTime.UtcNow
-                        auditable.ModifiedBy = "System"
+                        auditable.ModifiedBy = actor
                     End If
                 End If
 

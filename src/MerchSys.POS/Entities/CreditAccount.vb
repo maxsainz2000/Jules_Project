@@ -32,5 +32,11 @@ Namespace Entities
         ''' Gets or sets the last transaction date.
         ''' </summary>
         Public Property LastTransactionDate As DateTime?
+
+        ''' <summary>
+        ''' Optimistic concurrency token (mapped to MariaDB <c>TIMESTAMP(6)</c>).
+        ''' Guards concurrent balance mutations across clients (AGENTS.md).
+        ''' </summary>
+        Public Property RowVersion As DateTime
     End Class
 End Namespace

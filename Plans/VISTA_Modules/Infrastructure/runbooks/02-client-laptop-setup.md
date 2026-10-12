@@ -16,15 +16,12 @@ This runbook outlines the steps to configure a Client Laptop to run the VISTA ap
 ## 3. appsettings.json Configuration
 - Create the `%LOCALAPPDATA%\VISTA\` directory.
 - Copy `appsettings.Production.template.json` from the application directory to `%LOCALAPPDATA%\VISTA\appsettings.Production.json`.
-- Edit `%LOCALAPPDATA%\VISTA\appsettings.Production.json`:
+- Edit `%LOCALAPPDATA%\VISTA\appsettings.Production.json`. The connection string lives under
+  `Sync:MariaDbConnection`; this exact shape is what the application reads:
   ```json
   {
-    "Connection": {
-      "Host": "192.168.1.100",
-      "Database": "merchsys_central",
-      "User": "merchsys_sync",
-      "Password": "<your_database_password>",
-      "SslMode": "Required"
+    "Sync": {
+      "MariaDbConnection": "Server=192.168.1.100;Port=3306;Database=merchsys_central;Uid=merchsys_sync;Pwd=<your_database_password>;SslMode=Required;"
     },
     "Client": {
       "WorkstationName": "POS-01"
@@ -32,6 +29,17 @@ This runbook outlines the steps to configure a Client Laptop to run the VISTA ap
   }
   ```
   *(Replace `192.168.1.100` with the actual Host IP, update the password, and set a unique WorkstationName).*
+
+  Do not invent a different shape (for example a `Connection:` or `MariaDb:` object). The
+  application reads **only** `Sync:MariaDbConnection`; if that key is absent it cannot resolve
+  a connection string, shows a "Production Configuration Not Found" dialog and exits.
+
+  Keep `SslMode` to `Required` in production. The same connection string is parsed by two
+  different drivers — `MySql.Data` (via EF Core) and `MySqlConnector` (the raw-ADO services) —
+  and only `Preferred`, `Required`, `VerifyCA` and `VerifyFull` are valid for both. `SslMode=None`
+  is accepted by `MySqlConnector` but rejected by `MySql.Data`, so every EF context then fails
+  to construct with `Requested value 'None' was not found`. If a local development server has no
+  TLS configured, use `SslMode=Preferred`.
 
 ## 4. First Launch
 - Double-click the VISTA desktop shortcut.

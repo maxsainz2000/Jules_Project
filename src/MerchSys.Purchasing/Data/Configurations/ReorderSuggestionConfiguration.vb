@@ -13,7 +13,7 @@ Namespace Data.Configurations
 
             builder.HasIndex(Function(e) New With {e.ProductId, e.Status})
 
-            builder.Property(Function(e) e.RowVersion).IsRowVersion()
+            builder.Property(Function(e) e.RowVersion).IsRowVersion().HasColumnType("TIMESTAMP(6)")
         End Sub
     End Class
 End Namespace

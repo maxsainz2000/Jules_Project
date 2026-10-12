@@ -1,6 +1,6 @@
 CREATE TABLE `UserAccounts` (
     `Id` INT AUTO_INCREMENT PRIMARY KEY,
-    `Username` VARCHAR(255) NOT NULL UNIQUE,
+    `Username` VARCHAR(255) COLLATE utf8mb4_general_ci NOT NULL UNIQUE,
     `PasswordHash` VARCHAR(255) NOT NULL,
     `Role` INT NOT NULL,
     `IsActive` BOOLEAN NOT NULL DEFAULT 1,

@@ -6,6 +6,7 @@ Namespace Entities
     ''' </summary>
     Public Partial Class SalesTransaction
         Inherits SoftDeletableEntity
+        Implements MerchSys.SharedKernel.Interfaces.IPaginatedEntity
 
         ''' <summary>
         ''' Gets or sets the transaction number.
@@ -52,5 +53,10 @@ Namespace Entities
         Public Property ZeroRatedSales As Decimal
         Public Property VatRateSnapshot As Decimal
         Public Property IsVatRegisteredSnapshot As Boolean
+
+        ''' <summary>
+        ''' Optimistic concurrency token (mapped to MariaDB <c>TIMESTAMP(6)</c>).
+        ''' </summary>
+        Public Property RowVersion As DateTime
     End Class
 End Namespace

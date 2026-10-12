@@ -23,6 +23,11 @@ Namespace Data.Configurations
             builder.Property(Function(e) e.CurrentBalance) _
                 .HasPrecision(18, 2)
 
+            ' Optimistic concurrency token on the mutable balance (AGENTS.md).
+            builder.Property(Function(e) e.RowVersion) _
+                .IsRowVersion() _
+                .HasColumnType("TIMESTAMP(6)")
+
             builder.HasIndex(Function(e) e.IsBlocked)
 
             ' Seed three sample accounts

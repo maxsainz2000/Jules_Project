@@ -18,7 +18,7 @@ Namespace Data.Configurations
                 HasForeignKey(Function(e) e.PreferredVendorId).
                 OnDelete(DeleteBehavior.SetNull)
 
-            builder.Property(Function(e) e.RowVersion).IsRowVersion()
+            builder.Property(Function(e) e.RowVersion).IsRowVersion().HasColumnType("TIMESTAMP(6)")
         End Sub
     End Class
 End Namespace

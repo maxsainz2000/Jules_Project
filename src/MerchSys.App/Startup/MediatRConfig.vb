@@ -22,6 +22,10 @@ Namespace Startup
                                         GetType(AccountingDbContext).Assembly
                                     )
                                 End Sub)
+
+            ' INFRA-04 defined the IEventBus abstraction; it must have a concrete implementation
+            ' or every POS service that depends on it fails to resolve at runtime.
+            services.AddScoped(Of IEventBus, MediatREventBus)()
         End Sub
 
     End Module

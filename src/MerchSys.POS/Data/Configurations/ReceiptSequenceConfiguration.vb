@@ -15,7 +15,8 @@ Namespace Data.Configurations
 
             builder.Property(Function(rs) rs.RowVersion).
                 IsRowVersion().
-                IsConcurrencyToken()
+                IsConcurrencyToken().
+                HasColumnType("TIMESTAMP(6)")
         End Sub
     End Class
 End Namespace

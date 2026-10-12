@@ -5,7 +5,17 @@ Namespace Views
     Public Interface IMainWindowView
         Sub RenderView(view As UserControl)
         Sub AddNavigationButtons(items As List(Of NavigationItem))
-        Event NavigationRequested As EventHandler(Of Type)
+
+        ''' <summary>Hosts the connection status indicator in the shell.</summary>
+        Sub AddStatusIndicator(indicator As Control)
+
+        ''' <summary>Closes the shell window (used on logout).</summary>
+        Sub CloseWindow()
+
+        ''' <summary>Sidebar header text showing the signed-in user and role.</summary>
+        Property UserIdentityText As String
+
+        Event NavigationRequested As EventHandler(Of NavigationItem)
         Event Load As EventHandler
         Event LogoutRequested As EventHandler
     End Interface

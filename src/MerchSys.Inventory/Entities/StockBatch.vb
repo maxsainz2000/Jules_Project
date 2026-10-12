@@ -12,6 +12,12 @@ Namespace Entities
         Public Property ExpiryDate As DateTime?
         Public Property SourcePurchaseOrderId As Integer
 
+        ''' <summary>
+        ''' Optimistic concurrency token (mapped to MariaDB <c>TIMESTAMP(6)</c>).
+        ''' Guards concurrent decrements of <see cref="QuantityRemaining"/> across clients.
+        ''' </summary>
+        Public Property RowVersion As DateTime
+
         Public ReadOnly Property IsExpired As Boolean
             Get
                 If Not ExpiryDate.HasValue Then Return False

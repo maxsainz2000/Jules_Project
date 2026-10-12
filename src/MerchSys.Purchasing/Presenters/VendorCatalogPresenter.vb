@@ -66,8 +66,9 @@ Namespace Presenters
         End Function
 
         Private Function IsManager() As Boolean
-            Return _sessionService.CurrentUserRole = UserRole.Manager OrElse
-                   _sessionService.CurrentUserRole = UserRole.Developer
+            Dim role = _sessionService.CurrentUserRole
+            Return role.HasValue AndAlso
+                   (role.Value = UserRole.Manager OrElse role.Value = UserRole.Developer)
         End Function
 
         Private Async Function AddAsync() As Task

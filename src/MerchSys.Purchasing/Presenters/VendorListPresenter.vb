@@ -71,8 +71,10 @@ Namespace Presenters
         End Function
 
         Private Function IsManager() As Boolean
-            Return _sessionService.CurrentUserRole = MerchSys.SharedKernel.Enums.UserRole.Manager OrElse
-                   _sessionService.CurrentUserRole = MerchSys.SharedKernel.Enums.UserRole.Developer
+            Dim role = _sessionService.CurrentUserRole
+            Return role.HasValue AndAlso
+                   (role.Value = MerchSys.SharedKernel.Enums.UserRole.Manager OrElse
+                    role.Value = MerchSys.SharedKernel.Enums.UserRole.Developer)
         End Function
 
         Public Sub ToggleEditor(isOpen As Boolean)

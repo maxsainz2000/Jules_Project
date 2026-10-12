@@ -4,14 +4,21 @@ Imports System.Drawing
 Namespace Views
     Public Partial Class ConnectionStatusIndicator
         Inherits UserControl
+        Implements IConnectionStatusView
 
-        Public Event RetryClicked As EventHandler
+        Public Event RetryClicked As EventHandler Implements IConnectionStatusView.RetryClicked
 
         Public Sub New()
             InitializeComponent()
         End Sub
 
-        Public Sub SetState(statusText As String, indicatorColor As Color, isRetryVisible As Boolean)
+        Public ReadOnly Property Control As Control Implements IConnectionStatusView.Control
+            Get
+                Return Me
+            End Get
+        End Property
+
+        Public Sub SetState(statusText As String, indicatorColor As Color, isRetryVisible As Boolean) Implements IConnectionStatusView.SetState
             If Me.InvokeRequired Then
                 Me.Invoke(Sub() SetState(statusText, indicatorColor, isRetryVisible))
                 Return

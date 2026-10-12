@@ -3,6 +3,7 @@ Imports System.Windows.Forms
 Imports Microsoft.Extensions.DependencyInjection
 Imports Microsoft.Extensions.Hosting
 Imports Microsoft.Extensions.Configuration
+Imports Microsoft.Extensions.Logging
 Imports MerchSys.App.Configuration
 Imports MerchSys.App.Services
 Imports MerchSys.App.Views
@@ -26,6 +27,25 @@ Friend Module Program
         Application.SetHighDpiMode(HighDpiMode.SystemAware)
         Application.EnableVisualStyles()
         Application.SetCompatibleTextRenderingDefault(False)
+
+        ' Resolve and validate the production connection string BEFORE the host is built.
+        ' ConfigureServices runs inside Build(), and AddModuleDbContexts rejects an empty
+        ' connection string — so validating only afterwards would surface a raw
+        ' ArgumentException instead of the operator dialog (C4/M15).
+        Dim bootstrapConfig = New ConfigurationBuilder().
+            SetBasePath(AppContext.BaseDirectory).
+            AddJsonFile("appsettings.json", optional:=True, reloadOnChange:=False).
+            AddEnvironmentVariables().
+            AddCommandLine(args).
+            AddProductionOverlay().
+            Build()
+
+        Dim connString = ConnectionStringLoader.GetMariaDbConnectionString(bootstrapConfig, Nothing)
+        Dim configError = StartupConfigValidator.ValidateConnectionString(connString)
+        If configError IsNot Nothing Then
+            MessageBox.Show(configError, "Production Configuration Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Environment.Exit(1)
+        End If
 
         Dim host As IHost = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args).
             ConfigureAppConfiguration(Sub(context, builder)
@@ -51,6 +71,8 @@ Friend Module Program
 
                                   services.AddSingleton(Of LoginSessionService)()
                                   services.AddSingleton(Of ISessionService)(Function(sp) sp.GetRequiredService(Of LoginSessionService)())
+                                  ' Supplies the audit identity to the data layer (H4).
+                                  services.AddSingleton(Of ICurrentUserProvider, SessionCurrentUserProvider)()
 
                                   services.AddSingleton(Of IWriteContextScope, MerchSys.SharedKernel.Data.WriteContextScope)()
                                   services.AddScoped(Of MerchSys.SharedKernel.Data.RoleGuardInterceptor)()
@@ -61,18 +83,23 @@ Friend Module Program
                                   services.AddScoped(Of ILoginView, LoginView)()
                                   services.AddScoped(Of LoginPresenter)()
                                   
-                                  ' Shell infrastructure
-                                  services.AddSingleton(Of MainWindow)()
-                                  services.AddSingleton(Of IMainWindowView)(Function(sp) sp.GetRequiredService(Of MainWindow)())
-                                  services.AddSingleton(Of MainWindowPresenter)()
+                                  ' Shell infrastructure — scoped per login session so a re-login
+                                  ' after logout or an idle timeout gets a fresh, undisposed shell.
+                                  services.AddScoped(Of MainWindow)()
+                                  services.AddScoped(Of IMainWindowView)(Function(sp) sp.GetRequiredService(Of MainWindow)())
+                                  services.AddScoped(Of MainWindowPresenter)()
 
                                   services.AddScoped(Of IOwnerDashboardView, OwnerDashboardView)()
                                   services.AddScoped(Of OwnerDashboardPresenter)()
 
                                   services.AddConnectionHealthMonitor()
 
-                                  ' Add database contexts
-                                  services.AddModuleDbContexts(config.GetSection("Sync")("MariaDbConnection"))
+                                  ' Add database contexts — one resolved, pooling-enabled connection
+                                  ' string is used for EF contexts AND the raw-ADO services, so the
+                                  ' whole application always targets the same database.
+                                  ' One resolved value is shared by the EF contexts and the
+                                  ' raw-ADO services, so they always target the same database.
+                                  services.AddModuleDbContexts(connString)
 
                                   ' Add MediatR
                                   services.AddMediatRServices()
@@ -110,20 +137,16 @@ Friend Module Program
 
         _serviceProvider = host.Services
 
-        Dim configService = host.Services.GetRequiredService(Of IConfiguration)()
-        Dim connString = configService.GetSection("Sync")("MariaDbConnection")
-        If Not String.IsNullOrWhiteSpace(connString) Then
-            Try
-                Dim logger = host.Services.GetService(Of Microsoft.Extensions.Logging.ILogger(Of MariaDbSchemaInitializer))()
-                MariaDbSchemaInitializer.Initialize(connString, logger)
+        Dim loggerFactory = host.Services.GetRequiredService(Of Microsoft.Extensions.Logging.ILoggerFactory)()
+        Dim startupLogger = loggerFactory.CreateLogger(Of MariaDbSchemaInitializer)()
 
-                ' Initialize module databases
-                DatabaseInitializer.Initialize(_serviceProvider)
-            Catch ex As Exception
-                MessageBox.Show("Failed to initialize central database schema or module databases:" & Environment.NewLine & ex.Message, "Startup Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
-                Environment.Exit(1)
-            End Try
-        End If
+        Try
+            ' Single schema-bootstrap entry point: central versioned SQL + EF-model module schemas.
+            DatabaseBootstrapper.Initialize(connString, _serviceProvider, startupLogger)
+        Catch ex As Exception
+            MessageBox.Show("Failed to initialize central database schema or module databases:" & Environment.NewLine & ex.Message, "Startup Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Environment.Exit(1)
+        End Try
 
         Dim healthMonitor = _serviceProvider.GetRequiredService(Of IConnectionHealthMonitor)()
         ConnectionHealthMonitorLocator.Current = healthMonitor
@@ -135,24 +158,26 @@ Friend Module Program
 
         RunApplicationFlow()
 
+        ' Dispose the long-lived monitors so their timers are released at shutdown (L6).
         If _idleMonitor IsNot Nothing Then
             _idleMonitor.Stop()
+            Dim disposableIdle = TryCast(_idleMonitor, IDisposable)
+            If disposableIdle IsNot Nothing Then disposableIdle.Dispose()
         End If
 
         If ConnectionHealthMonitorLocator.Current IsNot Nothing Then
             ConnectionHealthMonitorLocator.Current.Stop()
+            Dim disposableMonitor = TryCast(ConnectionHealthMonitorLocator.Current, IDisposable)
+            If disposableMonitor IsNot Nothing Then disposableMonitor.Dispose()
         End If
     End Sub
 
-    Private _forceLogoutRequested As Boolean = False
     Private _mainWindowForm As Form
 
     Private Sub RunApplicationFlow()
         Dim continueRunning As Boolean = True
 
         While continueRunning
-            _forceLogoutRequested = False
-
             ' Create a scope for the login flow
             Dim loggedIn As Boolean = False
             Using loginScope = _serviceProvider.CreateScope()
@@ -164,34 +189,33 @@ Friend Module Program
                 End If
             End Using
 
-            If loggedIn Then
-                _idleMonitor.Start()
+            If Not loggedIn Then
+                continueRunning = False
+                Continue While
+            End If
 
-                ' Resolve main window and presenter (singletons)
-                Dim mainWindow = _serviceProvider.GetRequiredService(Of MainWindow)()
+            _idleMonitor.Start()
+
+            ' A fresh shell is created for every login session. Previously MainWindow and
+            ' its presenter were singletons, so re-login after an idle timeout reused a
+            ' window that Close() had already disposed (H7).
+            Dim sessionScope = _serviceProvider.CreateScope()
+            Try
+                Dim mainWindow = sessionScope.ServiceProvider.GetRequiredService(Of MainWindow)()
                 _mainWindowForm = mainWindow
-                Dim mainPresenter = _serviceProvider.GetRequiredService(Of MainWindowPresenter)()
+                sessionScope.ServiceProvider.GetRequiredService(Of MainWindowPresenter)()
 
                 Application.Run(mainWindow)
-
-                _idleMonitor.Stop()
+            Finally
                 _mainWindowForm = Nothing
+                _idleMonitor.Stop()
+                sessionScope.Dispose()
+            End Try
 
-                If _forceLogoutRequested Then
-                    continueRunning = True
-                Else
-                    Dim sessionService = _serviceProvider.GetRequiredService(Of LoginSessionService)()
-                    If sessionService.IsAuthenticated Then
-                        ' Main window closed but user wasn't logged out explicitly via flow, just exit
-                        continueRunning = False
-                    Else
-                        ' Logged out properly
-                        continueRunning = True
-                    End If
-                End If
-            Else
-                continueRunning = False
-            End If
+            ' Logout or idle timeout clears the session -> loop back to the login screen.
+            ' The user closing the window while still signed in exits the application.
+            Dim sessionService = _serviceProvider.GetRequiredService(Of LoginSessionService)()
+            continueRunning = Not sessionService.IsAuthenticated
         End While
     End Sub
 
@@ -255,7 +279,6 @@ Friend Module Program
         Dim sessionService = _serviceProvider.GetRequiredService(Of LoginSessionService)()
         sessionService.ClearUser()
 
-        _forceLogoutRequested = True
         If _mainWindowForm IsNot Nothing Then
             ' Safely close the main window on the UI thread
             If _mainWindowForm.InvokeRequired Then

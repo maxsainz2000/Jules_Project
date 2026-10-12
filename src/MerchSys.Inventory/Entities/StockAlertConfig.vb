@@ -6,6 +6,6 @@ Namespace Entities
 
         Public Property ProductId As Integer
         Public Property ExpiryAlertDays As Integer = 30
-        Public Property RowVersion As Byte()
+        Public Property RowVersion As DateTime
     End Class
 End Namespace

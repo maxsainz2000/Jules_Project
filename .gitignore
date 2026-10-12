@@ -1,0 +1,24 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+*.dll
+*.pdb
+*.cache
+
+# IDE
+.vs/
+.idea/
+*.user
+*.suo
+
+# Operator secrets — never commit the real production configuration
+appsettings.Production.json
+**/appsettings.Production.json
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Agent workspace data (not source)
+.workbuddy-ai/
+CodeReview_Phase1_Infrastructure.md

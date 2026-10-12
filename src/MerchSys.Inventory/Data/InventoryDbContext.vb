@@ -13,17 +13,15 @@ Namespace Data
         Public Property StockAlertConfigs As DbSet(Of Entities.StockAlertConfig)
         Public Property ProductPriceHistories As DbSet(Of Entities.ProductPriceHistory)
 
-        Public Sub New(options As DbContextOptions(Of InventoryDbContext))
-            MyBase.New(options)
+        Public Sub New(options As DbContextOptions(Of InventoryDbContext), Optional currentUserProvider As MerchSys.SharedKernel.Interfaces.ICurrentUserProvider = Nothing)
+            MyBase.New(options, currentUserProvider)
         End Sub
 
         Protected Overrides Sub OnModelCreating(modelBuilder As ModelBuilder)
             MyBase.OnModelCreating(modelBuilder)
             modelBuilder.ApplyConfigurationsFromAssembly(GetType(InventoryDbContext).Assembly)
 
-            For Each entityType In modelBuilder.Model.GetEntityTypes()
-                entityType.SetTableName("Inv_" & entityType.GetTableName())
-            Next
+            ApplyTablePrefix(modelBuilder, "Inv_")
 
             SeedData.InventorySeedData.Seed(modelBuilder)
         End Sub

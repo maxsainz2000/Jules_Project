@@ -18,8 +18,8 @@ Namespace Data
         Public Property ReceiptIntegrityArchives As DbSet(Of Entities.ReceiptIntegrityArchive)
         Public Property VatConfigurations As DbSet(Of Entities.VatConfiguration)
 
-        Public Sub New(options As DbContextOptions(Of POSDbContext))
-            MyBase.New(options)
+        Public Sub New(options As DbContextOptions(Of POSDbContext), Optional currentUserProvider As MerchSys.SharedKernel.Interfaces.ICurrentUserProvider = Nothing)
+            MyBase.New(options, currentUserProvider)
         End Sub
 
         Protected Overrides Sub OnConfiguring(optionsBuilder As DbContextOptionsBuilder)
@@ -34,9 +34,7 @@ Namespace Data
             MyBase.OnModelCreating(modelBuilder)
             modelBuilder.ApplyConfigurationsFromAssembly(GetType(POSDbContext).Assembly)
 
-            For Each entityType In modelBuilder.Model.GetEntityTypes()
-                entityType.SetTableName("Pos_" & entityType.GetTableName())
-            Next
+            ApplyTablePrefix(modelBuilder, "Pos_")
         End Sub
 
     End Class

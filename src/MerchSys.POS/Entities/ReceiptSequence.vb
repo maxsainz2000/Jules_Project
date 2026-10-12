@@ -6,6 +6,6 @@ Namespace Entities
 
         Public Property Year As Integer
         Public Property LastSequenceNumber As Integer
-        Public Property RowVersion As Byte()
+        Public Property RowVersion As DateTime
     End Class
 End Namespace

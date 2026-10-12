@@ -8,16 +8,31 @@ Namespace Views
         Implements IMainWindowView
 
         Public Event LogoutRequested As EventHandler Implements IMainWindowView.LogoutRequested
-        Public Event DashboardRequested As EventHandler
         Public Event ModuleSelected As EventHandler(Of AppModule)
-        Public Event NavigationRequested As EventHandler(Of Type) Implements IMainWindowView.NavigationRequested
-        Public Shadows Event Load As EventHandler Implements IMainWindowView.Load
+        Public Event NavigationRequested As EventHandler(Of NavigationItem) Implements IMainWindowView.NavigationRequested
+
+        Private _renderedItems As List(Of NavigationItem)
+
+        ''' <summary>
+        ''' Explicit interface implementation of <see cref="IMainWindowView.Load"/>.
+        ''' Uses the Custom Event pattern (as OwnerDashboardView does) instead of
+        ''' shadowing the inherited WinForms <c>Form.Load</c> member (L7).
+        ''' </summary>
+        Public Shadows Custom Event Load As EventHandler Implements IMainWindowView.Load
+            AddHandler(value As EventHandler)
+                AddHandler MyBase.Load, value
+            End AddHandler
+            RemoveHandler(value As EventHandler)
+                RemoveHandler MyBase.Load, value
+            End RemoveHandler
+            RaiseEvent(sender As Object, e As EventArgs)
+                ' The base Form Load event is raised automatically.
+            End RaiseEvent
+        End Event
 
         Public Sub New()
             InitializeComponent()
             Me.KeyPreview = True
-
-            AddHandler MyBase.Load, Sub(sender, e) RaiseEvent Load(sender, e)
         End Sub
 
         Protected Overrides Function ProcessCmdKey(ByRef msg As Message, keyData As Keys) As Boolean
@@ -43,29 +58,31 @@ Namespace Views
             Return MyBase.ProcessCmdKey(msg, keyData)
         End Function
 
-        Public Sub SyncActiveModuleVisuals(moduleId As AppModule)
-            ' No longer applicable in new layout
-        End Sub
-
+        ''' <summary>
+        ''' Sidebar header text showing the signed-in user and role (verification Test 20).
+        ''' Previously this wrote to the window title, which no test checks (L5).
+        ''' </summary>
         <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
-        Public Property UserIdentityText As String
+        Public Property UserIdentityText As String Implements IMainWindowView.UserIdentityText
             Get
-                Return Me.Text
+                Return lblUserIdentity.Text
             End Get
             Set(value As String)
-                Me.Text = value
+                lblUserIdentity.Text = value
             End Set
         End Property
 
-        <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
-        Public Property DashboardButtonVisible As Boolean
-            Get
-                Return False ' Deprecated
-            End Get
-            Set(value As Boolean)
-                ' Deprecated
-            End Set
-        End Property
+        ''' <summary>Hosts the connection status indicator at the bottom of the sidebar (H3).</summary>
+        Public Sub AddStatusIndicator(indicator As Control) Implements IMainWindowView.AddStatusIndicator
+            pnlStatusHost.Controls.Clear()
+            indicator.Dock = DockStyle.Fill
+            pnlStatusHost.Controls.Add(indicator)
+        End Sub
+
+        ''' <summary>Closes the shell window so the login flow can restart (H7).</summary>
+        Public Sub CloseWindow() Implements IMainWindowView.CloseWindow
+            Me.Close()
+        End Sub
 
         Public Sub RenderView(view As UserControl) Implements IMainWindowView.RenderView
             pnlContent.Controls.Clear()
@@ -74,6 +91,21 @@ Namespace Views
         End Sub
 
         Public Sub AddNavigationButtons(items As List(Of NavigationItem)) Implements IMainWindowView.AddNavigationButtons
+            ' When the item set is unchanged (the common case while navigating), only
+            ' refresh the active-state styling instead of disposing and recreating every
+            ' button, which caused flicker and handler churn (L8).
+            If _renderedItems IsNot Nothing AndAlso SameItems(_renderedItems, items) Then
+                For Each ctrl As Control In pnlSidebar.Controls
+                    Dim existing = TryCast(ctrl, Button)
+                    Dim navItem = If(existing IsNot Nothing, TryCast(existing.Tag, NavigationItem), Nothing)
+                    If existing IsNot Nothing AndAlso navItem IsNot Nothing Then
+                        existing.BackColor = If(navItem.IsActive, Color.FromArgb(52, 73, 94), Color.Transparent)
+                    End If
+                Next
+                _renderedItems = items
+                Return
+            End If
+
             For Each ctrl As Control In pnlSidebar.Controls
                 ctrl.Dispose()
             Next
@@ -84,7 +116,7 @@ Namespace Views
             For Each item In items
                 Dim btn As New Button()
                 btn.Text = item.Name
-                btn.Tag = item.ViewType
+                btn.Tag = item
                 btn.Width = pnlSidebar.Width - 20
                 btn.Height = 40
                 btn.Location = New Point(10, currentY)
@@ -116,13 +148,23 @@ Namespace Views
             AddHandler btnLogout.Click, AddressOf btnLogout_Click
 
             pnlSidebar.Controls.Add(btnLogout)
+
+            _renderedItems = items
         End Sub
+
+        Private Shared Function SameItems(left As List(Of NavigationItem), right As List(Of NavigationItem)) As Boolean
+            If left Is Nothing OrElse right Is Nothing OrElse left.Count <> right.Count Then Return False
+            For index = 0 To left.Count - 1
+                If Not Object.ReferenceEquals(left(index), right(index)) Then Return False
+            Next
+            Return True
+        End Function
 
         Private Sub NavButton_Click(sender As Object, e As EventArgs)
             Dim btn = DirectCast(sender, Button)
-            Dim viewType = TryCast(btn.Tag, Type)
-            If viewType IsNot Nothing Then
-                RaiseEvent NavigationRequested(Me, viewType)
+            Dim item = TryCast(btn.Tag, NavigationItem)
+            If item IsNot Nothing Then
+                RaiseEvent NavigationRequested(Me, item)
             End If
         End Sub
 

@@ -25,17 +25,66 @@ Partial Class MainWindow
         Me.components = New System.ComponentModel.Container()
         Me.pnlSidebar = New System.Windows.Forms.Panel()
         Me.pnlContent = New System.Windows.Forms.Panel()
+        Me.pnlLeft = New System.Windows.Forms.Panel()
+        Me.pnlHeader = New System.Windows.Forms.Panel()
+        Me.lblUserIdentity = New System.Windows.Forms.Label()
+        Me.pnlStatusHost = New System.Windows.Forms.Panel()
+        Me.pnlLeft.SuspendLayout()
+        Me.pnlHeader.SuspendLayout()
         Me.SuspendLayout()
         '
         ' pnlSidebar
         '
         Me.pnlSidebar.BackColor = System.Drawing.Color.FromArgb(CType(CType(44, Byte), Integer), CType(CType(62, Byte), Integer), CType(CType(80, Byte), Integer))
-        Me.pnlSidebar.Dock = System.Windows.Forms.DockStyle.Left
-        Me.pnlSidebar.Location = New System.Drawing.Point(0, 0)
+        Me.pnlSidebar.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlSidebar.Location = New System.Drawing.Point(0, 48)
         Me.pnlSidebar.Name = "pnlSidebar"
-        Me.pnlSidebar.Size = New System.Drawing.Size(200, 450)
+        Me.pnlSidebar.Size = New System.Drawing.Size(200, 354)
         Me.pnlSidebar.TabIndex = 1
         Me.pnlSidebar.AutoScroll = True
+        '
+        ' pnlHeader
+        '
+        Me.pnlHeader.BackColor = System.Drawing.Color.FromArgb(CType(CType(30, Byte), Integer), CType(CType(44, Byte), Integer), CType(CType(58, Byte), Integer))
+        Me.pnlHeader.Controls.Add(Me.lblUserIdentity)
+        Me.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top
+        Me.pnlHeader.Location = New System.Drawing.Point(0, 0)
+        Me.pnlHeader.Name = "pnlHeader"
+        Me.pnlHeader.Size = New System.Drawing.Size(200, 48)
+        Me.pnlHeader.TabIndex = 3
+        '
+        ' lblUserIdentity
+        '
+        Me.lblUserIdentity.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.lblUserIdentity.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold)
+        Me.lblUserIdentity.ForeColor = System.Drawing.Color.White
+        Me.lblUserIdentity.Location = New System.Drawing.Point(0, 0)
+        Me.lblUserIdentity.Name = "lblUserIdentity"
+        Me.lblUserIdentity.Padding = New System.Windows.Forms.Padding(10, 0, 0, 0)
+        Me.lblUserIdentity.Size = New System.Drawing.Size(200, 48)
+        Me.lblUserIdentity.TabIndex = 0
+        Me.lblUserIdentity.Text = "Not signed in"
+        Me.lblUserIdentity.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        ' pnlStatusHost
+        '
+        Me.pnlStatusHost.BackColor = System.Drawing.Color.FromArgb(CType(CType(30, Byte), Integer), CType(CType(44, Byte), Integer), CType(CType(58, Byte), Integer))
+        Me.pnlStatusHost.Dock = System.Windows.Forms.DockStyle.Bottom
+        Me.pnlStatusHost.Location = New System.Drawing.Point(0, 402)
+        Me.pnlStatusHost.Name = "pnlStatusHost"
+        Me.pnlStatusHost.Size = New System.Drawing.Size(200, 48)
+        Me.pnlStatusHost.TabIndex = 4
+        '
+        ' pnlLeft
+        '
+        Me.pnlLeft.Controls.Add(Me.pnlSidebar)
+        Me.pnlLeft.Controls.Add(Me.pnlHeader)
+        Me.pnlLeft.Controls.Add(Me.pnlStatusHost)
+        Me.pnlLeft.Dock = System.Windows.Forms.DockStyle.Left
+        Me.pnlLeft.Location = New System.Drawing.Point(0, 0)
+        Me.pnlLeft.Name = "pnlLeft"
+        Me.pnlLeft.Size = New System.Drawing.Size(200, 450)
+        Me.pnlLeft.TabIndex = 0
         '
         ' pnlContent
         '
@@ -51,15 +100,21 @@ Partial Class MainWindow
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(800, 450)
         Me.Controls.Add(Me.pnlContent)
-        Me.Controls.Add(Me.pnlSidebar)
+        Me.Controls.Add(Me.pnlLeft)
         Me.Name = "MainWindow"
         Me.Text = "MainWindow"
+        Me.pnlHeader.ResumeLayout(False)
+        Me.pnlLeft.ResumeLayout(False)
         Me.ResumeLayout(False)
 
     End Sub
 
     Friend WithEvents pnlSidebar As System.Windows.Forms.Panel
     Friend WithEvents pnlContent As System.Windows.Forms.Panel
+    Friend WithEvents pnlLeft As System.Windows.Forms.Panel
+    Friend WithEvents pnlHeader As System.Windows.Forms.Panel
+    Friend WithEvents lblUserIdentity As System.Windows.Forms.Label
+    Friend WithEvents pnlStatusHost As System.Windows.Forms.Panel
 
 End Class
 End Namespace
