@@ -68,61 +68,39 @@ Namespace Presenters
         End Function
 
         Private Async Function LoadLookupsAsync() As Task
-            Dim products = New List(Of ShrinkageProductItem)()
-            Dim batches = New List(Of ShrinkageBatchItem)()
-            ' Provider-agnostic on purpose: EF's connection is a MySql.Data connection, so
-            ' casting it to MySqlConnector's MySqlConnection throws InvalidCastException.
-            Dim connection = _db.Database.GetDbConnection()
-            Dim wasClosed = connection.State = System.Data.ConnectionState.Closed
-            If wasClosed Then
-                Await connection.OpenAsync()
-            End If
+            ' Plain EF queries. The raw readers this replaced existed only for the
+            ' "EF Core ToListAsync returns an empty list" workaround, which was retested
+            ' against MariaDB on 2026-10-12 and did not reproduce (see AGENTS.md).
+            ' Soft-deleted rows are excluded by BaseDbContext's global query filter.
+            Dim products = Await _db.Products.
+                OrderBy(Function(p) p.Name).
+                Select(Function(p) New ShrinkageProductItem With {
+                    .Id = p.Id,
+                    .Name = p.Name,
+                    .SKU = If(p.SKU, String.Empty)
+                }).
+                ToListAsync()
 
-            Dim savedEx As Exception = Nothing
-            Try
-                Using cmd = connection.CreateCommand()
-                    cmd.CommandText = "SELECT Id, Name, SKU FROM Inv_Products WHERE IsDeleted = 0 ORDER BY Name"
-                    Using reader = Await cmd.ExecuteReaderAsync()
-                        While Await reader.ReadAsync()
-                            products.Add(New ShrinkageProductItem With {
-                                .Id = reader.GetInt32(0),
-                                .Name = reader.GetString(1),
-                                .SKU = If(reader.IsDBNull(2), String.Empty, reader.GetString(2))
-                            })
-                        End While
-                    End Using
-                End Using
+            ' DisplayText is composed after materialising: a formatted-string projection would
+            ' not translate to SQL.
+            Dim batchRows = Await _db.StockBatches.
+                Where(Function(b) b.QuantityRemaining > 0).
+                OrderBy(Function(b) b.ReceiptDate).
+                Select(Function(b) New With {
+                    .Id = b.Id,
+                    .ProductId = b.ProductId,
+                    .ReceiptDate = b.ReceiptDate,
+                    .QuantityRemaining = b.QuantityRemaining
+                }).
+                ToListAsync()
 
-                Using cmd = connection.CreateCommand()
-                    cmd.CommandText = "SELECT Id, ProductId, ReceiptDate, QuantityRemaining FROM Inv_StockBatches WHERE QuantityRemaining > 0 ORDER BY ReceiptDate"
-                    Using reader = Await cmd.ExecuteReaderAsync()
-                        While Await reader.ReadAsync()
-                            Dim batchId = reader.GetInt32(0)
-                            Dim productId = reader.GetInt32(1)
-                            Dim rDate = reader.GetDateTime(2)
-                            Dim qRem = reader.GetInt32(3)
-                            batches.Add(New ShrinkageBatchItem With {
-                                .Id = batchId,
-                                .ProductId = productId,
-                                .ReceiptDate = rDate,
-                                .QuantityRemaining = qRem,
-                                .DisplayText = $"Batch {batchId} ({rDate:yyyy-MM-dd}) - Qty: {qRem}"
-                            })
-                        End While
-                    End Using
-                End Using
-
-            Catch ex As Exception
-                savedEx = ex
-            End Try
-
-            If wasClosed Then
-                Await connection.CloseAsync()
-            End If
-
-            If savedEx IsNot Nothing Then
-                Throw savedEx
-            End If
+            Dim batches = batchRows.Select(Function(b) New ShrinkageBatchItem With {
+                    .Id = b.Id,
+                    .ProductId = b.ProductId,
+                    .ReceiptDate = b.ReceiptDate,
+                    .QuantityRemaining = b.QuantityRemaining,
+                    .DisplayText = $"Batch {b.Id} ({b.ReceiptDate:yyyy-MM-dd}) - Qty: {b.QuantityRemaining}"
+                }).ToList()
 
             _view.AvailableProducts = products
             _view.AvailableBatches = batches
