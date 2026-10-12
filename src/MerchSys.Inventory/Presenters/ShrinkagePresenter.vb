@@ -70,7 +70,9 @@ Namespace Presenters
         Private Async Function LoadLookupsAsync() As Task
             Dim products = New List(Of ShrinkageProductItem)()
             Dim batches = New List(Of ShrinkageBatchItem)()
-            Dim connection = CType(_db.Database.GetDbConnection(), MySqlConnection)
+            ' Provider-agnostic on purpose: EF's connection is a MySql.Data connection, so
+            ' casting it to MySqlConnector's MySqlConnection throws InvalidCastException.
+            Dim connection = _db.Database.GetDbConnection()
             Dim wasClosed = connection.State = System.Data.ConnectionState.Closed
             If wasClosed Then
                 Await connection.OpenAsync()

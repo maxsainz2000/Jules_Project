@@ -47,6 +47,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The application's base configuration. Without this rule it is never copied to the
+         output, so a deployed client has no appsettings.json at all and every setting in it
+         (Session, Connection, Receipts, POS) silently falls back to code defaults. -->
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <InternalsVisibleTo Include="MerchSys.Tests" />
   </ItemGroup>
 
