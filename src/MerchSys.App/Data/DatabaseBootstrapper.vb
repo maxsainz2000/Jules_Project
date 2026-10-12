@@ -58,17 +58,24 @@ Namespace Data
         ''' short-circuit, guarded by a check that none of that context's tables exist yet.
         ''' </summary>
         Private Shared Sub EnsureModuleSchemas(connectionString As String, serviceProvider As IServiceProvider, logger As ILogger)
-            Dim existing = ReadExistingTableNames(connectionString)
+            ' Layer 2 failures must reach the log, not just the startup dialog: a client machine
+            ' cannot be diagnosed from a MessageBox on someone else's screen.
+            Try
+                Dim existing = ReadExistingTableNames(connectionString)
 
-            Using scope = serviceProvider.CreateScope()
-                Dim services = scope.ServiceProvider
+                Using scope = serviceProvider.CreateScope()
+                    Dim services = scope.ServiceProvider
 
-                If logger IsNot Nothing Then logger.LogInformation("Ensuring module database schemas from the EF model.")
-                EnsureContextTables(services.GetRequiredService(Of PurchasingDbContext)(), existing, logger)
-                EnsureContextTables(services.GetRequiredService(Of InventoryDbContext)(), existing, logger)
-                EnsureContextTables(services.GetRequiredService(Of POSDbContext)(), existing, logger)
-                EnsureContextTables(services.GetRequiredService(Of AccountingDbContext)(), existing, logger)
-            End Using
+                    If logger IsNot Nothing Then logger.LogInformation("Ensuring module database schemas from the EF model.")
+                    EnsureContextTables(services.GetRequiredService(Of PurchasingDbContext)(), existing, logger)
+                    EnsureContextTables(services.GetRequiredService(Of InventoryDbContext)(), existing, logger)
+                    EnsureContextTables(services.GetRequiredService(Of POSDbContext)(), existing, logger)
+                    EnsureContextTables(services.GetRequiredService(Of AccountingDbContext)(), existing, logger)
+                End Using
+            Catch ex As Exception
+                If logger IsNot Nothing Then logger.LogError(ex, "Failed to ensure the module database schemas.")
+                Throw
+            End Try
         End Sub
 
         ''' <summary>
@@ -81,6 +88,19 @@ Namespace Data
         End Function
 
         Private Shared Sub EnsureContextTables(db As DbContext, existing As HashSet(Of String), logger As ILogger)
+            ' Log which module failed. Without this a failure here is only ever visible in the
+            ' startup MessageBox, which is useless for diagnosing a client machine remotely.
+            Try
+                EnsureContextTablesCore(db, existing, logger)
+            Catch ex As Exception
+                If logger IsNot Nothing Then
+                    logger.LogError(ex, "Failed to create the module schema for {Context}.", db.GetType().Name)
+                End If
+                Throw
+            End Try
+        End Sub
+
+        Private Shared Sub EnsureContextTablesCore(db As DbContext, existing As HashSet(Of String), logger As ILogger)
             Dim modelTables = db.Model.GetEntityTypes().
                 Select(Function(et) et.GetTableName()).
                 Where(Function(n) n IsNot Nothing).
