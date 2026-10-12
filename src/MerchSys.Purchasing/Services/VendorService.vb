@@ -5,6 +5,7 @@ Imports System.Threading.Tasks
 Imports System
 Imports System.Linq
 Imports System.Collections.Generic
+Imports MerchSys.SharedKernel.Data
 
 Namespace Services
     Public Class VendorService
@@ -18,16 +19,18 @@ Namespace Services
 
         Public Async Function GetHistoryAsync(request As MerchSys.SharedKernel.Paging.PageRequest) As Task(Of MerchSys.SharedKernel.Paging.PagedResult(Of Vendor)) Implements IVendorService.GetHistoryAsync
             Dim result As New MerchSys.SharedKernel.Paging.PagedResult(Of Vendor)()
-            Dim conn = DirectCast(_dbContext.Database.GetDbConnection(), MySqlConnector.MySqlConnection)
+            ' Provider-agnostic on purpose: EF's connection is a MySql.Data connection, so
+            ' casting it to MySqlConnector.MySqlConnection throws InvalidCastException.
+            Dim conn = _dbContext.Database.GetDbConnection()
             Await _dbContext.Database.OpenConnectionAsync()
 
             Using cmd = conn.CreateCommand()
-                cmd.CommandText = "SELECT Id, Name, CreatedAt, CreatedBy, ModifiedAt, ModifiedBy, IsDeleted FROM Vendors WHERE @IsFirstPage = 1 OR (CreatedAt < @CursorDate OR (CreatedAt = @CursorDate AND Id < @CursorId)) ORDER BY CreatedAt DESC, Id DESC LIMIT @PageSizePlusOne"
+                cmd.CommandText = "SELECT Id, Name, CreatedAt, CreatedBy, ModifiedAt, ModifiedBy, IsDeleted FROM Pur_Vendors WHERE @IsFirstPage = 1 OR (CreatedAt < @CursorDate OR (CreatedAt = @CursorDate AND Id < @CursorId)) ORDER BY CreatedAt DESC, Id DESC LIMIT @PageSizePlusOne"
 
-                cmd.Parameters.Add(New MySqlConnector.MySqlParameter("@IsFirstPage", request.IsFirstPage))
-                cmd.Parameters.Add(New MySqlConnector.MySqlParameter("@CursorDate", If(request.CursorDate, CObj(DBNull.Value))))
-                cmd.Parameters.Add(New MySqlConnector.MySqlParameter("@CursorId", If(request.CursorId, CObj(DBNull.Value))))
-                cmd.Parameters.Add(New MySqlConnector.MySqlParameter("@PageSizePlusOne", request.PageSize + 1))
+                cmd.AddParameter("@IsFirstPage", request.IsFirstPage)
+                cmd.AddParameter("@CursorDate", request.CursorDate)
+                cmd.AddParameter("@CursorId", request.CursorId)
+                cmd.AddParameter("@PageSizePlusOne", request.PageSize + 1)
 
                 Using reader = Await cmd.ExecuteReaderAsync()
                     While Await reader.ReadAsync()

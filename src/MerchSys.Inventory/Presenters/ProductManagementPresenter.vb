@@ -67,7 +67,9 @@ Namespace Presenters
         Private Async Function LoadCategoriesAsync() As Task
             ' Use raw reader for EF Core ToListAsync bug workaround on full entities
             Dim categories = New List(Of CategoryManagementItem)()
-            Dim connection = CType(_db.Database.GetDbConnection(), MySqlConnection)
+            ' Provider-agnostic on purpose: EF's connection is a MySql.Data connection, so
+            ' casting it to MySqlConnector's MySqlConnection throws InvalidCastException.
+            Dim connection = _db.Database.GetDbConnection()
             Dim wasClosed = connection.State = System.Data.ConnectionState.Closed
             If wasClosed Then
                 Await connection.OpenAsync()
