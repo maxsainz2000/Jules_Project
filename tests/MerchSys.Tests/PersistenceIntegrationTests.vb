@@ -128,64 +128,23 @@ Public Class PersistenceIntegrationTests
     End Function
 
     ''' <summary>
-    ''' Covers GoodsReceivingService.GetReceiptsForPOAsync.
-    '''
-    ''' This method deliberately keeps its manual parent/child join. Replacing it with
-    ''' <c>Include(Function(r) r.Lines)</c> was tried on 2026-10-12 and returned an empty
-    ''' collection: GoodsReceiptConfiguration maps the relationship as
-    ''' <c>HasMany(Of GoodsReceiptLine)().WithOne()</c> — no navigation on the principal — so
-    ''' <c>GoodsReceipt.Lines</c> is not a usable navigation and the raw join was compensating for
-    ''' that, not for the disproven ToListAsync claim. Fixing the mapping is a prerequisite.
+    ''' Covers GoodsReceivingService.GetReceiptsForPOAsync, which now uses
+    ''' <c>Include(Function(r) r.Lines)</c> instead of the manual parent/child join it used to do
+    ''' by hand. That join existed only because GoodsReceiptConfiguration mapped the relationship
+    ''' without a navigation, which made the include join on a shadow GoodsReceiptId1 key.
     ''' </summary>
     <Fact>
     Public Async Function GetReceiptsForPOAsyncReturnsReceiptsWithTheirLines() As Task
-        Dim orderNumber = "PO-IT-" & Guid.NewGuid().ToString("N").Substring(0, 8)
-        Dim orderId As Integer
-        Dim receiptId As Integer
-
-        Using ctx = _fixture.NewPurchasing()
-            Dim order As New PurchaseOrder With {
-                .OrderNumber = orderNumber,
-                .VendorId = 1,
-                .TotalAmount = 100D,
-                .CreatedAt = DateTime.UtcNow
-            }
-            ctx.PurchaseOrders.Add(order)
-            Await ctx.SaveChangesAsync()
-            orderId = order.Id
-
-            Dim receipt As New GoodsReceipt With {
-                .ReceiptNumber = "GR-IT-" & orderNumber,
-                .PurchaseOrderId = orderId
-            }
-            ctx.GoodsReceipts.Add(receipt)
-            Await ctx.SaveChangesAsync()
-            receiptId = receipt.Id
-
-            ' The GoodsReceiptLine -> GoodsReceipt relationship is configured without an inverse
-            ' navigation, so adding lines to GoodsReceipt.Lines does not fix up the child FK.
-            ' Set it explicitly to isolate the Include() behaviour under test.
-            ctx.GoodsReceiptLines.Add(New GoodsReceiptLine With {
-                .GoodsReceiptId = receiptId, .ProductId = 1, .UnitCost = 10D,
-                .QuantityReceived = 3, .HasDiscrepancy = False,
-                .VatAmount = 0D, .VatableSales = 30D
-            })
-            ctx.GoodsReceiptLines.Add(New GoodsReceiptLine With {
-                .GoodsReceiptId = receiptId, .ProductId = 2, .UnitCost = 5D,
-                .QuantityReceived = 4, .HasDiscrepancy = False,
-                .VatAmount = 0D, .VatableSales = 20D
-            })
-            Await ctx.SaveChangesAsync()
-        End Using
+        Dim ids = Await CreateReceiptWithTwoLines()
 
         Using ctx = _fixture.NewPurchasing()
             ' The mediator, price-change service and VAT calculator are only used by the write
             ' paths; this query reads straight from the context.
             Dim service As New GoodsReceivingService(ctx, Nothing, Nothing, Nothing)
-            Dim receipts = Await service.GetReceiptsForPOAsync(orderId)
+            Dim receipts = Await service.GetReceiptsForPOAsync(ids.OrderId)
 
             Dim onlyOne = Assert.Single(receipts)
-            Assert.Equal(receiptId, onlyOne.Id)
+            Assert.Equal(ids.ReceiptId, onlyOne.Id)
             Assert.Equal(2, onlyOne.Lines.Count)
         End Using
     End Function
@@ -202,6 +161,93 @@ Public Class PersistenceIntegrationTests
             Dim receipts = Await service.GetReceiptsForPOAsync(-12345)
 
             Assert.Empty(receipts)
+        End Using
+    End Function
+
+    ''' <summary>
+    ''' GetReceiptByIdAsync shares the Include and was silently returning receipts with no lines.
+    ''' PriceChangeService.vb:20 uses the same pattern and was affected too.
+    ''' </summary>
+    <Fact>
+    Public Async Function GetReceiptByIdAsyncReturnsTheReceiptWithItsLines() As Task
+        Dim ids = Await CreateReceiptWithTwoLines()
+
+        Using ctx = _fixture.NewPurchasing()
+            Dim service As New GoodsReceivingService(ctx, Nothing, Nothing, Nothing)
+            Dim receipt = Await service.GetReceiptByIdAsync(ids.ReceiptId)
+
+            Assert.NotNull(receipt)
+            Assert.Equal(2, receipt.Lines.Count)
+        End Using
+    End Function
+
+    ''' <summary>
+    ''' Guards the mapping bug directly. A relationship configured without a navigation lets EF
+    ''' discover a second one by convention, which materialises as a shadow "&lt;Fk&gt;1" column
+    ''' and makes the navigation resolve on the wrong key.
+    ''' </summary>
+    <Fact>
+    Public Async Function SchemaHasNoShadowForeignKeyColumns() As Task
+        Using ctx = _fixture.NewPurchasing()
+            Dim conn = ctx.Database.GetDbConnection()
+            Await ctx.Database.OpenConnectionAsync()
+
+            Dim strays As New List(Of String)()
+            Using cmd = conn.CreateCommand()
+                cmd.CommandText = "SELECT TABLE_NAME, COLUMN_NAME FROM information_schema.COLUMNS " &
+                                  "WHERE TABLE_SCHEMA = DATABASE() AND COLUMN_NAME REGEXP 'Id[0-9]+$'"
+                Using reader = Await cmd.ExecuteReaderAsync()
+                    While Await reader.ReadAsync()
+                        strays.Add(reader.GetString(0) & "." & reader.GetString(1))
+                    End While
+                End Using
+            End Using
+
+            Assert.Empty(strays)
+        End Using
+    End Function
+
+    Private Class ReceiptFixture
+        Public Property OrderId As Integer
+        Public Property ReceiptId As Integer
+    End Class
+
+    ''' <summary>
+    ''' Creates a purchase order with one receipt carrying two lines. The lines are attached
+    ''' through <c>GoodsReceipt.Lines</c> on purpose: that only works once the relationship is
+    ''' mapped with a navigation, so it exercises the fix in both directions.
+    ''' </summary>
+    Private Async Function CreateReceiptWithTwoLines() As Task(Of ReceiptFixture)
+        Dim orderNumber = "PO-IT-" & Guid.NewGuid().ToString("N").Substring(0, 8)
+
+        Using ctx = _fixture.NewPurchasing()
+            Dim order As New PurchaseOrder With {
+                .OrderNumber = orderNumber,
+                .VendorId = 1,
+                .TotalAmount = 100D,
+                .CreatedAt = DateTime.UtcNow
+            }
+            ctx.PurchaseOrders.Add(order)
+            Await ctx.SaveChangesAsync()
+
+            Dim receipt As New GoodsReceipt With {
+                .ReceiptNumber = "GR-IT-" & orderNumber,
+                .PurchaseOrderId = order.Id,
+                .Lines = New List(Of GoodsReceiptLine) From {
+                    New GoodsReceiptLine With {
+                        .ProductId = 1, .UnitCost = 10D, .QuantityReceived = 3,
+                        .HasDiscrepancy = False, .VatAmount = 0D, .VatableSales = 30D
+                    },
+                    New GoodsReceiptLine With {
+                        .ProductId = 2, .UnitCost = 5D, .QuantityReceived = 4,
+                        .HasDiscrepancy = False, .VatAmount = 0D, .VatableSales = 20D
+                    }
+                }
+            }
+            ctx.GoodsReceipts.Add(receipt)
+            Await ctx.SaveChangesAsync()
+
+            Return New ReceiptFixture With {.OrderId = order.Id, .ReceiptId = receipt.Id}
         End Using
     End Function
 
