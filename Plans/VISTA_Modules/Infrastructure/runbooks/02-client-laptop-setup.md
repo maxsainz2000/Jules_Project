@@ -21,7 +21,7 @@ This runbook outlines the steps to configure a Client Laptop to run the VISTA ap
   ```json
   {
     "Sync": {
-      "MariaDbConnection": "Server=192.168.1.100;Port=3306;Database=merchsys_central;Uid=merchsys_sync;Pwd=<your_database_password>;SslMode=Required;"
+      "MariaDbConnection": "Server=192.168.1.100;Port=3306;Database=vista_central;Uid=merchsys_sync;Pwd=<your_database_password>;SslMode=Required;"
     },
     "Client": {
       "WorkstationName": "POS-01"

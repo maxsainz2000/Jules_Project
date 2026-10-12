@@ -188,7 +188,7 @@ Implemented INFRA-05: the dual-condition sync probe, background sync worker, syn
 Implemented INFRA-06: the central MariaDB schema, conflict resolver, per-module sync maps, and the
 `MariaDbSyncContext`. The `SyncOrchestrator` placeholder from INFRA-05 has been replaced with the
 full resolution-and-push pipeline. All 24 synced entity types are mapped; the SQL DDL creates the
-`merchsys_central` database with immutability triggers on BIR/ledger tables.
+`vista_central` database with immutability triggers on BIR/ledger tables.
 
 ### Requirements
 ### SharedKernel — new files
@@ -259,7 +259,7 @@ Implements the production deployment configuration layer for INFRA-11. Delivers 
 ### Requirements
 - **.gitignore**: added `appsettings.Production.json` exclusion (sequenced before the template was created)
 - **appsettings.json**: removed `Sync:MariaDbConnection` key (the only credential-bearing field); all other `Sync` fields retained for the TCP probe
-- **appsettings.Production.template.json**: operator template with `_comment` keys; placeholder values for `Host`, `Password`; real defaults for `Database` (`merchsys_central`) and `User` (`merchsys_sync`) matching `mariadb-init.sql`
+- **appsettings.Production.template.json**: operator template with `_comment` keys; placeholder values for `Host`, `Password`; real defaults for `Database` (`vista_central`) and `User` (`merchsys_sync`) matching `mariadb-init.sql`
 - **Configuration/ConnectionStringLoader.vb**: VB Module with three-state overlay logic: `GetProductionConfigPath()`, `AddProductionOverlay()` extension on `IConfigurationBuilder`, `GetMariaDbConnectionString(cfg, logger)`
 - **Application.Designer code.vb**: added `builder.ConfigureAppConfiguration` call to load the production overlay before DI resolution; added `Imports MerchSys.App.Configuration`
 - **Startup/SyncConfig.vb**: replaced `cfg.GetSection("Sync")("MariaDbConnection")` direct read with `ConnectionStringLoader.GetMariaDbConnectionString(cfg, logger)` call; added `Imports Microsoft.Extensions.Logging` and `Imports MerchSys.App.Configuration`
@@ -1369,7 +1369,7 @@ last-synced: 2026-06-01
 **Status:** COMPLETED (2026-05-28) — delivered by INFRA-29. See `Plans/VISTA_Modules/Infrastructure/runbooks/03-nightly-backup.md` and `runbooks/scripts/backup-mysqldump.ps1`.
 **Module:** Infrastructure / Database
 **Source:** `system_plan.md` Risk Mitigation Strategies (§11 - Data Loss)
-**Description:** Developed and configured a database utility script (PowerShell) that automatically dumps the central XAMPP MariaDB database (`merchsys_central`) nightly, compresses the output, and retains 7 daily / 4 weekly / 6 monthly copies. A Windows Task Scheduler XML (`vista-nightly-backup.xml`) automates execution at 02:00 daily even without a logged-in user.
+**Description:** Developed and configured a database utility script (PowerShell) that automatically dumps the central XAMPP MariaDB database (`vista_central`) nightly, compresses the output, and retains 7 daily / 4 weekly / 6 monthly copies. A Windows Task Scheduler XML (`vista-nightly-backup.xml`) automates execution at 02:00 daily even without a logged-in user.
 **Why deferred:** Was deferred pending a formal deployment; now addressed by INFRA-29 as part of the MariaDB client-server architecture rollout.
 **Depends on:** INFRA-29 (completed).
 

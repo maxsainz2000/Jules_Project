@@ -9,7 +9,7 @@ Namespace Data
 
         Public Function CreateDbContext(args As String()) As POSDbContext Implements IDesignTimeDbContextFactory(Of POSDbContext).CreateDbContext
             Dim optionsBuilder = New DbContextOptionsBuilder(Of POSDbContext)()
-            Dim connectionString = "Server=127.0.0.1;Port=3306;Database=villon_farm_supply;User=root;"
+            Dim connectionString = "Server=127.0.0.1;Port=3306;Database=vista_central;User=root;"
             optionsBuilder.UseMySQL(connectionString)
 
             Return New POSDbContext(optionsBuilder.Options)

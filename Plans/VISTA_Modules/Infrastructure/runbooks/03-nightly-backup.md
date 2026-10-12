@@ -3,7 +3,7 @@
 This runbook configures automated nightly backups of the MariaDB central database on the Host Laptop.
 
 ## 1. Scope
-This automated backup covers the entire `merchsys_central` MariaDB database, including all schema structures and transactional data. It does not back up the application binaries or the Windows OS state.
+This automated backup covers the entire `vista_central` MariaDB database, including all schema structures and transactional data. It does not back up the application binaries or the Windows OS state.
 
 ## 2. Requirements
 - Execution on the **Host Laptop**.
@@ -20,7 +20,7 @@ Create the file `C:\VISTA_Scripts\backup-mysqldump.ps1` with the following conte
 $BackupDir = "C:\VISTA_Backups"
 $DbUser = "root"
 $DbPassword = "your_root_password"
-$DbName = "merchsys_central"
+$DbName = "vista_central"
 $MySqlDumpPath = "C:\xampp\mysql\bin\mysqldump.exe"
 
 $DateStr = Get-Date -Format "yyyyMMdd_HHmmss"
@@ -121,4 +121,4 @@ Every 3 months, you must perform a restore drill:
 5. Verify you can log in and data is intact.
 
 ## 8. Backup User Privileges
-The backup script currently uses `root`. For enhanced security, create a dedicated `merchsys_backup` user in MariaDB with only `SELECT`, `SHOW VIEW`, `RELOAD`, `REPLICATION CLIENT`, `EVENT`, and `TRIGGER` privileges on `merchsys_central`. Update the `.ps1` script accordingly.
+The backup script currently uses `root`. For enhanced security, create a dedicated `merchsys_backup` user in MariaDB with only `SELECT`, `SHOW VIEW`, `RELOAD`, `REPLICATION CLIENT`, `EVENT`, and `TRIGGER` privileges on `vista_central`. Update the `.ps1` script accordingly.

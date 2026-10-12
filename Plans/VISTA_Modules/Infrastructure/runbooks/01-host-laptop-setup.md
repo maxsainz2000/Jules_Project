@@ -34,7 +34,19 @@ This runbook details the setup process for the Host Laptop, which acts as the ce
   default-time-zone = '+00:00'
   ```
 - Restart the MariaDB service via the XAMPP Control Panel.
-- Use a database tool (like HeidiSQL) to connect to the local MariaDB instance as `root` and execute the `mariadb-init.sql` script to set up the `merchsys_central` database and required user (`merchsys_sync`).
+- Create the database and the application account before the first launch. **`mariadb-init.sql`
+  does neither** — it only creates `Pos_OfficialReceipts`, which the application now creates from
+  the EF model with a different definition, so do not run it. Connect to the local MariaDB
+  instance as `root` (for example with HeidiSQL or `mysql.exe`) and run:
+  ```sql
+  CREATE DATABASE IF NOT EXISTS vista_central CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+  CREATE USER IF NOT EXISTS 'merchsys_sync'@'%' IDENTIFIED BY '<your_database_password>';
+  GRANT ALL PRIVILEGES ON vista_central.* TO 'merchsys_sync'@'%';
+  FLUSH PRIVILEGES;
+  ```
+  The application cannot create the database itself: it opens a connection to `vista_central`
+  during startup and fails with "Unknown database" if the schema does not already exist. Once
+  the database exists, the first launch creates the central tables and every module table.
 
 ## 5. Firewall Rule Configuration
 - Open **Windows Defender Firewall with Advanced Security**.

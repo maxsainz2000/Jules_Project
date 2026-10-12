@@ -18,7 +18,7 @@ Public Class StartupConfigValidatorTests
     <Fact>
     Public Sub AcceptsAUsableConnectionString()
         Assert.Null(StartupConfigValidator.ValidateConnectionString(
-            "Server=host;Port=3306;Database=merchsys_central;Uid=u;Pwd=p;"))
+            "Server=host;Port=3306;Database=vista_central;Uid=u;Pwd=p;"))
     End Sub
 
     <Fact>
