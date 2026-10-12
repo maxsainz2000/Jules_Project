@@ -6,7 +6,6 @@ Imports Microsoft.EntityFrameworkCore
 Imports MerchSys.Inventory.Data
 Imports MerchSys.Inventory.Services
 Imports MerchSys.Inventory.Views
-Imports MySqlConnector
 
 Namespace Presenters
 

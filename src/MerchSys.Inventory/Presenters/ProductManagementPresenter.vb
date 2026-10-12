@@ -8,7 +8,6 @@ Imports Microsoft.Extensions.DependencyInjection
 Imports MerchSys.Inventory.Entities
 Imports MerchSys.Inventory.Views
 Imports MerchSys.SharedKernel.Interfaces
-Imports MySqlConnector
 
 Namespace Presenters
 
@@ -81,7 +80,6 @@ Namespace Presenters
         End Function
 
         Private Async Function LoadProductsAsync() As Task
-            ' Project to DTO so EF Core ToListAsync works without bug
             Dim products = Await _db.Products.
                 Where(Function(p) Not p.IsDeleted).
                 GroupJoin(_db.ProductCategories,
