@@ -3,7 +3,7 @@ Imports MerchSys.SharedKernel.Entities
 Namespace Entities
     Public Class VatConfiguration
         Inherits BaseEntity
-        Public Property RowVersion As Byte()
+        Public Property RowVersion As DateTime
         Public Property IsVatRegistered As Boolean
         Public Property VatRate As Decimal = 0.12D
         Public Property NonVatPercentageTaxRate As Decimal = 0.03D

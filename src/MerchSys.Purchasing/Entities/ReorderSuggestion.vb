@@ -9,6 +9,6 @@ Namespace Entities
         Public Property Status As String = "Pending"
         Public Property ResultingPurchaseOrderId As Integer?
         Public Property Reason As String
-        Public Property RowVersion As Byte()
+        Public Property RowVersion As DateTime
     End Class
 End Namespace

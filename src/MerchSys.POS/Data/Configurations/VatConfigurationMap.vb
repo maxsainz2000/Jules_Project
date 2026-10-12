@@ -9,7 +9,7 @@ Namespace Data.Configurations
         Public Sub Configure(builder As EntityTypeBuilder(Of VatConfiguration)) Implements IEntityTypeConfiguration(Of VatConfiguration).Configure
             builder.ToTable("Pos_VatConfigurations")
             builder.Property(Function(x) x.Id).ValueGeneratedNever()
-            builder.Property(Function(x) x.RowVersion).IsRowVersion()
+            builder.Property(Function(x) x.RowVersion).IsRowVersion().HasColumnType("TIMESTAMP(6)")
 
             builder.Property(Function(x) x.VatRate).HasPrecision(18, 4)
             builder.Property(Function(x) x.NonVatPercentageTaxRate).HasPrecision(18, 4)

@@ -16,7 +16,7 @@ Namespace Data.Configurations
             builder.Property(Function(x) x.NetIncome).HasPrecision(18, 2)
             builder.Property(Function(x) x.GrossMarginPercent).HasPrecision(10, 4)
 
-            builder.Property(Function(x) x.RowVersion).IsRowVersion()
+            builder.Property(Function(x) x.RowVersion).IsRowVersion().HasColumnType("TIMESTAMP(6)")
         End Sub
     End Class
 End Namespace

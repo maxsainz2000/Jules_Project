@@ -10,6 +10,6 @@ Namespace Entities
         Public Property LeadTimeDays As Integer
         Public Property SeasonalMultiplier As Decimal = 1D
         Public Property PreferredVendorId As Integer?
-        Public Property RowVersion As Byte()
+        Public Property RowVersion As DateTime
     End Class
 End Namespace

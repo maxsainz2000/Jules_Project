@@ -19,7 +19,7 @@ Namespace Entities
         Public Property NetVatPayable As Decimal
         Public Property FiledAt As DateTime?
         Public Property FiledBy As String
-        Public Property RowVersion As Byte()
+        Public Property RowVersion As DateTime
         Public Overridable Property Lines As ICollection(Of VatReturnLine) = New List(Of VatReturnLine)
     End Class
 End Namespace

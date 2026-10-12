@@ -44,8 +44,9 @@
 ### Follow-up remediation — 2026-10-12
 
 A verification pass over PR #116 reproduced the review's three blockers and found three further
-defects. All six are fixed. Build gate: `dotnet build src/MerchSys.slnx` → 0 errors.
-Test gate: `dotnet test` → 34 passed, 0 failed (the original 20 plus 14 new regression tests).
+defects. A smoke test against a live MariaDB then surfaced two more. All eight are fixed.
+Build gate: `dotnet build src/MerchSys.slnx` → 0 errors.
+Test gate: `dotnet test` → 35 passed, 0 failed.
 
 | # | Defect | Resolution |
 |---|--------|-----------|
@@ -53,7 +54,17 @@ Test gate: `dotnet test` → 34 passed, 0 failed (the original 20 plus 14 new re
 | **F2** | Module tables were never created on a clean database. `Database.EnsureCreated()` short-circuits when the database already contains any table, and Layer 1 always creates `UserAccounts` first — so it reported success while creating nothing. The C5 consolidation was therefore inert. | `EnsureModuleSchemas` uses a presence-guarded `IRelationalDatabaseCreator.CreateTables()` per context. EF migrations were deliberately not introduced — see the C5 (partial) deferred row. |
 | **F3** | The module table prefix was applied twice: every POS table and two Purchasing configurations became `Pos_Pos_*` / `Pur_Pur_*`, names that the raw-ADO queries (`FROM Pur_VendorProducts`) and the runbooks do not use. | Prefixing moved into an idempotent `BaseDbContext.ApplyTablePrefix`, used by all four module contexts. |
 | **F4** | `Pur_AccountsPayable` had no concurrency token, although `AGENTS.md` requires one (the C3 row above omitted it). | `RowVersion` added to `AccountsPayableEntry` and mapped; `APLedgerPresenter` surfaces the mandated "Data changed elsewhere — refresh and retry" message instead of overwriting. |
-| **F5** | `PurchaseOrderLine` declared `RowVersion As Byte()` with no fluent mapping, so the **entire Purchasing model failed validation and could not be built** — every Purchasing query would throw. Masked by F2: `EnsureCreated()` short-circuited, so the model was never built at startup. | Explicit `IsRowVersion().IsConcurrencyToken()` mapping added, matching the other seven `Byte()` entities. |
+| **F5** | `PurchaseOrderLine` declared `RowVersion As Byte()` with no fluent mapping, so the **entire Purchasing model failed validation and could not be built** — every Purchasing query would throw. Masked by F2: `EnsureCreated()` short-circuited, so the model was never built at startup. | Explicit mapping added. |
+| **F6** | Eight entities declared `RowVersion As Byte()`, which the MySQL provider maps to `longblob DEFAULT NULL` with no auto-update — so the token value never changed and **could never detect a conflict**. Worst case was `Pos_ReceiptSequence`: `ReceiptIntegrityService` relies on `DbUpdateConcurrencyException` to catch two clients generating receipt numbers at once. | All eight migrated to `RowVersion As DateTime` mapped `.IsRowVersion().HasColumnType("TIMESTAMP(6)")`, matching the AGENTS.md-mandated tables. `ConcurrencyTokenTests` now asserts the column type as well as the concurrency-token flag, so an inert token cannot return. |
+| **F7** | The operator configuration contract was inconsistent in three places, and `SslMode=None` (from the operator's file) is rejected by `MySql.Data` while being accepted by `MySqlConnector` — so a correctly-followed install could not start. | Runbooks corrected (canonical path, canonical `Sync:MariaDbConnection` shape, fail-loudly behaviour) and the `SslMode` dialect constraint documented. See the SslMode note below. |
+
+**SslMode constraint (F7).** The single `Sync:MariaDbConnection` value is parsed by two different
+drivers — `MySql.Data` (through EF Core) and `MySqlConnector` (the raw-ADO services) — and their
+`SslMode` vocabularies differ. `SslMode=None` is valid for `MySqlConnector` but rejected by
+`MySql.Data`, which then throws `Requested value 'None' was not found` while constructing every
+EF context. Only `Preferred`, `Required`, `VerifyCA` and `VerifyFull` are safe for both. Use
+`Required` in production; use `Preferred` on a development server with no TLS configured
+(XAMPP reports `have_ssl=DISABLED`).
 
 **Raised separately (out of scope for this change set):** the EF provider is Oracle's
 `MySql.EntityFrameworkCore`, which depends on `MySql.Data` — but five sites cast

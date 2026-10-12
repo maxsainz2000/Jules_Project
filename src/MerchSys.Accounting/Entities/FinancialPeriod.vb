@@ -14,6 +14,6 @@ Namespace Entities
         Public Property GrossMarginPercent As Decimal
         Public Property OperatingExpenses As Decimal
         Public Property NetIncome As Decimal
-        Public Property RowVersion As Byte()
+        Public Property RowVersion As DateTime
     End Class
 End Namespace

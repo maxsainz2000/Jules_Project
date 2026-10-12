@@ -8,7 +8,7 @@ Namespace Data.Configurations
 
         Public Sub Configure(builder As EntityTypeBuilder(Of StockAlertConfig)) Implements IEntityTypeConfiguration(Of StockAlertConfig).Configure
             builder.ToTable("StockAlertConfigs")
-            builder.Property(Function(x) x.RowVersion).IsRowVersion()
+            builder.Property(Function(x) x.RowVersion).IsRowVersion().HasColumnType("TIMESTAMP(6)")
         End Sub
     End Class
 End Namespace
