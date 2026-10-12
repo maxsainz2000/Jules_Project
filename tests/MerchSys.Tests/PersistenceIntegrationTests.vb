@@ -10,6 +10,7 @@ Imports MySqlConnector
 Imports MerchSys.Purchasing.Data
 Imports MerchSys.Purchasing.Entities
 Imports MerchSys.Purchasing.Services
+Imports MerchSys.SharedKernel.Paging
 Imports MerchSys.Inventory.Data
 Imports MerchSys.POS.Data
 Imports MerchSys.Accounting.Data
@@ -248,6 +249,109 @@ Public Class PersistenceIntegrationTests
             Await ctx.SaveChangesAsync()
 
             Return New ReceiptFixture With {.OrderId = order.Id, .ReceiptId = receipt.Id}
+        End Using
+    End Function
+
+    ''' <summary>
+    ''' Pages a keyset-paginated history to exhaustion, asserting that no id appears on two pages
+    ''' and that paging terminates. Returns the number of distinct rows seen.
+    ''' </summary>
+    Private Shared Async Function PageThroughAll(Of T)(
+            fetch As Func(Of PageRequest, Task(Of PagedResult(Of T))),
+            idOf As Func(Of T, Integer),
+            pageSize As Integer) As Task(Of Integer)
+
+        Dim seen As New HashSet(Of Integer)()
+        Dim request As New PageRequest With {.PageSize = pageSize, .IsFirstPage = True}
+        Dim pages = 0
+
+        Do
+            Dim page = Await fetch(request)
+
+            For Each item In page.Items
+                Assert.True(seen.Add(idOf(item)), "id " & idOf(item) & " appeared on two pages")
+            Next
+
+            pages += 1
+            Assert.True(pages < 50, "paging did not terminate")
+
+            If Not page.HasMore Then Exit Do
+
+            request = New PageRequest With {
+                .PageSize = pageSize,
+                .IsFirstPage = False,
+                .CursorDate = page.NextCursorDate,
+                .CursorId = page.NextCursorId
+            }
+        Loop
+
+        Return seen.Count
+    End Function
+
+    <Fact>
+    Public Async Function VendorHistoryPagesWithoutOverlap() As Task
+        Using ctx = _fixture.NewPurchasing()
+            Dim service As New VendorService(ctx)
+
+            Dim total = Await PageThroughAll(Of Vendor)(
+                Function(r) service.GetHistoryAsync(r), Function(v As Vendor) v.Id, 2)
+
+            Assert.True(total >= 3, "expected at least the 3 seeded vendors, saw " & total)
+        End Using
+    End Function
+
+    ''' <summary>
+    ''' All three orders share one CreatedAt, so paging has to fall back on the Id tiebreak —
+    ''' the part of the keyset predicate that is easiest to get wrong.
+    ''' </summary>
+    <Fact>
+    Public Async Function PurchaseOrderHistoryPagesWithoutOverlapWhenCreatedAtTies() As Task
+        Dim stamp = DateTime.UtcNow
+
+        Using ctx = _fixture.NewPurchasing()
+            For i = 1 To 3
+                ctx.PurchaseOrders.Add(New PurchaseOrder With {
+                    .OrderNumber = "PO-PAGE-" & Guid.NewGuid().ToString("N").Substring(0, 8),
+                    .VendorId = 1,
+                    .TotalAmount = 10D,
+                    .CreatedAt = stamp
+                })
+            Next
+            Await ctx.SaveChangesAsync()
+        End Using
+
+        Using ctx = _fixture.NewPurchasing()
+            Dim service As New PurchaseOrderService(ctx)
+
+            Dim total = Await PageThroughAll(Of PurchaseOrder)(
+                Function(r) service.GetHistoryAsync(r), Function(p As PurchaseOrder) p.Id, 2)
+
+            Assert.True(total >= 3, "expected at least the 3 orders just created, saw " & total)
+        End Using
+    End Function
+
+    <Fact>
+    Public Async Function VendorProductHistoryPagesWithoutOverlap() As Task
+        Using ctx = _fixture.NewPurchasing()
+            For i = 1 To 3
+                ctx.VendorProducts.Add(New VendorProduct With {
+                    .VendorId = 1,
+                    .ProductId = 100 + i,
+                    .UnitCost = 5D,
+                    .CreatedAt = DateTime.UtcNow
+                })
+            Next
+            Await ctx.SaveChangesAsync()
+        End Using
+
+        Using ctx = _fixture.NewPurchasing()
+            ' GetHistoryAsync does not touch the session service; only the write paths do.
+            Dim service As New VendorProductService(ctx, Nothing)
+
+            Dim total = Await PageThroughAll(Of VendorProduct)(
+                Function(r) service.GetHistoryAsync(r), Function(vp As VendorProduct) vp.Id, 2)
+
+            Assert.True(total >= 3, "expected at least the 3 entries just created, saw " & total)
         End Using
     End Function
 
