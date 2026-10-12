@@ -69,7 +69,7 @@ Namespace UI.Controls
         Implements IDataGridViewEditingControl
 
         Private dataGridView As DataGridView
-        Private valueChanged As Boolean = False
+        Private _valueChanged As Boolean = False
         Private rowIndex As Integer
 
         Public Sub New()
@@ -144,10 +144,10 @@ Namespace UI.Controls
         <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
         Public Shadows Property EditingControlValueChanged() As Boolean Implements IDataGridViewEditingControl.EditingControlValueChanged
             Get
-                Return valueChanged
+                Return _valueChanged
             End Get
             Set(ByVal value As Boolean)
-                valueChanged = value
+                _valueChanged = value
             End Set
         End Property
 
@@ -158,7 +158,7 @@ Namespace UI.Controls
         End Property
 
         Protected Overrides Sub OnValueChanged(ByVal eventargs As EventArgs)
-            valueChanged = True
+            _valueChanged = True
             Me.EditingControlDataGridView.NotifyCurrentCellDirty(True)
             MyBase.OnValueChanged(eventargs)
         End Sub
