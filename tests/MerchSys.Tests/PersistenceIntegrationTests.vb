@@ -11,7 +11,12 @@ Imports MerchSys.Purchasing.Data
 Imports MerchSys.Purchasing.Entities
 Imports MerchSys.Purchasing.Services
 Imports MerchSys.SharedKernel.Paging
+Imports System.Threading
 Imports MerchSys.Inventory.Data
+Imports MerchSys.Inventory.Entities
+Imports MerchSys.Inventory.Handlers
+Imports MerchSys.Inventory.Services
+Imports MerchSys.SharedKernel.Queries
 Imports MerchSys.POS.Data
 Imports MerchSys.Accounting.Data
 
@@ -352,6 +357,53 @@ Public Class PersistenceIntegrationTests
                 Function(r) service.GetHistoryAsync(r), Function(vp As VendorProduct) vp.Id, 2)
 
             Assert.True(total >= 3, "expected at least the 3 entries just created, saw " & total)
+        End Using
+    End Function
+
+    ''' <summary>
+    ''' The seeded products have no batches, so this exercises the empty-group path — where a plain
+    ''' Sum over Integer would fault on the NULL that SQL returns.
+    ''' </summary>
+    <Fact>
+    Public Async Function CurrentStockLevelsCoalesceMissingBatchesToZero() As Task
+        Using ctx = _fixture.NewInventory()
+            Dim levels = Await New StockService(ctx).GetCurrentStockLevelsAsync()
+
+            Assert.Equal(20, levels.Count)
+            Assert.All(levels, Sub(l) Assert.Equal(0, l.CurrentQuantity))
+        End Using
+
+        Dim targetProductId As Integer
+        Using ctx = _fixture.NewInventory()
+            targetProductId = (Await ctx.Products.OrderBy(Function(p) p.Id).FirstAsync()).Id
+            ctx.StockBatches.Add(New StockBatch With {
+                .ProductId = targetProductId,
+                .QuantityReceived = 5,
+                .QuantityRemaining = 5,
+                .UnitCost = 2D,
+                .ReceiptDate = DateTime.UtcNow,
+                .SourcePurchaseOrderId = 1
+            })
+            Await ctx.SaveChangesAsync()
+        End Using
+
+        Using ctx = _fixture.NewInventory()
+            Dim levels = Await New StockService(ctx).GetCurrentStockLevelsAsync()
+            Dim target = levels.First(Function(l) l.ProductId = targetProductId)
+
+            Assert.Equal(5, target.CurrentQuantity)
+        End Using
+    End Function
+
+    <Fact>
+    Public Async Function CatalogQueryReturnsTheSeededProducts() As Task
+        Using ctx = _fixture.NewInventory()
+            Dim handler As New GetProductsForCatalogQueryHandler(ctx)
+
+            Dim products = Await handler.Handle(New GetProductsForCatalogQuery(), CancellationToken.None)
+
+            Assert.Equal(20, products.Count)
+            Assert.All(products, Sub(p) Assert.False(String.IsNullOrWhiteSpace(p.Name)))
         End Using
     End Function
 
