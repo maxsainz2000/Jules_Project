@@ -26,7 +26,8 @@
 | **`Console` namespace shadow** | When `Imports Microsoft.Extensions.Logging` is present, `Console` resolves to MEL's class. Always use `System.Console.WriteLine()`. | BC30456 |
 | **`Await` in Catch/Finally** | `Await` is illegal inside `Catch`/`Finally` blocks (BC36943). Capture error state before the block, await after. | BC36943 |
 | **Parameter shadows property** | A parameter named `vendors` shadows a property `Vendors`. Name parameters distinctly: `vendorList`, `inputItems`, etc. | silent |
-| **EF Core 10 VB.NET ToListAsync empty** | `ToListAsync()` on a full entity query silently returns an empty list. `CountAsync()` and scalar projections work. Use raw `MySqlConnector.MySqlConnection` reader loop. | silent |
+| **EF connection is not a MySqlConnector** | The EF provider is Oracle's `MySql.EntityFrameworkCore`, built on `MySql.Data`, so `Database.GetDbConnection()` returns a `MySql.Data` connection. Never cast it to `MySqlConnector.MySqlConnection`; if you need raw ADO, use the provider-agnostic `DbConnection`/`DbCommand` API with `DbCommandExtensions.AddParameter`. | `InvalidCastException` |
+| **`ToListAsync` empty list** | *Re-tested 2026-10-12: did not reproduce.* The original note blamed "the Pomelo provider" (`Infrastructure-Spec.md`), but this project uses Oracle's `MySql.EntityFrameworkCore`. Against MariaDB on EF Core 10 / 10.0.7, `CountAsync`, `ToListAsync` on a full entity, `AsNoTracking().ToListAsync`, scalar projections and a raw-ADO baseline all returned the same rows. Prefer plain EF queries; the legacy raw-ADO reader loops exist only for this disproven reason and can be retired. | silent |
 
 ## Additional Architecture Rules
 
