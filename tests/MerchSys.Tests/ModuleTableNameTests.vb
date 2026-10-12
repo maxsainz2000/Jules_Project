@@ -17,7 +17,7 @@ Imports MerchSys.Accounting.Data
 Public Class ModuleTableNameTests
 
     Private Const DummyConnection As String =
-        "Server=localhost;Port=3306;Database=merchsys_central;Uid=u;Pwd=p;"
+        "Server=localhost;Port=3306;Database=vista_central;Uid=u;Pwd=p;"
 
     Private Shared Function MappedTableNames(db As DbContext) As List(Of String)
         Return db.Model.GetEntityTypes().

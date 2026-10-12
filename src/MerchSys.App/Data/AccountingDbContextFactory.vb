@@ -9,7 +9,7 @@ Namespace Data
 
         Public Function CreateDbContext(args As String()) As AccountingDbContext Implements IDesignTimeDbContextFactory(Of AccountingDbContext).CreateDbContext
             Dim optionsBuilder = New DbContextOptionsBuilder(Of AccountingDbContext)()
-            Dim connectionString = "Server=127.0.0.1;Port=3306;Database=villon_farm_supply;User=root;"
+            Dim connectionString = "Server=127.0.0.1;Port=3306;Database=vista_central;User=root;"
             optionsBuilder.UseMySQL(connectionString)
 
             Return New AccountingDbContext(optionsBuilder.Options)

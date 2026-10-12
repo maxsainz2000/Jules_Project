@@ -24,7 +24,7 @@ Imports MerchSys.Accounting.Entities
 Public Class ConcurrencyTokenTests
 
     Private Const DummyConnection As String =
-        "Server=localhost;Port=3306;Database=merchsys_central;Uid=u;Pwd=p;"
+        "Server=localhost;Port=3306;Database=vista_central;Uid=u;Pwd=p;"
 
     Private Shared Sub AssertWorkingConcurrencyToken(db As DbContext, entityType As Type)
         Dim entity = db.Model.FindEntityType(entityType)

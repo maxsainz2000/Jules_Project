@@ -66,7 +66,7 @@ The following from the previous [[offline-first-sync]] design are removed:
 ## Operational Requirements
 
 - **UPS on host laptop** — hard requirement, elevated from recommendation.
-- **Nightly `mysqldump`** of `merchsys_central` to a secondary machine via Windows Task Scheduler.
+- **Nightly `mysqldump`** of `vista_central` to a secondary machine via Windows Task Scheduler.
 - **Wired Ethernet** preferred over Wi-Fi for the host laptop.
 - **Failover runbook**: bring MariaDB up on a backup laptop, update each client's `appsettings.json`, restart clients. Target RTO: 30 minutes.
 
