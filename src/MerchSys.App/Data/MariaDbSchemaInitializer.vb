@@ -53,7 +53,13 @@ Namespace Data
                     Next
 
                     ' Seed Accounts
+#If DEBUG Then
+                    ' The developer account (role 3, a superset of Manager) exists only for local
+                    ' debugging and its password is committed to the repository, so it must never
+                    ' be created on a production install (H2). The manager/owner bootstrap accounts
+                    ' below are separate and still seed in every configuration.
                     EnsureDeveloperAccount(conn)
+#End If
                     EnsureDefaultAccounts(conn)
 
                 End Using
@@ -303,9 +309,14 @@ Namespace Data
             End Using
         End Function
 
+#If DEBUG Then
+        ''' <summary>
+        ''' Seeds the local-development <c>developer</c> account. Debug-only: it is compiled out of
+        ''' Release builds so a production install never carries an account whose password is in the
+        ''' repository (H2). <c>INSERT IGNORE</c> keeps it idempotent, so two clients starting
+        ''' simultaneously cannot raise a duplicate-key error and abort startup (M14).
+        ''' </summary>
         Private Shared Sub EnsureDeveloperAccount(conn As MySqlConnection)
-            ' Idempotent: INSERT IGNORE means two clients starting simultaneously cannot
-            ' raise a duplicate-key error and abort startup (M14).
             Dim hash = PasswordHashHelper.HashPassword("VistaDeveloper2026!")
             Dim insertSql = "
                 INSERT IGNORE INTO `UserAccounts` (`Username`, `PasswordHash`, `Role`, `CreatedAt`, `IsActive`)
@@ -316,6 +327,7 @@ Namespace Data
                 cmd.ExecuteNonQuery()
             End Using
         End Sub
+#End If
 
         Private Shared Sub EnsureDefaultAccounts(conn As MySqlConnection)
             Dim checkSql = "SELECT COUNT(*) FROM `UserAccounts` WHERE `Username` IN ('manager', 'owner')"

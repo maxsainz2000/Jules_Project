@@ -45,6 +45,12 @@ Namespace Data
 
             ' Layer 2 — module schemas from the EF model.
             EnsureModuleSchemas(connectionString, serviceProvider, logger)
+
+            ' Layer 3 — BIR receipt-archive immutability triggers (H3). This must follow Layer 2:
+            ' the archive table they guard is created there. EF Core cannot create triggers, so they
+            ' are applied from an embedded script and then verified; a failure here is surfaced to
+            ' the operator rather than leaving NIRC sec. 235 immutability silently unenforced.
+            ReceiptArchiveTriggerBootstrapper.EnsureTriggers(connectionString, logger)
         End Sub
 
         ''' <summary>
