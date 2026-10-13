@@ -10,7 +10,12 @@
     <PackageReference Include="MediatR" Version="14.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.7" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.12" />
-    <PackageReference Include="MySql.EntityFrameworkCore" Version="10.0.7" />
+    <!-- EF Relational only. The MySQL provider is configured in exactly one place,
+         MerchSys.App/Data/DatabaseConfig.AddModuleDbContexts, so only that project needs
+         MySql.EntityFrameworkCore. This project uses Relational APIs (ToTable, HasIndex,
+         HasQueryFilter), so reference Relational directly rather than pulling the whole
+         provider — and MySql.Data with it — into every module. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.7" />
   </ItemGroup>
 
 </Project>

@@ -6,7 +6,9 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.7" />
-    <PackageReference Include="MySql.EntityFrameworkCore" Version="10.0.7" />
+    <!-- EF Relational only: the MySQL provider is configured once, in MerchSys.App
+         (DatabaseConfig.AddModuleDbContexts). Do not replace this with MySql.EntityFrameworkCore. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.7" />
   </ItemGroup>
 
   <PropertyGroup>
