@@ -51,13 +51,22 @@ This runbook details the setup process for the Host Laptop, which acts as the ce
   unbuilt, and the failure only appears later as "table doesn't exist" on the first POS query.
   The EF model is the single source of truth; `DatabaseBootstrapper` logs an error naming any
   tables it finds missing.
-- **After the first successful launch**, apply the receipt-archive immutability triggers:
-  ```
-  mysql -u root -p vista_central < Plans/VISTA_Modules/Infrastructure/sql/02-pos-receipt-integrity-triggers.sql
-  ```
-  EF Core cannot create triggers, and the table they guard is created by the application — so
-  this step has to come second. Verify the result with
-  `Resources/Sql/ReceiptIntegrityTriggerVerification.sql`.
+- **The receipt-archive immutability triggers are applied automatically.** EF Core cannot create
+  triggers, and the table they guard is created by the application, so the application applies them
+  itself as the *last* startup schema step (after the EF model has created the table) and then
+  verifies they exist. No manual step is required, and a database cannot run with immutability
+  silently unenforced — the failure mode that let NIRC sec. 235 go unenforced before.
+  - The database account therefore needs the `TRIGGER` privilege; the `GRANT ALL` above covers it.
+    If it is missing, startup fails with a clear message rather than continuing unprotected.
+  - The triggers are the **only** enforcement for `Pos_OfficialReceiptArchive` —
+    `ImmutableReceiptInterceptor` is application code and can be bypassed by direct SQL.
+  - To apply them by hand instead (e.g. to pre-seed before the first launch, or to inspect the
+    DDL), the canonical script is
+    `Plans/VISTA_Modules/Infrastructure/sql/02-pos-receipt-integrity-triggers.sql`:
+    ```
+    mysql -u root -p vista_central < Plans/VISTA_Modules/Infrastructure/sql/02-pos-receipt-integrity-triggers.sql
+    ```
+    `Resources/Sql/ReceiptIntegrityTriggerVerification.sql` confirms the result.
 
 ## 4b. Existing databases: schema changes the application cannot apply itself
 The application derives its schema from the EF model, but **only when it creates the tables** — there

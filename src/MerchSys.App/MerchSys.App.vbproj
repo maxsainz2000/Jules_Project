@@ -47,6 +47,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The BIR receipt-archive immutability triggers (H3). Applied by
+         ReceiptArchiveTriggerBootstrapper as a startup step of its own, AFTER the EF model has
+         created the archive table — not by MariaDbSchemaInitializer, whose versioned-migration
+         sweep runs first and would fail because the table does not exist yet. The file is the
+         canonical copy the infrastructure runbook points at; the .ddl logical name deliberately
+         does not end in .sql so that sweep leaves it alone. -->
+    <EmbeddedResource Include="..\..\Plans\VISTA_Modules\Infrastructure\sql\02-pos-receipt-integrity-triggers.sql">
+      <LogicalName>02-pos-receipt-integrity-triggers.ddl</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- The application's base configuration. Without this rule it is never copied to the
          output, so a deployed client has no appsettings.json at all and every setting in it
          (Session, Connection, Receipts, POS) silently falls back to code defaults. -->

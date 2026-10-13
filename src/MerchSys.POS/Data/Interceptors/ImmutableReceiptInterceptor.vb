@@ -26,7 +26,7 @@ Namespace Data.Interceptors
             If ArchivalBypass.Value Then Return
 
             For Each dbEntry In context.ChangeTracker.Entries()
-                If (TypeOf dbEntry.Entity Is OfficialReceipt OrElse TypeOf dbEntry.Entity Is ReceiptIntegrity) AndAlso
+                If IsImmutable(dbEntry.Entity) AndAlso
                    (dbEntry.State = EntityState.Modified OrElse dbEntry.State = EntityState.Deleted) Then
 
                     Dim entityType = dbEntry.Entity.GetType().Name
@@ -39,5 +39,22 @@ Namespace Data.Interceptors
                 End If
             Next
         End Sub
+
+        ''' <summary>
+        ''' The receipt entities that must never be modified or deleted once written.
+        '''
+        ''' The two archive entities are included so that BIR-retention rows cannot be edited or
+        ''' removed through EF either. They are the application-side counterpart to the
+        ''' <c>Pos_OfficialReceiptArchive</c> database triggers — which, until now, were the *only*
+        ''' enforcement for the archive, because this interceptor covered just the two live tables
+        ''' (H4). The archival service still works: it only ever <c>Add</c>s archive rows, and it
+        ''' runs with <see cref="ArchivalBypass"/> set.
+        ''' </summary>
+        Private Shared Function IsImmutable(entity As Object) As Boolean
+            Return TypeOf entity Is OfficialReceipt OrElse
+                   TypeOf entity Is ReceiptIntegrity OrElse
+                   TypeOf entity Is OfficialReceiptArchive OrElse
+                   TypeOf entity Is ReceiptIntegrityArchive
+        End Function
     End Class
 End Namespace
