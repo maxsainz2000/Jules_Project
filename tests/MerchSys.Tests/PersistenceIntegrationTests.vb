@@ -104,6 +104,7 @@ End Class
 '''   dotnet test --filter "Category!=Integration"
 ''' </summary>
 <Trait("Category", "Integration")>
+<Collection("IntegrationDatabase")>
 Public Class PersistenceIntegrationTests
     Implements IClassFixture(Of TestDatabaseFixture)
 
