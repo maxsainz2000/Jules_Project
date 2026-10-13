@@ -64,14 +64,15 @@ Namespace Services
 
             Dim receiptNumber = transaction.TransactionNumber ' Using TransactionNumber as basic receipt number
 
-            Dim saleCompletedEvent = New SaleCompletedEvent With {
-                .SaleId = transaction.Id,
-                .SaleDate = transaction.TransactionDate,
-                .Items = transaction.Lines.Select(Function(l) New SaleCompletedEvent.SaleCompletedItem With {
-                    .ProductId = l.ProductId,
-                    .QuantitySold = l.Quantity
-                }).ToList()
-            }
+                  Dim saleCompletedEvent = New SaleCompletedEvent With {
+                      .SaleId = transaction.Id,
+                      .SaleDate = transaction.TransactionDate,
+                      .Items = transaction.Lines.Select(Function(l) New SaleCompletedEvent.SaleCompletedItem With {
+                          .ProductId = l.ProductId,
+                          .QuantitySold = l.Quantity,
+                          .UnitPrice = l.UnitPrice
+                      }).ToList()
+                  }
 
             Await _dbContext.SaveChangesAsync()
 

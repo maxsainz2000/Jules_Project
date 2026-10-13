@@ -2,91 +2,45 @@ Imports System.Threading
 Imports MediatR
 Imports Microsoft.EntityFrameworkCore
 Imports MerchSys.SharedKernel.Events
-Imports MerchSys.SharedKernel.Queries
 Imports MerchSys.SharedKernel.Enums
 Imports MerchSys.Accounting.Data
 Imports MerchSys.Accounting.Entities
 
 Namespace Handlers
     ''' <summary>
-    ''' Records revenue and COGS for a completed sale.
+    ''' Records the revenue side of a completed sale: when it happened, how much was sold, at what
+    ''' price, and how it was paid.
     '''
-    ''' This handler is deliberately idempotent. Two different events can describe the same sale —
-    ''' <see cref="SaleCompletedEvent"/> (published by PaymentService) and
-    ''' <see cref="SaleCompletedWithVatEvent"/> (published by VatAwareReceiptService) — and MediatR
-    ''' gives no ordering guarantee between handlers. The original implementation called
-    ''' <c>RevenueRecords.Add(...)</c> unconditionally, so whichever handler ran second inserted a
-    ''' SECOND row for the same (sale, product) and revenue was double-counted. Upserting on
-    ''' (SourceTransactionId, ProductId) means whichever handler runs first, the other completes the
-    ''' same row.
-    '''
-    ''' Each handler writes only the columns it owns: this one owns the quantity/cost/payment
-    ''' columns, <see cref="SaleCompletedWithVatHandler"/> owns the VAT columns. Neither clobbers
-    ''' the other.
+    ''' This handler owns the quantity/price/payment columns. COGS is deliberately NOT written here —
+    ''' only Inventory knows the true FIFO cost of the units consumed, and it arrives separately via
+    ''' <see cref="StockDeductedEvent"/>. The VAT columns are owned by
+    ''' <see cref="SaleCompletedWithVatHandler"/>. Three handlers write the same row, so each touches
+    ''' only its own columns and upserts on (SourceTransactionId, ProductId); whichever runs last
+    ''' leaves the row complete rather than clobbering the others.
     ''' </summary>
     Public Class SaleCompletedAccountingHandler
         Implements INotificationHandler(Of SaleCompletedEvent)
 
         Private ReadOnly _dbContext As AccountingDbContext
-        Private ReadOnly _mediator As IMediator
 
-        Public Sub New(dbContext As AccountingDbContext, mediator As IMediator)
+        Public Sub New(dbContext As AccountingDbContext)
             _dbContext = dbContext
-            _mediator = mediator
         End Sub
 
         Public Async Function Handle(notification As SaleCompletedEvent, cancellationToken As CancellationToken) As Task Implements INotificationHandler(Of SaleCompletedEvent).Handle
             For Each item In notification.Items
-                Dim query = New GetProductCostQuery With {.ProductId = item.ProductId}
-                Dim costResult = Await _mediator.Send(query, cancellationToken)
-
-                Dim unitCost As Decimal = 0D
-                If costResult IsNot Nothing Then
-                    unitCost = costResult.FifoUnitCost
-                End If
-
-                Dim totalCogs As Decimal = CDec(item.QuantitySold) * unitCost
-
-                Dim revenueRecord = Await _dbContext.RevenueRecords.FirstOrDefaultAsync(
-                    Function(r) r.SourceTransactionId = notification.SaleId AndAlso r.ProductId = item.ProductId,
-                    cancellationToken)
-
-                If revenueRecord Is Nothing Then
-                    revenueRecord = New RevenueRecord With {
-                        .SourceTransactionId = notification.SaleId,
-                        .ProductId = item.ProductId
-                    }
-                    _dbContext.RevenueRecords.Add(revenueRecord)
-                End If
+                Dim revenueRecord = Await RevenueRecordUpsert.FindOrCreateAsync(_dbContext, notification.SaleId, item.ProductId, cancellationToken)
 
                 revenueRecord.RecordDate = notification.SaleDate
                 revenueRecord.QuantitySold = CDec(item.QuantitySold)
-                revenueRecord.UnitCost = unitCost
-                revenueRecord.TotalCogs = totalCogs
+                revenueRecord.UnitPrice = item.UnitPrice
+                revenueRecord.TotalRevenue = CDec(item.QuantitySold) * item.UnitPrice
                 revenueRecord.PaymentMethod = PaymentMethod.Cash
 
-                ' The COGS expense is keyed on the same natural identity so a repeat publication does
-                ' not book the expense twice. Description is deterministic per (sale, product).
-                Dim description = $"COGS for Sale #{notification.SaleId} Product #{item.ProductId}"
-                Dim expenseRecord = Await _dbContext.ExpenseRecords.FirstOrDefaultAsync(
-                    Function(e) e.SourceReferenceId.HasValue AndAlso
-                                 e.SourceReferenceId.Value = notification.SaleId AndAlso
-                                 e.Category = "COGS" AndAlso
-                                 e.Description = description,
-                    cancellationToken)
-
-                If expenseRecord Is Nothing Then
-                    expenseRecord = New ExpenseRecord With {
-                        .SourceReferenceId = notification.SaleId,
-                        .Category = "COGS",
-                        .Description = description
-                    }
-                    _dbContext.ExpenseRecords.Add(expenseRecord)
-                End If
-
-                expenseRecord.ExpenseDate = notification.SaleDate
-                expenseRecord.Amount = totalCogs
-                expenseRecord.SourceModule = "POS"
+                ' Recompute from whatever is currently persisted. The COGS handler may not have run
+                ' yet, in which case TotalCogs is still 0 and this is corrected when it does — and
+                ' symmetrically, the COGS handler recomputes after this one has set revenue.
+                revenueRecord.GrossProfit = revenueRecord.TotalRevenue - revenueRecord.TotalCogs
             Next
 
             Await _dbContext.SaveChangesAsync(cancellationToken)

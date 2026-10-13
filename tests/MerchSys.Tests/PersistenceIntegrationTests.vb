@@ -408,4 +408,42 @@ Public Class PersistenceIntegrationTests
         End Using
     End Function
 
+    ''' <summary>
+    ''' The FIFO cost of a sale is only knowable at deduction time: nothing in the model records
+    ''' which batches a sale consumed, so once the batches are decremented the information cannot be
+    ''' reconstructed. DeductStockFIFOAsync therefore has to report the cost of what it consumed —
+    ''' that value is what feeds COGS.
+    '''
+    ''' Uses product 2 rather than the lowest id, because the class fixture is shared and
+    ''' CurrentStockLevelsCoalesceMissingBatchesToZero seeds a batch for the lowest-id product.
+    ''' </summary>
+    <Fact>
+    Public Async Function FifoDeductionReportsTheCostOfTheBatchesItConsumed() As Task
+        Const productId As Integer = 2
+
+        Using ctx = _fixture.NewInventory()
+            ' Explicit precondition — this test assumes it is the only source of batches here.
+            Assert.Empty(Await ctx.StockBatches.Where(Function(b) b.ProductId = productId).ToListAsync())
+        End Using
+
+        Using ctx = _fixture.NewInventory()
+            Dim service As New StockService(ctx)
+
+            ' Two batches at different costs; the earlier one must be consumed first.
+            Await service.AddStockBatchAsync(productId, 5, 10D, New DateTime(2026, 1, 1), 0, Nothing)
+            Await service.AddStockBatchAsync(productId, 5, 14D, New DateTime(2026, 2, 1), 0, Nothing)
+
+            ' Sell 7: all 5 of the cheap batch, then 2 of the dearer one.
+            '   5 * 10.00 = 50.00
+            '   2 * 14.00 = 28.00
+            '               ------
+            '                78.00
+            Dim result = Await service.DeductStockFIFOAsync(productId, 7)
+
+            Assert.Equal(7, result.DeductedQuantity)
+            Assert.True(result.Success)
+            Assert.Equal(78D, result.TotalCost)
+        End Using
+    End Function
+
 End Class
