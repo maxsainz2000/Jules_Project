@@ -67,7 +67,11 @@ Namespace Services
             Await _receiptIntegrityService.ComputeAndPersistAsync(receipt.Id)
 
             ' 8. Construct and publish events
+            ' SaleId and the per-item ProductId are load-bearing: the Accounting handler upserts its
+            ' RevenueRecord on (SourceTransactionId, ProductId). Without them both defaulted to 0, so
+            ' every sale's VAT revenue collapsed onto a single row keyed (0, 0).
             Dim vatEvent = New SaleCompletedWithVatEvent() With {
+                .SaleId = transaction.Id,
                 .VatableSales = totals.VatableSales,
                 .VatExemptSales = totals.VatExemptSales,
                 .ZeroRatedSales = totals.ZeroRatedSales,
@@ -77,6 +81,7 @@ Namespace Services
 
             For Each line In transaction.Lines
                 vatEvent.Items.Add(New SaleCompletedWithVatEvent.SaleItemWithVat() With {
+                    .ProductId = line.ProductId,
                     .Treatment = line.Treatment,
                     .VatableAmount = line.VatableAmount,
                     .VatExemptAmount = line.VatExemptAmount,
