@@ -57,6 +57,8 @@ Test gate: `dotnet test` → 35 passed, 0 failed.
 | **F5** | `PurchaseOrderLine` declared `RowVersion As Byte()` with no fluent mapping, so the **entire Purchasing model failed validation and could not be built** — every Purchasing query would throw. Masked by F2: `EnsureCreated()` short-circuited, so the model was never built at startup. | Explicit mapping added. |
 | **F6** | Eight entities declared `RowVersion As Byte()`, which the MySQL provider maps to `longblob DEFAULT NULL` with no auto-update — so the token value never changed and **could never detect a conflict**. Worst case was `Pos_ReceiptSequence`: `ReceiptIntegrityService` relies on `DbUpdateConcurrencyException` to catch two clients generating receipt numbers at once. | All eight migrated to `RowVersion As DateTime` mapped `.IsRowVersion().HasColumnType("TIMESTAMP(6)")`, matching the AGENTS.md-mandated tables. `ConcurrencyTokenTests` now asserts the column type as well as the concurrency-token flag, so an inert token cannot return. |
 | **F7** | The operator configuration contract was inconsistent in three places, and `SslMode=None` (from the operator's file) is rejected by `MySql.Data` while being accepted by `MySqlConnector` — so a correctly-followed install could not start. | Runbooks corrected (canonical path, canonical `Sync:MariaDbConnection` shape, fail-loudly behaviour) and the `SslMode` dialect constraint documented. See the SslMode note below. |
+| **F8** | Three hand-run SQL scripts competed with the EF model for the same tables. `mariadb-init.sql` created `Pos_OfficialReceipts`; the trigger script created `Pos_OfficialReceiptArchive` with a **different column set** than the entity; and the two INFRA-14 alignment scripts were byte-identical duplicates. Because `ShouldCreateTables` treats a module as present if **any** of its tables exist, running `mariadb-init.sql` first would have made the POS context skip creation entirely — leaving ten tables unbuilt, with the failure surfacing only on the first POS query. Separately, `AlignReceiptSyncColumns.sql` sat in a repo-root `Data/` folder that no project compiles, so the "versioned migration" never ran; had it been compiled as intended it would have failed on every fresh install, because it alters a table that Layer 2 creates later. | The three redundant scripts deleted; the trigger script now creates only the triggers and documents that it must run *after* first launch; the partial-schema log names the missing tables at Error level. See the corrections section. |
+| **F9** | `CreditAccountConfiguration.HasData` used `DateTime.UtcNow`, so the POS model was not deterministic — every build produced a different seed snapshot. | Replaced with a fixed `SeedCreatedAt`. The other two seed sites (`InventorySeedData`, `PurchasingSeedData`) were already deterministic. |
 
 **SslMode constraint (F7).** The single `Sync:MariaDbConnection` value is parsed by two different
 drivers — `MySql.Data` (through EF Core) and `MySqlConnector` (the raw-ADO services) — and their
@@ -87,6 +89,18 @@ corrected or are superseded by this section:
 - **INFRA-28** referenced `appsettings.Example.json`, which did not exist. It now does.
 - **INFRA-15** referenced a `Sys_UserAccounts` table and a PHC hash prefix; the table is
   `UserAccounts` and the PHC format is now genuinely produced (H8).
+- **INFRA-14** described two deployment paths for aligning `Pos_OfficialReceipts`
+  (`mariadb-receipt-schema-alignment.sql` plus an updated `mariadb-init.sql`) and a "versioned
+  migration script (version 1)" at `Data/Migrations/Central/AlignReceiptSyncColumns.sql`. All three
+  have been deleted (F8). They existed to serve the SQLite → MariaDB sync path removed by the
+  2026-05-28 pivot — neither `SyncOrchestrator` nor SQLite exists in the codebase — and the columns
+  they add (`Status`, `IssuedAt`, `IntegrityHash`) are not on the `OfficialReceipt` entity, which
+  carries only `ReceiptNumber` and `SerializedLineItems`. `AlignReceiptSyncColumns.sql` was also in
+  a repo-root `Data/` folder that no project compiles, so it never ran. The table-creating half of
+  `02-pos-receipt-integrity-triggers.sql` has been removed for the same reason, but its two
+  triggers are retained: EF Core cannot create triggers, and `ImmutableReceiptInterceptor` covers
+  only `OfficialReceipt` and `ReceiptIntegrity`, so those triggers are the sole enforcement of
+  archive immutability.
 - **INFRA-10 / INFRA-30** describe WPF `DispatcherTimer`, `ContentControl`, `Grid.Row` and
   Activity-Rail constructs. The shipped shell is WinForms/MVP; those descriptions are
   historical.

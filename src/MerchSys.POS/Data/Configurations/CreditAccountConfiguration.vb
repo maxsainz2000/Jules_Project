@@ -8,6 +8,13 @@ Namespace Data.Configurations
     Public Class CreditAccountConfiguration
         Implements IEntityTypeConfiguration(Of CreditAccount)
 
+        ''' <summary>
+        ''' Fixed timestamp for the seeded rows. <c>HasData</c> must be deterministic — EF compares
+        ''' the model against the last snapshot, so a value read at build time (such as
+        ''' <c>DateTime.UtcNow</c>) makes every build produce a different model.
+        ''' </summary>
+        Private Shared ReadOnly SeedCreatedAt As DateTime = New DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+
         Public Sub Configure(builder As EntityTypeBuilder(Of CreditAccount)) Implements IEntityTypeConfiguration(Of CreditAccount).Configure
             builder.ToTable("Pos_CreditAccounts")
 
@@ -37,7 +44,7 @@ Namespace Data.Configurations
                     .CustomerName = "John Doe",
                     .CurrentBalance = 150.50D,
                     .IsBlocked = True,
-                    .CreatedAt = DateTime.UtcNow,
+                    .CreatedAt = SeedCreatedAt,
                     .CreatedBy = "System",
                     .IsDeleted = False
                 },
@@ -46,7 +53,7 @@ Namespace Data.Configurations
                     .CustomerName = "Jane Smith",
                     .CurrentBalance = 0D,
                     .IsBlocked = False,
-                    .CreatedAt = DateTime.UtcNow,
+                    .CreatedAt = SeedCreatedAt,
                     .CreatedBy = "System",
                     .IsDeleted = False
                 },
@@ -55,7 +62,7 @@ Namespace Data.Configurations
                     .CustomerName = "Juan Dela Cruz",
                     .CurrentBalance = 5000.00D,
                     .IsBlocked = True,
-                    .CreatedAt = DateTime.UtcNow,
+                    .CreatedAt = SeedCreatedAt,
                     .CreatedBy = "System",
                     .IsDeleted = False
                 }

@@ -110,10 +110,31 @@ Namespace Data
             If modelTables.Count = 0 Then Return
 
             If Not ShouldCreateTables(existing, modelTables) Then
-                ' A partially-present schema cannot be reconciled without migrations, which this
-                ' deployment deliberately does not use. Surface it rather than guess.
+                ' ShouldCreateTables is False in two very different situations: the schema is
+                ' already complete (nothing to do — the normal path on every launch after the
+                ' first), or it is genuinely partial. Distinguish them, otherwise a healthy
+                ' database logs a false failure.
+                Dim missing = modelTables.
+                    Where(Function(t) Not existing.Contains(t)).
+                    OrderBy(Function(t) t).
+                    ToList()
+
+                If missing.Count = 0 Then
+                    If logger IsNot Nothing Then
+                        logger.LogInformation("Module schema for {Context} is already present ({TableCount} tables).", db.GetType().Name, modelTables.Count)
+                    End If
+                    Return
+                End If
+
+                ' A partial schema cannot be reconciled without migrations, which this deployment
+                ' deliberately does not use — CreateTables() is not idempotent, so calling it here
+                ' would abort on the first table that already exists. Name the missing tables: a
+                ' module skipped silently only shows up much later as an unrelated
+                ' "table doesn't exist" failure on the first query against it.
                 If logger IsNot Nothing Then
-                    logger.LogWarning("Module schema for {Context} is partially present; skipping table creation.", db.GetType().Name)
+                    logger.LogError(
+                        "Module schema for {Context} is partially present: {MissingCount} of {TotalCount} tables are missing ({Missing}). Skipping table creation — this database cannot be reconciled automatically.",
+                        db.GetType().Name, missing.Count, modelTables.Count, String.Join(", ", missing))
                 End If
                 Return
             End If
