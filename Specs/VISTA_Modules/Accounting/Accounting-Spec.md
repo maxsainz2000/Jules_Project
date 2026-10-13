@@ -144,6 +144,15 @@ Implemented the full BIR VAT Reporting Service pipeline for ACC-11. This include
 - **MerchSys.Accounting/Handlers/GoodsReceivedWithVatHandler.vb**: handles `GoodsReceivedWithVatEvent`; idempotency via `(SourceModule, SourceReferenceId.HasValue + .Value, Description.Contains)`; populates three-bucket VAT on ExpenseRecord
 - **MerchSys.Accounting/Services/IVatReportingService.vb**: interface with Generate/Get/List/File/Amend methods
 - **MerchSys.Accounting/Services/VatReportingService.vb**: full implementation; uses IMediator to get VatConfiguration cross-module; private `LedgerData` class aggregates three-bucket totals; `GuardAndClearExistingAsync` enforces lock on Filed returns; `BuildVatReturn` maps all BIR line numbers (2550M: 1-23, 2550Q: 1-28, 2551Q: 1-14); banker's rounding throughout
+
+> **⚠ Errata (2026-10-13) — the entry above does not match the shipped code.** Verified against
+> `src/` on `master` (`be7b1fa`): `VatReportingService.vb` aggregates `RevenueRecord`/`ExpenseRecord`
+> by `RecordDate` over the period and emits **two** `VatReturnLine` rows (`SALES`, `PURCH`). There is
+> no `LedgerData`, no `GuardAndClearExistingAsync`, and no `BuildVatReturn` — those identifiers do not
+> appear anywhere in `src/`; the only `MidpointRounding.ToEven` is in the POS `VatCalculator`. The
+> Filed-return lock is enforced inline in `GenerateVatReturnAsync` (throws `VatReturnLockedException`).
+> **The BIR line-number mapping described above is therefore not implemented**, which matters for the
+> Phase-6 VAT / credit-note work. Original text kept as the historical work log.
 - **MerchSys.Accounting/Services/VatReturnExporter.vb**: both `IVatReturnExporter` interface and `VatReturnExporter` class; CSV export enumerates all form-specific BIR lines; PDF export reads embedded `.template` resource with `{{Placeholder}}` substitution, falls back to built-in string if resource missing; returns `MemoryStream`
 - **MerchSys.Accounting/Presenters/VatReturnPresenter.vb**: `VatReturnLineRow`, `ExportReadyEventArgs`, full Presenter with IsForm2550M/Q/R boolean properties, `UpdateWhatThisMeans()`, `AsyncRelayCommand` for Generate/File/Amend/ExportCSV/ExportPDF; export commands raise `ExportReady` event (keeps Presenter in class library without WinForms reference)
 - **MerchSys.Accounting/Migrations/20260515100000_FixVatReturnAmendedIndex.vb**: drops full unique index on `(Year, Period, PeriodType, FormType)`; recreates as partial unique index `WHERE FilingStatus != 3` to allow Amended rows without constraint violation

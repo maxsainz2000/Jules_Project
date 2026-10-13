@@ -9,11 +9,12 @@ Imports MySqlConnector
 Namespace Data
 
     ''' <summary>
-    ''' Layer 3 of startup schema preparation: the BIR / NIRC sec. 235 immutability triggers on
-    ''' <c>Pos_OfficialReceiptArchive</c>.
+    ''' Layer 3 of startup schema preparation: the BIR / NIRC sec. 235 immutability triggers on the
+    ''' two receipt-archive tables — <c>Pos_OfficialReceiptArchive</c> and
+    ''' <c>Pos_ReceiptIntegrityArchive</c>.
     '''
     ''' EF Core cannot create triggers, so they live in an embedded SQL script. They must run
-    ''' <em>after</em> the EF model has created the archive table, which is why this is a separate
+    ''' <em>after</em> the EF model has created the archive tables, which is why this is a separate
     ''' step from <see cref="MariaDbSchemaInitializer"/> (Layer 1 — the versioned central
     ''' migrations) and runs after the module schemas (Layer 2).
     '''
@@ -23,29 +24,39 @@ Namespace Data
     ''' now applies the triggers itself (idempotently, only when they are missing) and verifies the
     ''' result, failing startup loudly if they still cannot be created (H3).
     '''
-    ''' The triggers are the <b>only</b> enforcement of immutability for
-    ''' <c>Pos_OfficialReceiptArchive</c>: <c>ImmutableReceiptInterceptor</c> is application code and
-    ''' can be bypassed by anything that talks to the database directly.
+    ''' The triggers are the <b>only</b> enforcement of immutability that survives a client which
+    ''' does not go through EF: <c>ImmutableReceiptInterceptor</c> is application code, bypassed by
+    ''' direct SQL, by another client, and by EF bulk operations (which raise no SaveChanges
+    ''' interceptor).
+    '''
+    ''' <c>Pos_OfficialReceiptArchive</c> was covered first. <c>Pos_ReceiptIntegrityArchive</c> is
+    ''' the second BIR retention table and previously had no database-level protection at all — only
+    ''' the interceptor, which is not enforcement.
     ''' </summary>
     Public NotInheritable Class ReceiptArchiveTriggerBootstrapper
 
         Private Sub New()
         End Sub
 
-        ''' <summary>The archive table the triggers guard.</summary>
-        Friend Const ArchiveTable As String = "Pos_OfficialReceiptArchive"
+        ''' <summary>The BIR retention tables these triggers guard.</summary>
+        Friend Shared ReadOnly ArchiveTables As String() = {
+            "Pos_OfficialReceiptArchive",
+            "Pos_ReceiptIntegrityArchive"
+        }
 
         ''' <summary>
         ''' The embedded DDL. The <c>.ddl</c> logical name deliberately does not end in <c>.sql</c>
         ''' so <see cref="MariaDbSchemaInitializer"/>'s "every embedded .sql is a versioned
-        ''' migration" sweep does not apply it during Layer 1 — before the archive table exists.
+        ''' migration" sweep does not apply it during Layer 1 — before the archive tables exist.
         ''' </summary>
         Friend Const TriggerScriptResource As String = "02-pos-receipt-integrity-triggers.ddl"
 
-        ''' <summary>The triggers the archive table must carry.</summary>
+        ''' <summary>The triggers the archive tables must carry.</summary>
         Public Shared ReadOnly RequiredTriggers As String() = {
             "pos_receipt_archive_no_update",
-            "pos_receipt_archive_no_delete"
+            "pos_receipt_archive_no_delete",
+            "pos_receipt_integrity_archive_no_update",
+            "pos_receipt_integrity_archive_no_delete"
         }
 
         Public Shared Sub EnsureTriggers(connectionString As String, logger As ILogger)
@@ -58,13 +69,13 @@ Namespace Data
 
                 If HasAllRequiredTriggers(ReadTriggerNames(conn)) Then
                     If logger IsNot Nothing Then
-                        logger.LogInformation("BIR receipt-archive immutability triggers are present on {Table}.", ArchiveTable)
+                        logger.LogInformation("BIR receipt-archive immutability triggers are present on {Tables}.", TablesForLog())
                     End If
                     Return
                 End If
 
                 If logger IsNot Nothing Then
-                    logger.LogWarning("BIR receipt-archive immutability triggers are missing on {Table}; applying them.", ArchiveTable)
+                    logger.LogWarning("BIR receipt-archive immutability triggers are missing on {Tables}; applying them.", TablesForLog())
                 End If
 
                 ApplyTriggerScript(conn)
@@ -72,13 +83,13 @@ Namespace Data
                 Dim afterApply = ReadTriggerNames(conn)
                 Dim missing = RequiredTriggers.Where(Function(t) Not afterApply.Contains(t)).ToList()
                 If missing.Count > 0 Then
-                    Dim message = $"BIR receipt-archive immutability is NOT enforced: trigger(s) {String.Join(", ", missing)} could not be created on {ArchiveTable}. NIRC sec. 235 immutability is unenforced — check that the database account holds the TRIGGER privilege."
+                    Dim message = $"BIR receipt-archive immutability is NOT enforced: trigger(s) {String.Join(", ", missing)} could not be created on {TablesForLog()}. NIRC sec. 235 immutability is unenforced — check that the database account holds the TRIGGER privilege."
                     If logger IsNot Nothing Then logger.LogError(message)
                     Throw New InvalidOperationException(message)
                 End If
 
                 If logger IsNot Nothing Then
-                    logger.LogInformation("Applied BIR receipt-archive immutability triggers on {Table}.", ArchiveTable)
+                    logger.LogInformation("Applied BIR receipt-archive immutability triggers on {Tables}.", TablesForLog())
                 End If
             End Using
         End Sub
@@ -95,15 +106,14 @@ Namespace Data
         End Function
 
         ''' <summary>
-        ''' The trigger names currently defined on the archive table, read from
-        ''' <c>information_schema.TRIGGERS</c> scoped to the connection's own schema.
+        ''' The trigger names currently defined in the connection's own schema, read from
+        ''' <c>information_schema.TRIGGERS</c>. Trigger names are unique per schema, so the names
+        ''' alone identify which of the required triggers are present.
         ''' </summary>
         Friend Shared Function ReadTriggerNames(conn As MySqlConnection) As HashSet(Of String)
             Dim names As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
             Using cmd = conn.CreateCommand()
-                cmd.CommandText = "SELECT TRIGGER_NAME FROM information_schema.TRIGGERS " &
-                                  "WHERE TRIGGER_SCHEMA = DATABASE() AND EVENT_OBJECT_TABLE = @table"
-                cmd.Parameters.AddWithValue("@table", ArchiveTable)
+                cmd.CommandText = "SELECT TRIGGER_NAME FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA = DATABASE()"
                 Using reader = cmd.ExecuteReader()
                     While reader.Read()
                         names.Add(reader.GetString(0))
@@ -111,6 +121,10 @@ Namespace Data
                 End Using
             End Using
             Return names
+        End Function
+
+        Private Shared Function TablesForLog() As String
+            Return String.Join(", ", ArchiveTables)
         End Function
 
         Private Shared Sub ApplyTriggerScript(conn As MySqlConnection)

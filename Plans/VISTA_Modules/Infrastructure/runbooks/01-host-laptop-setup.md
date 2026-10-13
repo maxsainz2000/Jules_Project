@@ -52,14 +52,18 @@ This runbook details the setup process for the Host Laptop, which acts as the ce
   The EF model is the single source of truth; `DatabaseBootstrapper` logs an error naming any
   tables it finds missing.
 - **The receipt-archive immutability triggers are applied automatically.** EF Core cannot create
-  triggers, and the table they guard is created by the application, so the application applies them
-  itself as the *last* startup schema step (after the EF model has created the table) and then
+  triggers, and the tables they guard are created by the application, so the application applies them
+  itself as the *last* startup schema step (after the EF model has created the tables) and then
   verifies they exist. No manual step is required, and a database cannot run with immutability
   silently unenforced — the failure mode that let NIRC sec. 235 go unenforced before.
+  - Two BIR retention tables are covered, each with an UPDATE and a DELETE trigger:
+    `Pos_OfficialReceiptArchive` and `Pos_ReceiptIntegrityArchive`. **INSERT stays allowed** — the
+    archival service inserts rows into both.
   - The database account therefore needs the `TRIGGER` privilege; the `GRANT ALL` above covers it.
     If it is missing, startup fails with a clear message rather than continuing unprotected.
-  - The triggers are the **only** enforcement for `Pos_OfficialReceiptArchive` —
-    `ImmutableReceiptInterceptor` is application code and can be bypassed by direct SQL.
+  - The triggers are the **only** enforcement that survives a direct-SQL client:
+    `ImmutableReceiptInterceptor` is application code, bypassed by raw SQL, by another client, and by
+    EF bulk operations (`ExecuteDelete`/`ExecuteUpdate` raise no SaveChanges interceptor).
   - To apply them by hand instead (e.g. to pre-seed before the first launch, or to inspect the
     DDL), the canonical script is
     `Plans/VISTA_Modules/Infrastructure/sql/02-pos-receipt-integrity-triggers.sql`:
@@ -102,6 +106,17 @@ is missing a column surfaces as "Unknown column" at runtime, not at startup.
 - The application will automatically perform schema initializations and seeding.
 - Log in using the default credentials (`manager` / `Vista2026!`).
 - Complete the mandatory first-login password change.
+- **Delete the seeded `developer` account from any database that is not for development.** It is
+  seeded **only by Debug builds** — Release compiles the seeding out — but a database that has ever
+  been opened by a Debug build still carries it, with a role-3 (Manager-superset) account whose
+  password is committed to the repository. Prune it once the database is no longer used for
+  development:
+  ```sql
+  DELETE FROM `UserAccounts` WHERE `Username` = 'developer';
+  ```
+  The deletion is not self-healing in the other direction — nothing re-creates the account in Release
+  — but a single Debug launch pointed at that database re-inserts it (`INSERT IGNORE`), so do this
+  last, and never point a Debug build at production.
 
 ## 8. Smoke Test
 - Verify you can log in with the newly set password.
