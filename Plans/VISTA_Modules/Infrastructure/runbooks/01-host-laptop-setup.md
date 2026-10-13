@@ -34,10 +34,8 @@ This runbook details the setup process for the Host Laptop, which acts as the ce
   default-time-zone = '+00:00'
   ```
 - Restart the MariaDB service via the XAMPP Control Panel.
-- Create the database and the application account before the first launch. **`mariadb-init.sql`
-  does neither** — it only creates `Pos_OfficialReceipts`, which the application now creates from
-  the EF model with a different definition, so do not run it. Connect to the local MariaDB
-  instance as `root` (for example with HeidiSQL or `mysql.exe`) and run:
+- Create the database and the application account before the first launch. Connect to the local
+  MariaDB instance as `root` (for example with HeidiSQL or `mysql.exe`) and run:
   ```sql
   CREATE DATABASE IF NOT EXISTS vista_central CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
   CREATE USER IF NOT EXISTS 'merchsys_sync'@'%' IDENTIFIED BY '<your_database_password>';
@@ -47,6 +45,19 @@ This runbook details the setup process for the Host Laptop, which acts as the ce
   The application cannot create the database itself: it opens a connection to `vista_central`
   during startup and fails with "Unknown database" if the schema does not already exist. Once
   the database exists, the first launch creates the central tables and every module table.
+- **Do not create any application table by hand before the first launch.** The startup schema
+  step treats a module as "already present" if *any* of its tables exist, and skips that module
+  entirely. Creating even one POS table manually therefore leaves the other ten POS tables
+  unbuilt, and the failure only appears later as "table doesn't exist" on the first POS query.
+  The EF model is the single source of truth; `DatabaseBootstrapper` logs an error naming any
+  tables it finds missing.
+- **After the first successful launch**, apply the receipt-archive immutability triggers:
+  ```
+  mysql -u root -p vista_central < Plans/VISTA_Modules/Infrastructure/sql/02-pos-receipt-integrity-triggers.sql
+  ```
+  EF Core cannot create triggers, and the table they guard is created by the application — so
+  this step has to come second. Verify the result with
+  `Resources/Sql/ReceiptIntegrityTriggerVerification.sql`.
 
 ## 5. Firewall Rule Configuration
 - Open **Windows Defender Firewall with Advanced Security**.
