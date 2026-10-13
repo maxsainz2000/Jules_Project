@@ -100,7 +100,8 @@ Namespace Services
             For Each line In transaction.Lines
                 legacyEvent.Items.Add(New SaleCompletedEvent.SaleCompletedItem() With {
                     .ProductId = line.ProductId,
-                    .QuantitySold = line.Quantity
+                    .QuantitySold = line.Quantity,
+                    .UnitPrice = line.UnitPrice
                 })
             Next
 

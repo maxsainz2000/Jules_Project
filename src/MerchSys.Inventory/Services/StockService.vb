@@ -40,6 +40,7 @@ Namespace Services
 
             Dim remainingToDeduct = quantity
             Dim deducted = 0
+            Dim totalCost As Decimal = 0D
 
             For Each batch In batches
                 If remainingToDeduct <= 0 Then
@@ -50,6 +51,10 @@ Namespace Services
                 batch.QuantityRemaining -= deductAmount
                 remainingToDeduct -= deductAmount
                 deducted += deductAmount
+
+                ' Cost of the units taken from THIS batch, at this batch's own unit cost — that is
+                ' what makes it FIFO costing rather than an average.
+                totalCost += CDec(deductAmount) * batch.UnitCost
             Next
 
             Await _dbContext.SaveChangesAsync()
@@ -58,7 +63,8 @@ Namespace Services
                 .ProductId = productId,
                 .DeductedQuantity = deducted,
                 .RemainingQuantityNeeded = remainingToDeduct,
-                .Success = remainingToDeduct = 0
+                .Success = remainingToDeduct = 0,
+                .TotalCost = totalCost
             }
         End Function
 

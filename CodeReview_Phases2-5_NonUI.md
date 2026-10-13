@@ -70,11 +70,33 @@ upserts on `(SourceTransactionId, ProductId)`, so **every sale's VAT revenue col
 single row keyed `(0, 0)`** — the VAT breakdown was overwritten on each sale rather than recorded
 per transaction. This one *is* live whenever `GenerateReceiptAsync` runs.
 
-### C2. COGS is always zero — the FIFO cost handler is a stub **[reported]**
-`GetProductCostQueryHandler.vb:12-15` returns `FifoUnitCost = 0D` unconditionally. Consumed at
-`SaleCompletedAccountingHandler.vb:28,31` (`totalCogs = CDec(item.QuantitySold) * unitCost`).
-Every `RevenueRecord.TotalCogs` and COGS `ExpenseRecord` is zero, so Gross Profit, the Income
-Statement and Financial Overview are all overstated.
+### C2. COGS was always zero, and revenue was never recorded at all **[verified]**
+`GetProductCostQueryHandler.vb:12-15` returned `FifoUnitCost = 0D` unconditionally — a stub with no
+dependencies at all. Consumed at `SaleCompletedAccountingHandler.vb:28,31`, so every
+`RevenueRecord.TotalCogs` and COGS `ExpenseRecord` was zero.
+
+Investigating it surfaced a **larger, adjacent gap**: `RevenueRecord.TotalRevenue`, `UnitPrice` and
+`GrossProfit` were **never written by anything**. They are *read* by
+`FinancialOverviewService.vb:40-49,70` (Today/MTD/YTD revenue and profit) and
+`IncomeStatementPresenter.vb:115` — so every revenue and gross-profit figure in the application
+reported zero. Fixing COGS alone would have made gross profit *worse* (0 − COGS), which is why both
+had to be fixed together.
+
+**Why the obvious fix was wrong.** The natural repair is to implement the cost query against current
+stock. That returns the cost of the *remaining* batches — the next cost, not the consumed one —
+which is both systematically biased and non-deterministic, because it depends on whether Inventory
+or Accounting happens to handle the event first. It would have looked correct while being wrong.
+
+**The actual fix.** Nothing in the model records which batches a sale consumed, so the true FIFO cost
+is knowable *only* at deduction time. `DeductStockFIFOAsync` now accumulates
+`deductAmount × batch.UnitCost` and returns it as `FIFODeductionResult.TotalCost`; Inventory
+publishes a new `StockDeductedEvent` carrying that cost; `StockDeductedAccountingHandler` books it.
+Revenue is carried on `SaleCompletedEvent.SaleCompletedItem.UnitPrice`. The stub, its query and its
+result type are deleted.
+
+Both accounting handlers upsert the same `RevenueRecord` and recompute `GrossProfit` from the
+persisted row, so the final value is correct whichever runs last. Covered by tests for **both
+interleavings**, each also publishing twice to prove idempotency.
 
 ### C3. `GetInventoryValuationQuery` has no handler **[reported]**
 Sent from `FinancialOverviewService.vb:55,135`; no `IRequestHandler(Of GetInventoryValuationQuery,…)`

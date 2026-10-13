@@ -9,10 +9,18 @@ Namespace Events
         Public Property SaleDate As DateTime
         Public Property Items As List(Of SaleCompletedItem) = New List(Of SaleCompletedItem)()
 
-        Public Class SaleCompletedItem
-            Public Property ProductId As Integer
-            Public Property QuantitySold As Integer
-        End Class
+            Public Class SaleCompletedItem
+                Public Property ProductId As Integer
+                Public Property QuantitySold As Integer
+
+                ''' <summary>
+                ''' Price per unit at the time of sale. Accounting needs it to record revenue —
+                ''' without it <c>RevenueRecord.TotalRevenue</c> was never populated, so every
+                ''' revenue and gross-profit figure in FinancialOverviewService and
+                ''' IncomeStatementPresenter reported zero.
+                ''' </summary>
+                Public Property UnitPrice As Decimal
+            End Class
     End Class
 
 End Namespace
