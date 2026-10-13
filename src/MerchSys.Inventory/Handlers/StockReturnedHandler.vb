@@ -70,7 +70,16 @@ Namespace Handlers
                         item.ProductId, notification.SaleId, item.QuantityReturned)
                 End If
 
-                ' No purchase order behind a customer return.
+                ' No purchase order behind a customer return, and no expiry date either.
+                '
+                ' The expiry is deliberately left null rather than guessed. A returned item has no
+                ' batch lineage — nothing records which batch a sale consumed (the same gap that
+                ' forces FIFO cost to be captured at deduction time) — so the batch it came from,
+                ' and therefore its expiry, cannot be recovered here. Inventing one (e.g. from
+                ' whichever batch is on hand) would put a wrong date in the expiry monitor and could
+                ' trigger a false write-off, which is worse than a missing date. The fix is to take
+                ' the date from the operator at return time, who has the physical item; that needs a
+                ' return-dialog input for products with HasExpiry. Tracked in Deferred_Tasks.md.
                 Await _stockService.AddStockBatchAsync(
                     item.ProductId,
                     item.QuantityReturned,
