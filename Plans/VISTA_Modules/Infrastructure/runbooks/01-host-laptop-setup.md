@@ -59,6 +59,20 @@ This runbook details the setup process for the Host Laptop, which acts as the ce
   this step has to come second. Verify the result with
   `Resources/Sql/ReceiptIntegrityTriggerVerification.sql`.
 
+## 4b. Existing databases: schema changes the application cannot apply itself
+The application derives its schema from the EF model, but **only when it creates the tables** — there
+are no migrations, so a model change never reaches a database that already exists. A database created
+before one of the changes below needs the column added by hand, or the affected screen fails.
+
+- **`Pos_SalesReturns.SerializedLines`** (LONGTEXT NULL) — records which products a return covered.
+  Without it, processing a return fails and the transaction history screen cannot load returns.
+  ```sql
+  ALTER TABLE vista_central.Pos_SalesReturns ADD COLUMN SerializedLines LONGTEXT NULL;
+  ```
+
+Check for anything else the model expects but the database lacks by comparing the two — a table that
+is missing a column surfaces as "Unknown column" at runtime, not at startup.
+
 ## 5. Firewall Rule Configuration
 - Open **Windows Defender Firewall with Advanced Security**.
 - Create a new **Inbound Rule**.
