@@ -8,6 +8,7 @@ Imports Microsoft.EntityFrameworkCore
 Imports MediatR
 Imports MerchSys.POS.Entities
 Imports MerchSys.POS.Services
+Imports MerchSys.SharedKernel.Enums
 Imports MerchSys.SharedKernel.Events
 Imports MerchSys.SharedKernel.Interfaces
 
@@ -54,7 +55,10 @@ Public Class SalesReturnServiceTests
                 .ProductName = "Return Test Product",
                 .UnitPrice = TestUnitPrice,
                 .Quantity = PurchasedQuantity,
-                .LineTotal = PurchasedQuantity * TestUnitPrice
+                .LineTotal = PurchasedQuantity * TestUnitPrice,
+                .Treatment = VatTreatment.Vatable,
+                .VatableAmount = 90D,          ' 100.00 gross = 90.00 vatable + 10.00 output VAT
+                .OutputVat = 10D
             })
 
             ctx.SalesTransactions.Add(transaction)
@@ -180,6 +184,32 @@ Public Class SalesReturnServiceTests
             Dim item = Assert.Single(Assert.IsType(Of SaleReturnedEvent)(Assert.Single(bus.Published)).Items)
             Assert.Equal(PurchasedQuantity, item.QuantityReturned)
             Assert.Equal(PurchasedQuantity, item.CumulativeQuantityReturned)
+        End Using
+    End Function
+
+    ''' <summary>
+    ''' Accounting reverses output VAT from the figures carried on the event, because the
+    ''' RevenueRecord's own VAT columns are overwritten by each reversal. The sale line is the only
+    ''' place the originals still exist, so the service has to put them on the event.
+    ''' </summary>
+    <Fact>
+    Public Async Function ReturnEventCarriesTheOriginalVatFigures() As Task
+        Using fixture As New TestDatabaseFixture()
+            Dim sale = Await CreateSaleAsync(fixture)
+            Dim bus As New CapturingEventBus()
+
+            Using ctx = fixture.NewPOS()
+                Dim service As New SalesReturnService(ctx, bus)
+                Await service.ProcessReturnAsync(
+                    sale.Item1, New Dictionary(Of Integer, Integer) From {{sale.Item2, 2}}, "Damaged", True)
+            End Using
+
+            Dim item = Assert.Single(Assert.IsType(Of SaleReturnedEvent)(Assert.Single(bus.Published)).Items)
+
+            Assert.Equal(90D, item.OriginalVatableAmount)
+            Assert.Equal(10D, item.OriginalOutputVat)
+            Assert.Equal(0D, item.OriginalVatExemptAmount)
+            Assert.Equal(0D, item.OriginalZeroRatedAmount)
         End Using
     End Function
 

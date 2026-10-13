@@ -36,6 +36,18 @@ Namespace Events
             Public Property CumulativeQuantityReturned As Integer
             Public Property OriginalQuantitySold As Integer
             Public Property UnitPrice As Decimal
+
+            ''' <summary>
+            ''' The VAT figures the original sale booked for this product, for the original quantity.
+            ''' Carried on the event rather than read back from the <c>RevenueRecord</c> because that
+            ''' record's own VAT columns are overwritten by each reversal — using them as the base
+            ''' would compound on a repeated publication. Accounting assigns
+            ''' <c>original × (net ÷ original quantity)</c> so the reversal stays idempotent.
+            ''' </summary>
+            Public Property OriginalVatableAmount As Decimal
+            Public Property OriginalVatExemptAmount As Decimal
+            Public Property OriginalZeroRatedAmount As Decimal
+            Public Property OriginalOutputVat As Decimal
         End Class
 
     End Class

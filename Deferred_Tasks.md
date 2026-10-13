@@ -9,6 +9,7 @@ This ledger acts as a central tracking point for any tasks that Jules AI encount
 | Date | Phase / ID | Description of Issue / Jules Feedback | Agent Recommendation | Status |
 |---|---|---|---|---|
 | _Example_ | _INV-02_ | _Spec demands local SQLite for caching, violating MariaDB-only rule_ | _Rewrite Spec INV-02 to use MemoryCache_ | _Pending Review_ |
+| 2026-10-13 | Returns / INV-02 | A restocked sales return is created with **no expiry date** — `StockReturnedHandler` passes `expiryDate:=Nothing` — so returned pesticides, seeds and feeds never appear in the expiry monitor (INV-12). The return path has **no batch lineage**: nothing records which batch a sale consumed, so the original batch's expiry cannot be recovered. A guessed date would be worse than a missing one — it would put a wrong date in the monitor and could trigger a false write-off. | Take the date from the **operator at return time**, who has the physical item: add an optional per-product expiry to the return flow (`ProcessReturnRequestedEventArgs` → `ISalesReturnService.ProcessReturnAsync` → `SaleReturnedEvent.ReturnedItem.ExpiryDate` → `StockReturnedHandler`), surfaced only for products with `HasExpiry = True`. The event/handler plumbing is small; the return dialog is the larger half. The alternative — recording batch consumption at sale time — is the deeper fix but touches the (currently unwired) checkout path. | Pending Review |
 
 ---
 

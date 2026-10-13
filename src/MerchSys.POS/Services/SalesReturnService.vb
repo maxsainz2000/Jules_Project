@@ -27,6 +27,16 @@ Namespace Services
             Public Property UnitPrice As Decimal
         End Class
 
+        ''' <summary>
+        ''' The VAT the original sale booked for one product, summed across that product's lines.
+        ''' </summary>
+        Private Class ProductVat
+            Public Property VatableAmount As Decimal
+            Public Property VatExemptAmount As Decimal
+            Public Property ZeroRatedAmount As Decimal
+            Public Property OutputVat As Decimal
+        End Class
+
         Public Async Function ProcessReturnAsync(transactionId As Integer, returnQuantities As Dictionary(Of Integer, Integer), reason As String, isRestocked As Boolean) As Task(Of SalesReturn) Implements ISalesReturnService.ProcessReturnAsync
             Dim transactionData = Await _db.SalesTransactions _
                 .Where(Function(t) t.Id = transactionId) _
@@ -66,6 +76,20 @@ Namespace Services
             Dim originalByProduct = transaction.Lines.
                 GroupBy(Function(l) l.ProductId).
                 ToDictionary(Function(g) g.Key, Function(g) g.Sum(Function(l) l.Quantity))
+
+            ' The VAT the sale booked, per product. Accounting reverses output VAT on a return and
+            ' needs the original figures: the RevenueRecord's own VAT columns are overwritten by
+            ' each reversal, so they cannot serve as the base.
+            Dim vatByProduct = transaction.Lines.
+                GroupBy(Function(l) l.ProductId).
+                ToDictionary(
+                    Function(g) g.Key,
+                    Function(g) New ProductVat With {
+                        .VatableAmount = g.Sum(Function(l) l.VatableAmount),
+                        .VatExemptAmount = g.Sum(Function(l) l.VatExemptAmount),
+                        .ZeroRatedAmount = g.Sum(Function(l) l.ZeroRatedAmount),
+                        .OutputVat = g.Sum(Function(l) l.OutputVat)
+                    })
 
             Dim previouslyReturnedByProduct = Await GetPreviouslyReturnedByProductAsync(transactionId)
 
@@ -151,12 +175,19 @@ Namespace Services
             }
 
             For Each line In returnedLines
+                Dim productVat As ProductVat = Nothing
+                vatByProduct.TryGetValue(line.ProductId, productVat)
+
                 returnedEvent.Items.Add(New SaleReturnedEvent.ReturnedItem With {
                     .ProductId = line.ProductId,
                     .QuantityReturned = line.Quantity,
                     .CumulativeQuantityReturned = line.Quantity + If(previouslyReturnedByProduct.ContainsKey(line.ProductId), previouslyReturnedByProduct(line.ProductId), 0),
                     .OriginalQuantitySold = If(originalByProduct.ContainsKey(line.ProductId), originalByProduct(line.ProductId), 0),
-                    .UnitPrice = line.UnitPrice
+                    .UnitPrice = line.UnitPrice,
+                    .OriginalVatableAmount = If(productVat?.VatableAmount, 0D),
+                    .OriginalVatExemptAmount = If(productVat?.VatExemptAmount, 0D),
+                    .OriginalZeroRatedAmount = If(productVat?.ZeroRatedAmount, 0D),
+                    .OriginalOutputVat = If(productVat?.OutputVat, 0D)
                 })
             Next
 
