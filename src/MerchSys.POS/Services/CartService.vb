@@ -92,7 +92,13 @@ Namespace Services
             }
 
             For Each line In cart.Lines
+                ' ProductId is load-bearing and must not be omitted. It used to be missing here, so
+                ' every persisted line defaulted to 0: the sale-completion handler then deducted stock
+                ' for product 0 and threw InsufficientStockException, and Accounting — which keys
+                ' RevenueRecord on (SourceTransactionId, ProductId) — collapsed every line of a
+                ' multi-line sale into a single row.
                 transaction.Lines.Add(New SalesTransactionLine With {
+                    .ProductId = line.ProductId,
                     .ProductName = line.ProductName,
                     .UnitPrice = line.UnitPrice,
                     .Quantity = line.Quantity,
