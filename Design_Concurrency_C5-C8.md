@@ -222,8 +222,23 @@ window, for two reasons found while implementing:
   - Note: the translation covers all seven saves the token can affect (`UpdateDraft`, `Submit`,
     `Receive`, `Verify`, `Close`, `RecalculateTotal`, `Delete`), not just the four transitions —
     otherwise the token would have replaced a silent overwrite with a raw provider error.
-- [ ] **T5 — C7 transaction number.** (`CartService.vb`, tests.)
-- [ ] **T6 — C8b sequence retry** (small) **+ C8a chain serialization** (if D4 approves).
+- [x] **T5 — C7 transaction number.** `CartService.FinalizeTransactionAsync` re-derives and retries
+  on a duplicate key, bounded at 5 attempts. `DuplicateKeyDetector` matches MariaDB's
+  "Duplicate entry" text rather than catching the provider's exception type, which POS does not
+  reference.
+  - Verified: `PosIdentifierConcurrencyTests.ConcurrentSalesAllocateDistinctTransactionNumbers`.
+- [x] **T6 — C8b sequence retry + C8a chain serialization.**
+  - C8b: the retry loop now also catches the duplicate key, and detaches the rejected insert so the
+    retry is not the same failing insert for ever.
+  - C8a: the append takes `FOR UPDATE` on that year's `Pos_ReceiptSequence` row, and **both the tail
+    read and `ValidateChainAsync` now walk the integrity table's own `Id`** — append order.
+  - **Finding while implementing:** the fork had *two* causes. Serializing the append alone was not
+    enough, because the chain was built in append order but validated in `ReceiptId` order — two
+    different sequences (a receipt is created before its integrity row is appended). The test caught
+    this: it still failed with the lock in place until the ordering was corrected too.
+  - Verified: `ConcurrentIntegrityAppendsDoNotForkTheChain` and
+    `ConcurrentReceiptNumbersAreAllDistinct`; the chain test was confirmed to **fail** with the lock
+    removed.
 - [ ] **T7 — verify.** Full suite + Debug/Release build; live smoke test; runbook + memory updated.
 - [ ] **T8 — D1(c) pre-commit stock check.** Must sit at the cart checkout (`CartService.vb:116`),
   via the existing `GetCurrentStockQuery`, **not** at payment. POS-side; the checkout path is

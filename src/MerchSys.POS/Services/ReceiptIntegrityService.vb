@@ -1,12 +1,15 @@
 Imports System
+Imports System.Data.Common
 Imports System.Security.Cryptography
 Imports System.Text
 Imports System.Threading.Tasks
 Imports Microsoft.EntityFrameworkCore
+Imports Microsoft.EntityFrameworkCore.Storage
 Imports Microsoft.Extensions.Logging
 Imports MediatR
 Imports MerchSys.POS.Data
 Imports MerchSys.POS.Entities
+Imports MerchSys.SharedKernel.Data
 Imports MerchSys.SharedKernel.Events
 
 Namespace Services
@@ -43,26 +46,75 @@ Namespace Services
                 Throw New ArgumentException($"Receipt with ID {receiptId} not found.")
             End If
 
-            Dim lastIntegrity = Await _db.ReceiptIntegrities.OrderByDescending(Function(ri) ri.ReceiptId).FirstOrDefaultAsync()
-            Dim prevHash = If(lastIntegrity IsNot Nothing, lastIntegrity.IntegrityHash, GenesisHash)
+            Using transaction = Await _db.Database.BeginTransactionAsync()
+                ' Serialize the append. Reading the tail and then writing a row that points at it is a
+                ' read-modify-write: two clients issuing a receipt at the same moment read the same
+                ' PreviousHash and the chain forks — each row validates on its own, and
+                ' ValidateChainAsync then reports a break.
+                Await LockReceiptSequenceAsync(receipt.CreatedAt.Year)
 
-            Dim canonicalStr = Await BuildCanonicalStringAsync(receipt.Id, receipt.ReceiptNumber)
-            Dim computedHash = ComputeSha256(canonicalStr + prevHash)
+                ' The chain follows APPEND order — this table's own identity column, not ReceiptId.
+                ' They are two different sequences: a receipt is created before its integrity row is
+                ' appended, so two clients can append in the opposite order to their ReceiptIds.
+                ' Chaining on ReceiptId is what let the chain fork even once appends were serialized.
+                Dim lastIntegrity = Await _db.ReceiptIntegrities.OrderByDescending(Function(ri) ri.Id).FirstOrDefaultAsync()
+                Dim prevHash = If(lastIntegrity IsNot Nothing, lastIntegrity.IntegrityHash, GenesisHash)
 
-            Dim integrity As New ReceiptIntegrity With {
-                .ReceiptId = receipt.Id,
-                .IntegrityHash = computedHash,
-                .PreviousHash = prevHash,
-                .RetentionExpiresAt = receipt.CreatedAt.AddYears(10),
-                .CanonicalPayload = canonicalStr,
-                .IsImmutable = True,
-                .HashAlgorithm = "SHA-256-v1"
-            }
+                Dim canonicalStr = Await BuildCanonicalStringAsync(receipt.Id, receipt.ReceiptNumber)
+                Dim computedHash = ComputeSha256(canonicalStr + prevHash)
 
-            _db.ReceiptIntegrities.Add(integrity)
-            Await _db.SaveChangesAsync()
+                Dim integrity As New ReceiptIntegrity With {
+                    .ReceiptId = receipt.Id,
+                    .IntegrityHash = computedHash,
+                    .PreviousHash = prevHash,
+                    .RetentionExpiresAt = receipt.CreatedAt.AddYears(10),
+                    .CanonicalPayload = canonicalStr,
+                    .IsImmutable = True,
+                    .HashAlgorithm = "SHA-256-v1"
+                }
 
-            Return integrity
+                _db.ReceiptIntegrities.Add(integrity)
+                Await _db.SaveChangesAsync()
+                Await transaction.CommitAsync()
+
+                Return integrity
+            End Using
+        End Function
+
+        ''' <summary>
+        ''' Locks the receipt-sequence row for a year, which serializes receipt issuance for that year.
+        '''
+        ''' That row is the right lock: the receipt number was issued from it moments earlier, so it
+        ''' exists, and every receipt of the year contends on it. Locking "the last integrity row"
+        ''' instead would have no row to lock when the chain is empty — which is exactly when the
+        ''' first two receipts race.
+        '''
+        ''' The lock is per year while the chain is global, so two receipts issued in different
+        ''' calendar years within the same instant are not serialized against each other — a residual
+        ''' narrower than the defect it replaces.
+        '''
+        ''' Same raw-ADO approach as the inventory batch lock: EF cannot express FOR UPDATE, and the
+        ''' connection belongs to MySql.Data (casting it to MySqlConnector throws).
+        ''' </summary>
+        Private Async Function LockReceiptSequenceAsync(year As Integer) As Task
+            Dim connection = _db.Database.GetDbConnection()
+            Dim currentTransaction = _db.Database.CurrentTransaction
+            Dim tableName = _db.Model.FindEntityType(GetType(ReceiptSequence)).GetTableName()
+
+            Using command = connection.CreateCommand()
+                If currentTransaction IsNot Nothing Then
+                    command.Transaction = currentTransaction.GetDbTransaction()
+                End If
+
+                command.CommandText = $"SELECT Id FROM `{tableName}` WHERE Year = @year FOR UPDATE"
+                command.AddParameter("@year", year)
+
+                Using reader = Await command.ExecuteReaderAsync()
+                    While Await reader.ReadAsync()
+                        ' Reading the row is what acquires the lock.
+                    End While
+                End Using
+            End Using
         End Function
 
         Public Async Function ValidateAsync(receiptId As Integer) As Task(Of IntegrityValidationResult) Implements IReceiptIntegrityService.ValidateAsync
@@ -104,7 +156,10 @@ Namespace Services
         End Function
 
         Public Async Function ValidateChainAsync() As Task(Of ChainValidationResult) Implements IReceiptIntegrityService.ValidateChainAsync
-            Dim integrities = Await _db.ReceiptIntegrities.Include(Function(ri) ri.OfficialReceipt).OrderBy(Function(ri) ri.ReceiptId).ToListAsync()
+            ' Walk in APPEND order (this table's own Id), matching how ComputeAndPersistAsync builds
+            ' the chain. Walking ReceiptId instead traverses a different sequence and reports a break
+            ' for a chain that is in fact intact.
+            Dim integrities = Await _db.ReceiptIntegrities.Include(Function(ri) ri.OfficialReceipt).OrderBy(Function(ri) ri.Id).ToListAsync()
             Dim currentPrevHash = GenesisHash
             Dim verifiedCount = 0
 
@@ -139,9 +194,10 @@ Namespace Services
         End Function
 
         Public Async Function GetNextReceiptNumberAsync(year As Integer) As Task(Of String) Implements IReceiptIntegrityService.GetNextReceiptNumberAsync
-            Dim retries = 0
-            While retries < 10
-                Dim concurrencyException As DbUpdateConcurrencyException = Nothing
+            Const maxAttempts As Integer = 10
+
+            For attempt = 1 To maxAttempts
+                Dim failure As Exception = Nothing
                 Try
                     Dim seq = Await _db.ReceiptSequences.FirstOrDefaultAsync(Function(rs) rs.Year = year)
                     If seq Is Nothing Then
@@ -154,19 +210,41 @@ Namespace Services
 
                     Return $"OR-{year}-{seq.LastSequenceNumber:D4}"
                 Catch ex As DbUpdateConcurrencyException
-                    concurrencyException = ex
+                    failure = ex
+                Catch ex As DbUpdateException When DuplicateKeyDetector.IsDuplicateKey(ex)
+                    ' Two clients issued the first receipt of the year at the same moment: both found
+                    ' no sequence row and both tried to insert one. The unique index on Year rejects
+                    ' the loser — and that used to escape unhandled, failing receipt generation
+                    ' outright rather than retrying.
+                    failure = ex
                 End Try
 
-                If concurrencyException IsNot Nothing Then
-                    retries += 1
-                    For Each dbEntry In concurrencyException.Entries
+                ' Discard the rejected insert, or the retry would repeat exactly the same failing
+                ' insert for ever.
+                DetachAddedReceiptSequences()
+
+                Dim concurrencyFailure = TryCast(failure, DbUpdateConcurrencyException)
+                If concurrencyFailure IsNot Nothing Then
+                    For Each dbEntry In concurrencyFailure.Entries
                         Await dbEntry.ReloadAsync()
                     Next
                 End If
-            End While
+            Next
 
             Throw New Exception("Failed to generate next receipt number due to high concurrency.")
         End Function
+
+        ''' <summary>
+        ''' Discards receipt-sequence rows that exist only as a failed insert, so a retry starts from
+        ''' the persisted state rather than repeating the same rejected insert.
+        ''' </summary>
+        Private Sub DetachAddedReceiptSequences()
+            For Each dbEntry In _db.ChangeTracker.Entries(Of ReceiptSequence)().ToList()
+                If dbEntry.State = EntityState.Added Then
+                    dbEntry.State = EntityState.Detached
+                End If
+            Next
+        End Sub
 
         Private Function ComputeSha256(input As String) As String
             Using sha256 As SHA256 = SHA256.Create()
