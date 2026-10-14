@@ -27,10 +27,46 @@ Namespace Services
             Await _dbContext.SaveChangesAsync()
         End Function
 
+        ''' <summary>
+        ''' Deducts stock FIFO, serialized against the other client laptops.
+        '''
+        ''' AGENTS.md requires <c>SELECT ... FOR UPDATE</c> here, and this is why: without it the
+        ''' method is an unlocked read-modify-write, so two clients can both read the same batches,
+        ''' both pass the sufficiency check, and both try to decrement. The row-version token catches
+        ''' the second one — but only after the sale is already committed, so the sale succeeds and
+        ''' the stock silently fails to move.
+        '''
+        ''' The lock and the decrement share one transaction, so the second client blocks on the
+        ''' first and then reads the post-decrement quantities instead of failing.
+        '''
+        ''' If the caller already has a transaction open — <c>SaleCompletedHandler</c> wraps a whole
+        ''' sale's items in one, so a mid-sale failure cannot leave a partial deduction — this joins
+        ''' it rather than beginning a nested one. EF throws if a second transaction is started on a
+        ''' context that already has one, and joining is what makes the caller's unit of work atomic.
+        ''' </summary>
         Public Async Function DeductStockFIFOAsync(productId As Integer, quantity As Integer) As Task(Of FIFODeductionResult) Implements IStockService.DeductStockFIFOAsync
+            If _dbContext.Database.CurrentTransaction IsNot Nothing Then
+                Return Await DeductStockFIFOCoreAsync(productId, quantity)
+            End If
+
+            ' No explicit commit path: disposing an uncommitted transaction rolls it back, so an
+            ' exception anywhere below leaves the batches untouched.
+            Using transaction = Await _dbContext.Database.BeginTransactionAsync()
+                Dim result = Await DeductStockFIFOCoreAsync(productId, quantity)
+                Await transaction.CommitAsync()
+                Return result
+            End Using
+        End Function
+
+        Private Async Function DeductStockFIFOCoreAsync(productId As Integer, quantity As Integer) As Task(Of FIFODeductionResult)
+            ' Lock before reading. The ordering must match the read below: two clients that take the
+            ' same locks in the same order simply queue, whereas different orders deadlock.
+            Await StockBatchLock.LockInStockBatchesAsync(_dbContext, productId)
+
             Dim batches = Await _dbContext.StockBatches.
                 Where(Function(b) b.ProductId = productId AndAlso b.QuantityRemaining > 0).
                 OrderBy(Function(b) b.ReceiptDate).
+                ThenBy(Function(b) b.Id).
                 ToListAsync()
 
             Dim totalAvailable = batches.Sum(Function(b) b.QuantityRemaining)
