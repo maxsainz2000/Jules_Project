@@ -10,6 +10,14 @@ Namespace Data.Configurations
             builder.ToTable("PurchaseOrders")
             builder.HasIndex(Function(e) e.OrderNumber).IsUnique()
 
+            ' Optimistic concurrency token. The mapping is mandatory: BaseDbContext's
+            ' IgnoreNonTokenRowVersionConvention removes any RowVersion that is not explicitly mapped
+            ' as a token, and an unmapped one fails model validation for the whole module.
+            builder.Property(Function(e) e.RowVersion).
+                IsRowVersion().
+                IsConcurrencyToken().
+                HasColumnType("TIMESTAMP(6)")
+
             builder.HasMany(Of PurchaseOrderLine)().
                 WithOne().
                 HasForeignKey(Function(l) l.PurchaseOrderId).

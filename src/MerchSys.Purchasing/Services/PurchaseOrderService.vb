@@ -5,6 +5,7 @@ Imports System.Threading.Tasks
 Imports MerchSys.SharedKernel.Paging
 Imports MerchSys.SharedKernel.Enums
 Imports MerchSys.SharedKernel.Data
+Imports MerchSys.SharedKernel.Exceptions
 Imports MerchSys.Purchasing.Helpers
 Imports System
 
@@ -99,7 +100,7 @@ Namespace Services
             If notes IsNot Nothing Then po.Notes = notes
             If expectedDeliveryDate IsNot Nothing Then po.ExpectedDeliveryDate = expectedDeliveryDate
 
-            Await _dbContext.SaveChangesAsync()
+            Await SaveOrReportConflictAsync("updating it")
             Return po
         End Function
 
@@ -109,7 +110,7 @@ Namespace Services
             If po.Status <> PurchaseOrderStatus.Draft Then Throw New InvalidOperationException("Can only submit draft purchase orders.")
 
             po.Status = PurchaseOrderStatus.Submitted
-            Await _dbContext.SaveChangesAsync()
+            Await SaveOrReportConflictAsync("submitting it")
         End Function
 
         Public Async Function ReceiveAsync(id As Integer) As Task Implements IPurchaseOrderService.ReceiveAsync
@@ -118,7 +119,7 @@ Namespace Services
             If po.Status <> PurchaseOrderStatus.Submitted Then Throw New InvalidOperationException("Can only receive submitted purchase orders.")
 
             po.Status = PurchaseOrderStatus.Received
-            Await _dbContext.SaveChangesAsync()
+            Await SaveOrReportConflictAsync("receiving it")
         End Function
 
         Public Async Function VerifyAsync(id As Integer) As Task Implements IPurchaseOrderService.VerifyAsync
@@ -127,7 +128,7 @@ Namespace Services
             If po.Status <> PurchaseOrderStatus.Received Then Throw New InvalidOperationException("Can only verify received purchase orders.")
 
             po.Status = PurchaseOrderStatus.Verified
-            Await _dbContext.SaveChangesAsync()
+            Await SaveOrReportConflictAsync("verifying it")
         End Function
 
         Public Async Function CloseAsync(id As Integer) As Task Implements IPurchaseOrderService.CloseAsync
@@ -148,7 +149,10 @@ Namespace Services
             }
             _dbContext.Set(Of AccountsPayableEntry)().Add(apEntry)
 
-            Await _dbContext.SaveChangesAsync()
+            ' One SaveChanges, so the status change and the payable entry commit together — the token
+            ' guard here is what stops two clients closing the same order and booking the liability
+            ' twice.
+            Await SaveOrReportConflictAsync("closing it")
         End Function
 
         Public Async Function AddLineAsync(id As Integer, line As CreatePOLineDto) As Task(Of PurchaseOrderLine) Implements IPurchaseOrderService.AddLineAsync
@@ -192,10 +196,31 @@ Namespace Services
                     Where(Function(l) l.PurchaseOrderId = id).
                     SumAsync(Function(l) l.LineTotal)
                 po.TotalAmount = total
-                Await _dbContext.SaveChangesAsync()
+                Await SaveOrReportConflictAsync("recalculating its total")
             End If
         End Function
     
+        ''' <summary>
+        ''' Saves and translates a lost race into the operator-facing conflict AGENTS.md requires.
+        '''
+        ''' The order carries a row-version token, so a write based on a stale read fails here
+        ''' instead of silently overwriting the other client's change — which is the whole point of
+        ''' the token. Without this translation the operator would see a raw provider error.
+        ''' </summary>
+        Private Async Function SaveOrReportConflictAsync(operation As String) As Task
+            ' Capture the failure rather than awaiting in the Catch block (VB forbids Await there).
+            Dim concurrencyFailure As DbUpdateConcurrencyException = Nothing
+            Try
+                Await _dbContext.SaveChangesAsync()
+            Catch ex As DbUpdateConcurrencyException
+                concurrencyFailure = ex
+            End Try
+
+            If concurrencyFailure IsNot Nothing Then
+                Throw New ConcurrentModificationException($"Purchase order was changed by another client while {operation}.")
+            End If
+        End Function
+
         Public Async Function GetByIdAsync(id As Integer) As Task(Of PurchaseOrder) Implements IPurchaseOrderService.GetByIdAsync
             Dim items = Await _dbContext.Set(Of PurchaseOrder)().Where(Function(p) p.Id = id).Select(Function(p) New With { .Id = p.Id, .OrderNumber = p.OrderNumber, .VendorId = p.VendorId, .Status = p.Status, .Notes = p.Notes, .ExpectedDeliveryDate = p.ExpectedDeliveryDate, .TotalAmount = p.TotalAmount, .CreatedAt = p.CreatedAt, .CreatedBy = p.CreatedBy, .ModifiedAt = p.ModifiedAt, .ModifiedBy = p.ModifiedBy, .IsDeleted = p.IsDeleted }).ToListAsync()
             If items.Count = 0 Then Return Nothing
@@ -217,7 +242,7 @@ Namespace Services
             If po Is Nothing Then Throw New InvalidOperationException("Purchase order not found.")
             If po.Status <> PurchaseOrderStatus.Draft Then Throw New InvalidOperationException("Can only delete draft purchase orders.")
             _dbContext.Set(Of PurchaseOrder)().Remove(po)
-            Await _dbContext.SaveChangesAsync()
+            Await SaveOrReportConflictAsync("deleting it")
         End Function
 
         Public Async Function SearchAsync(term As String, status As PurchaseOrderStatus?) As Task(Of List(Of PurchaseOrder)) Implements IPurchaseOrderService.SearchAsync
