@@ -213,11 +213,15 @@ window, for two reasons found while implementing:
   - Verified: `AMidSaleFailureLeavesNoDeductionAndPublishesNothing`.
 - [x] **T3 — `ShrinkageService` same treatment.**
   - Verified: `ShrinkageDeductsFifoAndReportsTheValue`.
-- [ ] **T4 — C6 `PurchaseOrder` token.** `PurchaseOrder.vb`, `PurchaseOrderConfiguration.vb`,
+- [x] **T4 — C6 `PurchaseOrder` token.** `PurchaseOrder.vb`, `PurchaseOrderConfiguration.vb`,
   runbook 01 §4b, tests.
   - Acceptance: two concurrent `CloseAsync` calls → one succeeds, one surfaces the conflict; only one
     AP entry exists.
-  - Verify: integration test with two contexts.
+  - Verified: `PurchaseOrderConcurrencyTests` — two tests (close and submit), both confirmed to **fail**
+    with the token removed. Applied to `vista_central`; the runbook carries the hand-run ALTER.
+  - Note: the translation covers all seven saves the token can affect (`UpdateDraft`, `Submit`,
+    `Receive`, `Verify`, `Close`, `RecalculateTotal`, `Delete`), not just the four transitions —
+    otherwise the token would have replaced a silent overwrite with a raw provider error.
 - [ ] **T5 — C7 transaction number.** (`CartService.vb`, tests.)
 - [ ] **T6 — C8b sequence retry** (small) **+ C8a chain serialization** (if D4 approves).
 - [ ] **T7 — verify.** Full suite + Debug/Release build; live smoke test; runbook + memory updated.
