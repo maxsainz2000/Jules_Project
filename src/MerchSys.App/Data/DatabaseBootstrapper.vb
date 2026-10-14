@@ -43,6 +43,10 @@ Namespace Data
             ' Layer 1 — central schema + reference data (versioned embedded SQL).
             MariaDbSchemaInitializer.Initialize(connectionString, logger)
 
+            ' Also central schema, but created here rather than as versioned SQL or an EF entity — see
+            ' AuditLogSchema. Shared by all four module contexts, so no module may own it.
+            AuditLogTableBootstrapper.EnsureTable(connectionString, logger)
+
             ' Layer 2 — module schemas from the EF model.
             EnsureModuleSchemas(connectionString, serviceProvider, logger)
 

@@ -6,6 +6,7 @@ Namespace Entities
     ''' </summary>
     Public Class CreditAccount
         Inherits SoftDeletableEntity
+        Implements MerchSys.SharedKernel.Interfaces.IAuditedEntity
 
         ''' <summary>
         ''' Gets or sets the customer's name.

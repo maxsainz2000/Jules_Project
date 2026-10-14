@@ -3,6 +3,7 @@ Imports MerchSys.SharedKernel.Entities
 Namespace Entities
     Public Class VatReturnLine
         Inherits AuditableEntity
+        Implements MerchSys.SharedKernel.Interfaces.IAuditedEntity
 
         Public Property VatReturnId As Integer
         Public Property LineNumber As Integer

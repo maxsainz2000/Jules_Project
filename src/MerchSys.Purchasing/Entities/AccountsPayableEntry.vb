@@ -4,6 +4,7 @@ Imports MerchSys.SharedKernel.Entities
 Namespace Entities
     Public Class AccountsPayableEntry
         Inherits AuditableEntity
+        Implements MerchSys.SharedKernel.Interfaces.IAuditedEntity
 
         Public Property VendorId As Integer
         Public Property PurchaseOrderId As Integer?

@@ -162,6 +162,11 @@ audit table** in the schema (queried `information_schema.TABLES … LIKE '%audit
 audit log. Successful financial operations log nothing: `PaymentService.vb:21-86` has no logger,
 `VatReportingService.vb` has none, `SaleCompletedHandler.vb:25` logs only on exception.
 
+**Fixed 2026-10-14 (PR #132, branch `feat/audit-trail`).** `App_AuditLog` is written transactionally by
+`BaseDbContext.SaveChangesAsync` for the opt-in `IAuditedEntity` financial records, and is DB-level
+immutable via triggers. The write could not be an EF entity (see §3 of the design note — `CreateTables()`
+is not idempotent); full design and verification in `Design_Audit_Trail_H1.md`.
+
 ### H2. Hardcoded default credentials seeded unconditionally **[reported]**
 `MariaDbSchemaInitializer.vb:309` hashes `"VistaDeveloper2026!"` and `:330-331` `"Vista2026!"`.
 `EnsureDeveloperAccount` is called at `:56` with **no `#If DEBUG` guard**, so every install —

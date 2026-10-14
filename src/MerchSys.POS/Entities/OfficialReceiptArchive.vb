@@ -4,6 +4,7 @@ Imports MerchSys.SharedKernel.Entities
 Namespace Entities
     Public Class OfficialReceiptArchive
         Inherits BaseEntity
+        Implements MerchSys.SharedKernel.Interfaces.IAuditedEntity
 
         Public Property OriginalReceiptId As Integer
         Public Property ReceiptNumber As String
