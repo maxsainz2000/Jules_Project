@@ -16,7 +16,7 @@ Public Class ReceiptArchiveTriggerBootstrapperTests
     End Sub
 
     ''' <summary>
-    ''' The two tables are guarded independently, so having only the official-receipt triggers — the
+    ''' The tables are guarded independently, so having only the official-receipt triggers — the
     ''' state the codebase was actually in before this change — must not read as protected.
     ''' </summary>
     <Fact>
@@ -47,7 +47,8 @@ Public Class ReceiptArchiveTriggerBootstrapperTests
     Public Sub HasAllRequiredTriggers_IsCaseInsensitive()
         Assert.True(ReceiptArchiveTriggerBootstrapper.HasAllRequiredTriggers(
             {"POS_RECEIPT_ARCHIVE_NO_UPDATE", "Pos_Receipt_Archive_No_Delete",
-             "Pos_Receipt_Integrity_Archive_No_Update", "POS_RECEIPT_INTEGRITY_ARCHIVE_NO_DELETE"}))
+             "Pos_Receipt_Integrity_Archive_No_Update", "POS_RECEIPT_INTEGRITY_ARCHIVE_NO_DELETE",
+             "App_Audit_Log_No_Update", "APP_AUDIT_LOG_NO_DELETE"}))
     End Sub
 
     ''' <summary>
@@ -82,9 +83,9 @@ Public Class ReceiptArchiveTriggerBootstrapperTests
         ' The header comment is carried into the first statement (the splitter preserves comments),
         ' so match on the DDL phrases themselves rather than on "CREATE TRIGGER", which also occurs
         ' in the prose.
-        Assert.Equal(8, statements.Count)
-        Assert.Equal(4, statements.Where(Function(s) s.Contains("DROP TRIGGER IF EXISTS")).Count())
-        Assert.Equal(4, statements.Where(Function(s) s.Contains("SIGNAL SQLSTATE '45000'")).Count())
+        Assert.Equal(12, statements.Count)
+        Assert.Equal(6, statements.Where(Function(s) s.Contains("DROP TRIGGER IF EXISTS")).Count())
+        Assert.Equal(6, statements.Where(Function(s) s.Contains("SIGNAL SQLSTATE '45000'")).Count())
     End Sub
 
 End Class

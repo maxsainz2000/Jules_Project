@@ -6,6 +6,7 @@ Namespace Entities
     ''' </summary>
     Public Class SalesReturn
         Inherits AuditableEntity
+        Implements MerchSys.SharedKernel.Interfaces.IAuditedEntity
 
         ''' <summary>
         ''' Gets or sets the ID of the returned sales transaction.

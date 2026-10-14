@@ -6,6 +6,7 @@ Namespace Entities
     ''' </summary>
     Public Class CreditPayment
         Inherits AuditableEntity
+        Implements MerchSys.SharedKernel.Interfaces.IAuditedEntity
 
         ''' <summary>
         ''' Gets or sets the payment amount.

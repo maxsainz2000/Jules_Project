@@ -7,6 +7,7 @@ Namespace Entities
     ''' </summary>
     Public Partial Class SalesTransactionLine
         Inherits AuditableEntity
+        Implements MerchSys.SharedKernel.Interfaces.IAuditedEntity
 
         ''' <summary>
         ''' Gets or sets the ID of the product sold.

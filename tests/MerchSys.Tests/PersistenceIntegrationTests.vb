@@ -19,6 +19,7 @@ Imports MerchSys.Inventory.Services
 Imports MerchSys.SharedKernel.Queries
 Imports MerchSys.POS.Data
 Imports MerchSys.Accounting.Data
+Imports MerchSys.App.Data
 
 ''' <summary>
 ''' Builds a throwaway database for the DB-backed tests: creates it, materialises the module
@@ -52,9 +53,14 @@ Public Class TestDatabaseFixture
         Using db = NewInventory() : db.Database.GetService(Of IRelationalDatabaseCreator)().CreateTables() : End Using
         Using db = NewPOS() : db.Database.GetService(Of IRelationalDatabaseCreator)().CreateTables() : End Using
         Using db = NewAccounting() : db.Database.GetService(Of IRelationalDatabaseCreator)().CreateTables() : End Using
+
+        ' The audit log is deliberately not an EF entity — CreateTables() is not idempotent, so a table
+        ' mapped into more than one context would be created by the first and abort the second — so it
+        ' is created here exactly the way the bootstrapper creates it.
+        AuditLogTableBootstrapper.EnsureTable(ConnectionString, Nothing)
     End Sub
 
-    Private Function ServerConnectionString() As String
+    Friend Shared Function ServerConnectionString() As String
         Dim configured = Environment.GetEnvironmentVariable("VISTA_TEST_CONNECTION")
         Return If(String.IsNullOrWhiteSpace(configured), DefaultServer, configured)
     End Function

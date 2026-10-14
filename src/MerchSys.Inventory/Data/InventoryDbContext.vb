@@ -13,9 +13,16 @@ Namespace Data
         Public Property StockAlertConfigs As DbSet(Of Entities.StockAlertConfig)
         Public Property ProductPriceHistories As DbSet(Of Entities.ProductPriceHistory)
 
-        Public Sub New(options As DbContextOptions(Of InventoryDbContext), Optional currentUserProvider As MerchSys.SharedKernel.Interfaces.ICurrentUserProvider = Nothing)
-            MyBase.New(options, currentUserProvider)
+        Public Sub New(options As DbContextOptions(Of InventoryDbContext), Optional currentUserProvider As MerchSys.SharedKernel.Interfaces.ICurrentUserProvider = Nothing, Optional writeContextScope As MerchSys.SharedKernel.Interfaces.IWriteContextScope = Nothing)
+            MyBase.New(options, currentUserProvider, writeContextScope)
         End Sub
+
+        ''' <summary>Tag written into the audit log for records this context writes.</summary>
+        Protected Overrides ReadOnly Property AuditModuleTag As String
+            Get
+                Return "Inv"
+            End Get
+        End Property
 
         Protected Overrides Sub OnModelCreating(modelBuilder As ModelBuilder)
             MyBase.OnModelCreating(modelBuilder)

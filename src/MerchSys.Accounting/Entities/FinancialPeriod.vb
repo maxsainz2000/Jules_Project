@@ -3,6 +3,7 @@ Imports MerchSys.SharedKernel.Entities
 Namespace Entities
     Public Class FinancialPeriod
         Inherits AuditableEntity
+        Implements MerchSys.SharedKernel.Interfaces.IAuditedEntity
 
         Public Property PeriodType As String
         Public Property StartDate As DateTime

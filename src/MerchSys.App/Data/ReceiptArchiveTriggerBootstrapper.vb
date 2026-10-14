@@ -9,9 +9,12 @@ Imports MySqlConnector
 Namespace Data
 
     ''' <summary>
-    ''' Layer 3 of startup schema preparation: the BIR / NIRC sec. 235 immutability triggers on the
-    ''' two receipt-archive tables — <c>Pos_OfficialReceiptArchive</c> and
-    ''' <c>Pos_ReceiptIntegrityArchive</c>.
+    ''' Layer 3 of startup schema preparation: the immutability triggers on the append-only tables —
+    ''' the two BIR retention archives (<c>Pos_OfficialReceiptArchive</c>,
+    ''' <c>Pos_ReceiptIntegrityArchive</c>) and the audit log (<c>App_AuditLog</c>).
+    '''
+    ''' The class name predates the audit log and is now narrower than its job; the DDL it applies lives
+    ''' in <c>Plans/VISTA_Modules/Infrastructure/sql/02-pos-receipt-integrity-triggers.sql</c>.
     '''
     ''' EF Core cannot create triggers, so they live in an embedded SQL script. They must run
     ''' <em>after</em> the EF model has created the archive tables, which is why this is a separate
@@ -38,10 +41,14 @@ Namespace Data
         Private Sub New()
         End Sub
 
-        ''' <summary>The BIR retention tables these triggers guard.</summary>
+        ''' <summary>
+        ''' The append-only tables these triggers guard: the two BIR retention archives and the audit
+        ''' log.
+        ''' </summary>
         Friend Shared ReadOnly ArchiveTables As String() = {
             "Pos_OfficialReceiptArchive",
-            "Pos_ReceiptIntegrityArchive"
+            "Pos_ReceiptIntegrityArchive",
+            "App_AuditLog"
         }
 
         ''' <summary>
@@ -51,12 +58,14 @@ Namespace Data
         ''' </summary>
         Friend Const TriggerScriptResource As String = "02-pos-receipt-integrity-triggers.ddl"
 
-        ''' <summary>The triggers the archive tables must carry.</summary>
+        ''' <summary>The triggers the append-only tables must carry.</summary>
         Public Shared ReadOnly RequiredTriggers As String() = {
             "pos_receipt_archive_no_update",
             "pos_receipt_archive_no_delete",
             "pos_receipt_integrity_archive_no_update",
-            "pos_receipt_integrity_archive_no_delete"
+            "pos_receipt_integrity_archive_no_delete",
+            "app_audit_log_no_update",
+            "app_audit_log_no_delete"
         }
 
         Public Shared Sub EnsureTriggers(connectionString As String, logger As ILogger)
