@@ -115,6 +115,57 @@ Public Class ReceiptImmutabilityIntegrationTests
         End Using
     End Function
 
+    ''' <summary>
+    ''' The second BIR retention table had no database-level protection at all — only the
+    ''' interceptor, which direct SQL bypasses — so it now carries the same two triggers.
+    ''' </summary>
+    <Fact>
+    Public Async Function TriggersRejectUpdateAndDeleteOnTheIntegrityArchiveTable() As Task
+        ReceiptArchiveTriggerBootstrapper.EnsureTriggers(_fixture.ConnectionString, Nothing)
+
+        Dim id = Await InsertIntegrityArchiveRow()
+
+        Using conn As New MySqlConnection(_fixture.ConnectionString)
+            conn.Open()
+            Assert.True(Await FailsWithBirImmutable(conn, $"UPDATE Pos_ReceiptIntegrityArchive SET IntegrityHash = 'tampered' WHERE Id = {id}"),
+                        "an UPDATE on the integrity archive table was allowed")
+            Assert.True(Await FailsWithBirImmutable(conn, $"DELETE FROM Pos_ReceiptIntegrityArchive WHERE Id = {id}"),
+                        "a DELETE on the integrity archive table was allowed")
+        End Using
+    End Function
+
+    ''' <summary>
+    ''' The interceptor is the integrity archive's only application-layer guard, so it has to cover
+    ''' that entity as well as the official-receipt one.
+    ''' </summary>
+    <Fact>
+    Public Async Function InterceptorBlocksModifyingAndDeletingIntegrityArchiveRows() As Task
+        Dim options = New DbContextOptionsBuilder(Of POSDbContext)().
+            UseMySQL(_fixture.ConnectionString).
+            AddInterceptors(New ImmutableReceiptInterceptor()).
+            Options
+
+        Dim id As Integer
+        Using ctx = New POSDbContext(options)
+            Dim archive = NewIntegrityArchiveRow()
+            ctx.ReceiptIntegrityArchives.Add(archive)
+            Await ctx.SaveChangesAsync()
+            id = archive.Id
+        End Using
+
+        Using ctx = New POSDbContext(options)
+            Dim archive = Await ctx.ReceiptIntegrityArchives.FirstAsync(Function(a) a.Id = id)
+            archive.IntegrityHash = "tampered"
+            Await Assert.ThrowsAsync(Of ImmutableEntityException)(Async Function() Await ctx.SaveChangesAsync())
+        End Using
+
+        Using ctx = New POSDbContext(options)
+            Dim archive = Await ctx.ReceiptIntegrityArchives.FirstAsync(Function(a) a.Id = id)
+            ctx.ReceiptIntegrityArchives.Remove(archive)
+            Await Assert.ThrowsAsync(Of ImmutableEntityException)(Async Function() Await ctx.SaveChangesAsync())
+        End Using
+    End Function
+
     Private Async Function InsertArchiveRow() As Task(Of Integer)
         Using ctx = _fixture.NewPOS()
             Dim archive = NewArchiveRow()
@@ -133,6 +184,29 @@ Public Class ReceiptImmutabilityIntegrationTests
             .SerializedLines = "[]",
             .ArchivedAt = DateTime.UtcNow,
             .ArchivedHash = "hash"
+        }
+    End Function
+
+    Private Async Function InsertIntegrityArchiveRow() As Task(Of Integer)
+        Using ctx = _fixture.NewPOS()
+            Dim archive = NewIntegrityArchiveRow()
+            ctx.ReceiptIntegrityArchives.Add(archive)
+            Await ctx.SaveChangesAsync()
+            Return archive.Id
+        End Using
+    End Function
+
+    Private Shared Function NewIntegrityArchiveRow() As ReceiptIntegrityArchive
+        Return New ReceiptIntegrityArchive With {
+            .ReceiptId = 1,
+            .ReceiptNumber = "OR-INT-" & Guid.NewGuid().ToString("N").Substring(0, 8),
+            .IntegrityHash = "hash",
+            .PreviousHash = "prev",
+            .RetentionExpiresAt = DateTime.UtcNow.AddYears(10),
+            .CanonicalPayload = "{}",
+            .HashAlgorithm = "SHA256",
+            .ArchivedAt = DateTime.UtcNow,
+            .ArchivedByService = "test"
         }
     End Function
 
