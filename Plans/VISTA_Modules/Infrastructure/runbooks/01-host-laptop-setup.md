@@ -82,6 +82,16 @@ before one of the changes below needs the column added by hand, or the affected 
   ```sql
   ALTER TABLE vista_central.Pos_SalesReturns ADD COLUMN SerializedLines LONGTEXT NULL;
   ```
+- **`Pur_PurchaseOrders.RowVersion`** — the optimistic concurrency token on the order's status. A
+  database created before it exists will fail every purchase-order write with "Unknown column
+  'RowVersion'". The `ON UPDATE` clause must be written **explicitly** here: MariaDB applies it
+  implicitly only to the first `TIMESTAMP` column of a table it is creating, not to an added column,
+  and without it the token never changes and two clients can close the same order and book the
+  payable twice.
+  ```sql
+  ALTER TABLE vista_central.Pur_PurchaseOrders
+      ADD COLUMN RowVersion TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6);
+  ```
 
 Check for anything else the model expects but the database lacks by comparing the two — a table that
 is missing a column surfaces as "Unknown column" at runtime, not at startup.
