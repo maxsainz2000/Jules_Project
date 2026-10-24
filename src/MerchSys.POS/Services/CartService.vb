@@ -11,6 +11,12 @@ Namespace Services
         Private ReadOnly _db As POSDbContext
         Private Shared ReadOnly _carts As New ConcurrentDictionary(Of String, CartDto)()
 
+        ''' <summary>
+        ''' A handful of attempts is plenty for four client laptops; more would only mask a real
+        ''' problem with the numbering.
+        ''' </summary>
+        Private Const MaxTransactionNumberAttempts As Integer = 5
+
         Public Sub New(db As POSDbContext)
             _db = db
         End Sub
@@ -114,7 +120,32 @@ Namespace Services
             End If
 
             _db.SalesTransactions.Add(transaction)
-            Await _db.SaveChangesAsync()
+
+            ' The number is derived from the current maximum, so two clients finalising at the same
+            ' moment derive the same one and the unique index on TransactionNumber rejects the loser.
+            ' That used to escape as an unhandled DbUpdateException and the sale was lost. Re-derive
+            ' and retry instead — the number is the only thing that moves, so the retry re-inserts
+            ' the same entity graph.
+            For attempt = 1 To MaxTransactionNumberAttempts
+                Dim duplicate As DbUpdateException = Nothing
+                Try
+                    Await _db.SaveChangesAsync()
+                Catch ex As DbUpdateException When DuplicateKeyDetector.IsDuplicateKey(ex)
+                    duplicate = ex
+                End Try
+
+                If duplicate Is Nothing Then
+                    Exit For
+                End If
+
+                If attempt = MaxTransactionNumberAttempts Then
+                    Throw New InvalidOperationException(
+                        $"Could not allocate a unique transaction number after {MaxTransactionNumberAttempts} attempts.",
+                        duplicate)
+                End If
+
+                transaction.TransactionNumber = Await GenerateNextTransactionNumberAsync()
+            Next
 
             ClearCart(cartId)
 
