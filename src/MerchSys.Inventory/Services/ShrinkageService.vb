@@ -4,6 +4,7 @@ Imports Microsoft.EntityFrameworkCore
 Imports MerchSys.Inventory.Data
 Imports MerchSys.Inventory.Entities
 Imports MerchSys.SharedKernel.Events
+Imports MerchSys.SharedKernel.Exceptions
 Imports MediatR
 
 Namespace Services
@@ -19,6 +20,17 @@ Namespace Services
             _mediator = mediator
         End Sub
 
+        ''' <summary>
+        ''' Records a shrinkage loss, which decrements <c>QuantityRemaining</c> on the batches it
+        ''' consumes.
+        '''
+        ''' That is the same column a sale decrements, so this takes the same lock in the same order —
+        ''' without it two clients (a sale and a shrinkage, or two shrinkages) can both pass their
+        ''' checks and both write, and the row-version token only turns that into a failed write
+        ''' after the loss has been reported.
+        '''
+        ''' The event is published after the commit, so a rolled-back write is never announced.
+        ''' </summary>
         Public Async Function RecordShrinkageAsync(productId As Integer, quantity As Integer, reason As String, batchId As Integer?) As Task Implements IShrinkageService.RecordShrinkageAsync
             If String.IsNullOrWhiteSpace(reason) Then
                 Throw New ArgumentException("Shrinkage reason must be provided.")
@@ -29,57 +41,72 @@ Namespace Services
 
             Dim totalValue As Decimal = 0D
 
-            If batchId.HasValue Then
-                Dim batch = Await _dbContext.StockBatches.FirstOrDefaultAsync(Function(b) b.Id = batchId.Value AndAlso b.ProductId = productId)
-                If batch Is Nothing Then
-                    Throw New InvalidOperationException("Specified batch not found.")
-                End If
-                If batch.QuantityRemaining < quantity Then
-                    Throw New InvalidOperationException("Insufficient quantity in specified batch.")
-                End If
+            Using transaction = Await _dbContext.Database.BeginTransactionAsync()
+                Await StockBatchLock.LockInStockBatchesAsync(_dbContext, productId)
 
-                batch.QuantityRemaining -= quantity
-                totalValue = quantity * batch.UnitCost
-            Else
-                Dim batchIds = Await _dbContext.StockBatches.
-                    Where(Function(b) b.ProductId = productId AndAlso b.QuantityRemaining > 0).
-                    OrderBy(Function(b) b.ReceiptDate).
-                    Select(Function(b) b.Id).
-                    ToListAsync()
-
-                Dim remainingToDeduct = quantity
-
-                For Each id In batchIds
-                    If remainingToDeduct <= 0 Then
-                        Exit For
+                If batchId.HasValue Then
+                    Dim batch = Await _dbContext.StockBatches.FirstOrDefaultAsync(Function(b) b.Id = batchId.Value AndAlso b.ProductId = productId)
+                    If batch Is Nothing Then
+                        Throw New InvalidOperationException("Specified batch not found.")
+                    End If
+                    If batch.QuantityRemaining < quantity Then
+                        Throw New InvalidOperationException("Insufficient quantity in specified batch.")
                     End If
 
-                    Dim batch = Await _dbContext.StockBatches.FindAsync(id)
-                    If batch IsNot Nothing AndAlso batch.QuantityRemaining > 0 Then
+                    batch.QuantityRemaining -= quantity
+                    totalValue = quantity * batch.UnitCost
+                Else
+                    ' Order matches the lock order exactly, so the batch FIFO picks is the one it
+                    ' locked, even when two batches share a receipt date.
+                    Dim batches = Await _dbContext.StockBatches.
+                        Where(Function(b) b.ProductId = productId AndAlso b.QuantityRemaining > 0).
+                        OrderBy(Function(b) b.ReceiptDate).
+                        ThenBy(Function(b) b.Id).
+                        ToListAsync()
+
+                    Dim remainingToDeduct = quantity
+
+                    For Each batch In batches
+                        If remainingToDeduct <= 0 Then
+                            Exit For
+                        End If
+
                         Dim deductAmount = Math.Min(batch.QuantityRemaining, remainingToDeduct)
                         batch.QuantityRemaining -= deductAmount
                         remainingToDeduct -= deductAmount
                         totalValue += deductAmount * batch.UnitCost
+                    Next
+
+                    If remainingToDeduct > 0 Then
+                        Throw New InvalidOperationException("Insufficient stock for FIFO deduction.")
                     End If
-                Next
-
-                If remainingToDeduct > 0 Then
-                    Throw New InvalidOperationException("Insufficient stock for FIFO deduction.")
                 End If
-            End If
 
-            Dim unitCost As Decimal = totalValue / quantity
+                Dim unitCost As Decimal = totalValue / quantity
 
-            Dim record = New ShrinkageRecord With {
-                .ProductId = productId,
-                .Reason = reason,
-                .QuantityLost = quantity,
-                .UnitCost = unitCost,
-                .TotalValue = totalValue
-            }
+                _dbContext.ShrinkageRecords.Add(New ShrinkageRecord With {
+                    .ProductId = productId,
+                    .Reason = reason,
+                    .QuantityLost = quantity,
+                    .UnitCost = unitCost,
+                    .TotalValue = totalValue
+                })
 
-            _dbContext.ShrinkageRecords.Add(record)
-            Await _dbContext.SaveChangesAsync()
+                ' Capture the failure rather than awaiting in the Catch block (VB forbids Await
+                ' there), then surface it as the operator-facing conflict AGENTS.md requires.
+                Dim concurrencyFailure As DbUpdateConcurrencyException = Nothing
+                Try
+                    Await _dbContext.SaveChangesAsync()
+                Catch ex As DbUpdateConcurrencyException
+                    concurrencyFailure = ex
+                End Try
+
+                If concurrencyFailure IsNot Nothing Then
+                    Throw New ConcurrentModificationException($"Stock for product {productId} was changed by another client while recording shrinkage.")
+                End If
+
+                Await transaction.CommitAsync()
+            End Using
 
             Dim shrinkageEvent = New ShrinkageRecordedEvent With {
                 .ProductId = productId,
