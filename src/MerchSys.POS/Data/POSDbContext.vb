@@ -18,9 +18,16 @@ Namespace Data
         Public Property ReceiptIntegrityArchives As DbSet(Of Entities.ReceiptIntegrityArchive)
         Public Property VatConfigurations As DbSet(Of Entities.VatConfiguration)
 
-        Public Sub New(options As DbContextOptions(Of POSDbContext), Optional currentUserProvider As MerchSys.SharedKernel.Interfaces.ICurrentUserProvider = Nothing)
-            MyBase.New(options, currentUserProvider)
+        Public Sub New(options As DbContextOptions(Of POSDbContext), Optional currentUserProvider As MerchSys.SharedKernel.Interfaces.ICurrentUserProvider = Nothing, Optional writeContextScope As MerchSys.SharedKernel.Interfaces.IWriteContextScope = Nothing)
+            MyBase.New(options, currentUserProvider, writeContextScope)
         End Sub
+
+        ''' <summary>Tag written into the audit log for records this context writes.</summary>
+        Protected Overrides ReadOnly Property AuditModuleTag As String
+            Get
+                Return "Pos"
+            End Get
+        End Property
 
         Protected Overrides Sub OnConfiguring(optionsBuilder As DbContextOptionsBuilder)
             MyBase.OnConfiguring(optionsBuilder)

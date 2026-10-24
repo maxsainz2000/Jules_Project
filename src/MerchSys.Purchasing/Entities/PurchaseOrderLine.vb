@@ -3,6 +3,7 @@ Imports MerchSys.SharedKernel.Entities
 Namespace Entities
     Public Class PurchaseOrderLine
         Inherits AuditableEntity
+        Implements MerchSys.SharedKernel.Interfaces.IAuditedEntity
 
         Public Property PurchaseOrderId As Integer
         Public Property ProductId As Integer

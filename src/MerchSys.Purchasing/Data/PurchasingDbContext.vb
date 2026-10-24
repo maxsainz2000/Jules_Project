@@ -19,9 +19,16 @@ Namespace Data
         Public Property PriceChangeAlerts As DbSet(Of PriceChangeAlert)
         Public Property VendorProducts As DbSet(Of VendorProduct)
 
-        Public Sub New(options As DbContextOptions(Of PurchasingDbContext), Optional currentUserProvider As MerchSys.SharedKernel.Interfaces.ICurrentUserProvider = Nothing)
-            MyBase.New(options, currentUserProvider)
+        Public Sub New(options As DbContextOptions(Of PurchasingDbContext), Optional currentUserProvider As MerchSys.SharedKernel.Interfaces.ICurrentUserProvider = Nothing, Optional writeContextScope As MerchSys.SharedKernel.Interfaces.IWriteContextScope = Nothing)
+            MyBase.New(options, currentUserProvider, writeContextScope)
         End Sub
+
+        ''' <summary>Tag written into the audit log for records this context writes.</summary>
+        Protected Overrides ReadOnly Property AuditModuleTag As String
+            Get
+                Return "Pur"
+            End Get
+        End Property
 
         Protected Overrides Sub OnModelCreating(modelBuilder As ModelBuilder)
             MyBase.OnModelCreating(modelBuilder)

@@ -6,6 +6,7 @@ Namespace Entities
     ''' </summary>
     Public Partial Class SalesTransaction
         Inherits SoftDeletableEntity
+        Implements MerchSys.SharedKernel.Interfaces.IAuditedEntity
         Implements MerchSys.SharedKernel.Interfaces.IPaginatedEntity
 
         ''' <summary>

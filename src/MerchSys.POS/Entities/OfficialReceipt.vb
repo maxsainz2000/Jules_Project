@@ -7,6 +7,7 @@ Namespace Entities
     ''' </summary>
     Public Class OfficialReceipt
         Inherits AuditableEntity
+        Implements MerchSys.SharedKernel.Interfaces.IAuditedEntity
 
         ''' <summary>
         ''' Gets or sets the receipt number (format: OR-YYYY-XXXX).

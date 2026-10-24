@@ -6,9 +6,16 @@ Namespace Data
     Public Class AccountingDbContext
         Inherits BaseDbContext
 
-        Public Sub New(options As DbContextOptions(Of AccountingDbContext), Optional currentUserProvider As MerchSys.SharedKernel.Interfaces.ICurrentUserProvider = Nothing)
-            MyBase.New(options, currentUserProvider)
+        Public Sub New(options As DbContextOptions(Of AccountingDbContext), Optional currentUserProvider As MerchSys.SharedKernel.Interfaces.ICurrentUserProvider = Nothing, Optional writeContextScope As MerchSys.SharedKernel.Interfaces.IWriteContextScope = Nothing)
+            MyBase.New(options, currentUserProvider, writeContextScope)
         End Sub
+
+        ''' <summary>Tag written into the audit log for records this context writes.</summary>
+        Protected Overrides ReadOnly Property AuditModuleTag As String
+            Get
+                Return "Acc"
+            End Get
+        End Property
 
         Public Property FinancialPeriods As DbSet(Of Entities.FinancialPeriod)
         Public Property RevenueRecords As DbSet(Of Entities.RevenueRecord)

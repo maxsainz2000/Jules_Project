@@ -3,6 +3,7 @@ Imports MerchSys.SharedKernel.Entities
 Namespace Entities
     Public Class StockBatch
         Inherits AuditableEntity
+        Implements MerchSys.SharedKernel.Interfaces.IAuditedEntity
 
         Public Property ProductId As Integer
         Public Property QuantityReceived As Integer
