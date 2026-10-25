@@ -225,6 +225,14 @@ Namespace Views.Accounting
             '
             'pnlVatTile
             '
+            ' ARCHITECTURAL INTEGRATION & DATAFLOW:
+            ' Data Source: Populated via FinancialOverviewPresenter from the VatEnrichedFinancialOverviewService
+            '              decorator which wraps FinancialOverviewService with IKpiProvider (VatPayableKpiProvider).
+            ' Role Guarding: Restricted navigation. Only UserRole.Manager and UserRole.Developer are permitted to navigate.
+            '                UserRole.Owner displays the tile and severity, but clicking suppresses navigation.
+            ' Navigation Chain: pnlVatTile.Click / label clicks -> RaiseEvent VatTileClicked
+            '                   -> FinancialOverviewPresenter.OnVatTileClicked -> RaiseEvent NavigateToVatReturnRequested
+            '                   -> FinancialOverviewView.OnNavigateToVatReturnRequested -> shell.Presenter.NavigateTo("VAT Returns").
             Me.pnlVatTile.BackColor = System.Drawing.Color.LightGray
             Me.pnlVatTile.Controls.Add(Me.lblVatPayable)
             Me.pnlVatTile.Controls.Add(Me.lblVatDueDate)

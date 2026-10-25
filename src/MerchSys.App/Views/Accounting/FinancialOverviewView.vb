@@ -58,10 +58,18 @@ Namespace Views.Accounting
             RaiseEvent RefreshRequested(Me, EventArgs.Empty)
         End Sub
 
+        ''' <summary>
+        ''' Initiates the WinForms MVP navigation flow by raising an event to the Presenter.
+        ''' (Part of the ACC-16 VAT Payable integration flow).
+        ''' </summary>
         Private Sub pnlVatTile_Click(sender As Object, e As EventArgs) Handles pnlVatTile.Click, lblVatPayable.Click, lblVatDueDate.Click
             RaiseEvent VatTileClicked(Me, EventArgs.Empty)
         End Sub
 
+        ''' <summary>
+        ''' Completes the WinForms MVP navigation flow. Invoked by the Presenter if role authorization passes.
+        ''' Traverses to the main shell to execute module navigation.
+        ''' </summary>
         Public Sub OnNavigateToVatReturnRequested(sender As Object, e As EventArgs)
             Dim shell = Application.OpenForms.OfType(Of MainWindow)().FirstOrDefault()
             If shell IsNot Nothing AndAlso shell.Presenter IsNot Nothing Then
