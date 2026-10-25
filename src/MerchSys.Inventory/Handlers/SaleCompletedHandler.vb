@@ -131,7 +131,7 @@ Namespace Handlers
 
                     Dim pAction = command.CreateParameter()
                     pAction.ParameterName = "@Action"
-                    pAction.Value = "DeductFail"
+                    pAction.Value = "DedFail"
                     command.Parameters.Add(pAction)
 
                     Dim pChangesJson = command.CreateParameter()

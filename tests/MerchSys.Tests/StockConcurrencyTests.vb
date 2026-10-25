@@ -168,7 +168,7 @@ Public Class StockConcurrencyTests
                 Using reader = Await command.ExecuteReaderAsync()
                     Assert.True(Await reader.ReadAsync(), "No audit log found for the failed sale deduction")
 
-                    Assert.Equal("DeductFail", reader.GetString(0))
+                    Assert.Equal("DedFail", reader.GetString(0))
                     Assert.Equal(saleId.ToString(), reader.GetString(1))
 
                     Dim json = reader.GetString(2)
