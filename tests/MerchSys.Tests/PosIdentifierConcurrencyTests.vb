@@ -2,9 +2,12 @@ Imports Xunit
 Imports System
 Imports System.Collections.Generic
 Imports System.Linq
+Imports System.Threading
 Imports System.Threading.Tasks
+Imports MediatR
 Imports MerchSys.POS.Entities
 Imports MerchSys.POS.Services
+Imports MerchSys.SharedKernel.Queries
 
 ''' <summary>
 ''' DB-backed coverage for the POS identifier races: C7 (transaction number) and C8 (receipt number
@@ -107,12 +110,54 @@ Public Class PosIdentifierConcurrencyTests
 
     Private Async Function FinalizeOneSaleAsync(cartId As String) As Task(Of String)
         Using ctx = _fixture.NewPOS()
-            Dim service As New CartService(ctx)
+            Dim mediator = New FakeStockMediator()
+            Dim service As New CartService(ctx, mediator)
             service.AddToCart(cartId, 1, "Concurrency Test Product", 10D, 1)
             Dim sale = Await service.FinalizeTransactionAsync(cartId, "Cash")
             Return sale.TransactionNumber
         End Using
     End Function
+
+    Private Class FakeStockMediator
+        Implements IMediator
+
+        Public Function Send(Of TResponse)(request As IRequest(Of TResponse), Optional cancellationToken As CancellationToken = Nothing) As Task(Of TResponse) Implements ISender.Send
+            If TypeOf request Is GetCurrentStockQuery Then
+                Dim result = New GetCurrentStockResult()
+                ' Just provide enough stock for the test product (productId 1)
+                result.StockLevels.Add(New ProductStockLevel With {
+                    .ProductId = 1,
+                    .CurrentQuantity = 100
+                })
+                Return Task.FromResult(DirectCast(DirectCast(result, Object), TResponse))
+            End If
+            Throw New NotSupportedException()
+        End Function
+
+        Public Function Send(Of TRequest As IRequest)(request As TRequest, Optional cancellationToken As CancellationToken = Nothing) As Task Implements ISender.Send
+            Throw New NotSupportedException()
+        End Function
+
+        Public Function Send(request As Object, Optional cancellationToken As CancellationToken = Nothing) As Task(Of Object) Implements ISender.Send
+            Throw New NotSupportedException()
+        End Function
+
+        Public Function Publish(notification As Object, Optional cancellationToken As CancellationToken = Nothing) As Task Implements IPublisher.Publish
+            Throw New NotSupportedException()
+        End Function
+
+        Public Function Publish(Of TNotification As INotification)(notification As TNotification, Optional cancellationToken As CancellationToken = Nothing) As Task Implements IPublisher.Publish
+            Throw New NotSupportedException()
+        End Function
+
+        Public Function CreateStream(Of TResponse)(request As IStreamRequest(Of TResponse), Optional cancellationToken As CancellationToken = Nothing) As IAsyncEnumerable(Of TResponse) Implements ISender.CreateStream
+            Throw New NotSupportedException()
+        End Function
+
+        Public Function CreateStream(request As Object, Optional cancellationToken As CancellationToken = Nothing) As IAsyncEnumerable(Of Object) Implements ISender.CreateStream
+            Throw New NotSupportedException()
+        End Function
+    End Class
 
     Private Async Function NextReceiptNumberAsync(year As Integer) As Task(Of String)
         Using ctx = _fixture.NewPOS()

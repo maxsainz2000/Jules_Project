@@ -1,6 +1,9 @@
 Imports System.Collections.Concurrent
+Imports MediatR
 Imports MerchSys.POS.Data
 Imports MerchSys.POS.Entities
+Imports MerchSys.SharedKernel.Exceptions
+Imports MerchSys.SharedKernel.Queries
 Imports Microsoft.EntityFrameworkCore
 
 Namespace Services
@@ -9,6 +12,7 @@ Namespace Services
         Implements ICartService
 
         Private ReadOnly _db As POSDbContext
+        Private ReadOnly _mediator As IMediator
         Private Shared ReadOnly _carts As New ConcurrentDictionary(Of String, CartDto)()
 
         ''' <summary>
@@ -17,8 +21,9 @@ Namespace Services
         ''' </summary>
         Private Const MaxTransactionNumberAttempts As Integer = 5
 
-        Public Sub New(db As POSDbContext)
+        Public Sub New(db As POSDbContext, mediator As IMediator)
             _db = db
+            _mediator = mediator
         End Sub
 
         Public Function GetCart(cartId As String) As CartDto Implements ICartService.GetCart
@@ -73,6 +78,14 @@ Namespace Services
             If Not cart.Lines.Any() Then
                 Throw New InvalidOperationException("Cannot finalize an empty cart.")
             End If
+
+            Dim stockResult = Await _mediator.Send(New GetCurrentStockQuery())
+            For Each line In cart.Lines
+                Dim stock = stockResult.StockLevels.FirstOrDefault(Function(s) s.ProductId = line.ProductId)
+                If stock Is Nothing OrElse stock.CurrentQuantity < line.Quantity Then
+                    Throw New InsufficientStockException($"Insufficient stock for product {line.ProductName}. Requested: {line.Quantity}, Available: {If(stock IsNot Nothing, stock.CurrentQuantity, 0)}")
+                End If
+            Next
 
             Dim creditAccount As CreditAccount = Nothing
 

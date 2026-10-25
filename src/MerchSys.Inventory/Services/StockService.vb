@@ -1,6 +1,7 @@
 Imports Microsoft.EntityFrameworkCore
 Imports MerchSys.Inventory.Data
 Imports MerchSys.Inventory.Entities
+Imports MerchSys.SharedKernel.Exceptions
 
 Namespace Services
 
@@ -128,14 +129,6 @@ Namespace Services
                     .IsBelowThreshold = If(r.CurrentQuantity, 0) < r.ThresholdQuantity
                 }).ToList()
         End Function
-    End Class
-
-    Public Class InsufficientStockException
-        Inherits Exception
-
-        Public Sub New(message As String)
-            MyBase.New(message)
-        End Sub
     End Class
 
 End Namespace

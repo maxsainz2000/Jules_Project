@@ -240,10 +240,10 @@ window, for two reasons found while implementing:
     `ConcurrentReceiptNumbersAreAllDistinct`; the chain test was confirmed to **fail** with the lock
     removed.
 - [ ] **T7 — verify.** Full suite + Debug/Release build; live smoke test; runbook + memory updated.
-- [ ] **T8 — D1(c) pre-commit stock check.** Must sit at the cart checkout (`CartService.vb:116`),
+- [x] **T8 — D1(c) pre-commit stock check.** Must sit at the cart checkout (`CartService.vb:116`),
   via the existing `GetCurrentStockQuery`, **not** at payment. POS-side; the checkout path is
   unwired, so it is service-level testable only.
-- [ ] **T9 — D1(b) compensate and surface.** Blocked on **H1** — there is no audit table to record
+- [x] **T9 — D1(b) compensate and surface.** Blocked on **H1** — there is no audit table to record
   the failure in.
 
 Each task touches ≤5 files. T1–T3 are one PR (the C5 theme); T4, T5, T6 can be separate PRs.

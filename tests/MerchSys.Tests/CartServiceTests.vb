@@ -1,9 +1,14 @@
 Imports Xunit
 Imports System
 Imports System.Linq
+Imports System.Collections.Generic
+Imports System.Threading
 Imports System.Threading.Tasks
+Imports MediatR
 Imports Microsoft.EntityFrameworkCore
 Imports MerchSys.POS.Services
+Imports MerchSys.SharedKernel.Exceptions
+Imports MerchSys.SharedKernel.Queries
 
 ''' <summary>
 ''' Regression test for C9.
@@ -36,7 +41,11 @@ Public Class CartServiceTests
             Dim transactionId As Integer
 
             Using ctx = fixture.NewPOS()
-                Dim service As New CartService(ctx)
+                Dim mediator = New FakeStockMediator(New Dictionary(Of Integer, Integer) From {
+                    {firstProductId, 10},
+                    {secondProductId, 10}
+                })
+                Dim service As New CartService(ctx, mediator)
                 service.AddToCart(cartId, firstProductId, "First Product", 10D, 2)
                 service.AddToCart(cartId, secondProductId, "Second Product", 20D, 1)
 
@@ -64,5 +73,78 @@ Public Class CartServiceTests
             End Using
         End Using
     End Function
+
+    <Fact>
+    Public Async Function FinalizeTransactionThrowsIfStockIsInsufficient() As Task
+        Const productId As Integer = 10
+        Dim cartId = "cart-insufficient-" & Guid.NewGuid().ToString("N")
+
+        Using fixture As New TestDatabaseFixture()
+            Using ctx = fixture.NewPOS()
+                ' Mock only 2 items in stock
+                Dim mediator = New FakeStockMediator(New Dictionary(Of Integer, Integer) From {
+                    {productId, 2}
+                })
+                Dim service As New CartService(ctx, mediator)
+
+                ' Try to buy 3 items
+                service.AddToCart(cartId, productId, "Test Product", 10D, 3)
+
+                Dim ex = Await Assert.ThrowsAsync(Of InsufficientStockException)(
+                    Function() service.FinalizeTransactionAsync(cartId, "Cash")
+                )
+
+                Assert.Contains("Insufficient stock", ex.Message)
+            End Using
+        End Using
+    End Function
+
+    Private Class FakeStockMediator
+        Implements IMediator
+
+        Private ReadOnly _stockLevels As Dictionary(Of Integer, Integer)
+
+        Public Sub New(stockLevels As Dictionary(Of Integer, Integer))
+            _stockLevels = stockLevels
+        End Sub
+
+        Public Function Send(Of TResponse)(request As IRequest(Of TResponse), Optional cancellationToken As CancellationToken = Nothing) As Task(Of TResponse) Implements ISender.Send
+            If TypeOf request Is GetCurrentStockQuery Then
+                Dim result = New GetCurrentStockResult()
+                For Each kvp In _stockLevels
+                    result.StockLevels.Add(New ProductStockLevel With {
+                        .ProductId = kvp.Key,
+                        .CurrentQuantity = kvp.Value
+                    })
+                Next
+                Return Task.FromResult(DirectCast(DirectCast(result, Object), TResponse))
+            End If
+            Throw New NotSupportedException()
+        End Function
+
+        Public Function Send(Of TRequest As IRequest)(request As TRequest, Optional cancellationToken As CancellationToken = Nothing) As Task Implements ISender.Send
+            Throw New NotSupportedException()
+        End Function
+
+        Public Function Send(request As Object, Optional cancellationToken As CancellationToken = Nothing) As Task(Of Object) Implements ISender.Send
+            Throw New NotSupportedException()
+        End Function
+
+        Public Function Publish(notification As Object, Optional cancellationToken As CancellationToken = Nothing) As Task Implements IPublisher.Publish
+            Throw New NotSupportedException()
+        End Function
+
+        Public Function Publish(Of TNotification As INotification)(notification As TNotification, Optional cancellationToken As CancellationToken = Nothing) As Task Implements IPublisher.Publish
+            Throw New NotSupportedException()
+        End Function
+
+        Public Function CreateStream(Of TResponse)(request As IStreamRequest(Of TResponse), Optional cancellationToken As CancellationToken = Nothing) As IAsyncEnumerable(Of TResponse) Implements ISender.CreateStream
+            Throw New NotSupportedException()
+        End Function
+
+        Public Function CreateStream(request As Object, Optional cancellationToken As CancellationToken = Nothing) As IAsyncEnumerable(Of Object) Implements ISender.CreateStream
+            Throw New NotSupportedException()
+        End Function
+    End Class
 
 End Class
