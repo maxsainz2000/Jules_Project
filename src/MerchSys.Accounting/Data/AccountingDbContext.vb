@@ -23,6 +23,7 @@ Namespace Data
         Public Property FinancialSnapshots As DbSet(Of Entities.FinancialSnapshot)
         Public Property VatReturns As DbSet(Of Entities.VatReturn)
         Public Property VatReturnLines As DbSet(Of Entities.VatReturnLine)
+        Public Property TamperAuditEntries As DbSet(Of Entities.TamperAuditEntry)
 
         Protected Overrides Sub OnModelCreating(modelBuilder As ModelBuilder)
             MyBase.OnModelCreating(modelBuilder)
