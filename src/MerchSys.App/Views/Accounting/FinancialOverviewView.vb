@@ -24,6 +24,24 @@ Namespace Views.Accounting
             _presenter = presenter
             _presenter.View = Me
             SetupDataGridViews()
+
+            AddHandler pnlVatTile.Click, AddressOf OnTileClick
+            AddHandler lblVatPayable.Click, AddressOf OnTileClick
+            AddHandler lblVatDueDate.Click, AddressOf OnTileClick
+
+            AddHandler _presenter.NavigateToVatReturnRequested, AddressOf OnNavigateToVatReturnRequested
+        End Sub
+
+        Private Sub OnNavigateToVatReturnRequested(sender As Object, e As EventArgs)
+            Dim shell = Application.OpenForms.OfType(Of MainWindow)().FirstOrDefault()
+            If shell IsNot Nothing AndAlso shell.Presenter IsNot Nothing Then
+                Dim target = shell.Presenter.NavigationGroups.
+                    SelectMany(Function(g) g.Items).
+                    FirstOrDefault(Function(i) i.Name = "VAT Returns")
+                If target IsNot Nothing Then
+                    shell.Presenter.NavigateTo(target)
+                End If
+            End If
         End Sub
 
         Private Sub SetupDataGridViews()
@@ -57,7 +75,7 @@ Namespace Views.Accounting
             RaiseEvent RefreshRequested(Me, EventArgs.Empty)
         End Sub
 
-        Private Sub pnlVatTile_Click(sender As Object, e As EventArgs) Handles pnlVatTile.Click, lblVatPayable.Click, lblVatDueDate.Click
+        Private Sub OnTileClick(sender As Object, e As EventArgs)
             RaiseEvent VatTileClicked(Me, EventArgs.Empty)
         End Sub
 

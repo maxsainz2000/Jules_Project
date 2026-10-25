@@ -13,6 +13,9 @@ Namespace Views
 
         Private _renderedItems As List(Of NavigationItem)
 
+        <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
+        Public Property Presenter As MainWindowPresenter
+
         ''' <summary>
         ''' Explicit interface implementation of <see cref="IMainWindowView.Load"/>.
         ''' Uses the Custom Event pattern (as OwnerDashboardView does) instead of
