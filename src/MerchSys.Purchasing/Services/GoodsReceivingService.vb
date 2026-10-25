@@ -45,54 +45,81 @@ Namespace Services
                 End If
             Next
 
-            Dim existingReceipts = Await _db.GoodsReceipts.Select(Function(r) r.ReceiptNumber).ToListAsync()
-            Dim receiptNumber = SequentialNumberGenerator.Generate("GR", DateTime.Now.Year, existingReceipts)
-
-            Dim receipt = New GoodsReceipt With {
-                .PurchaseOrderId = po.Id,
-                .ReceiptNumber = receiptNumber,
-                .Lines = New List(Of GoodsReceiptLine)()
-            }
-
             Dim vatConfig = Await _mediator.Send(New MerchSys.SharedKernel.Queries.GetVatConfigurationQuery())
             Dim vatDivisor As Decimal = If(vatConfig IsNot Nothing AndAlso vatConfig.VatRate > 0, 1D + vatConfig.VatRate, 1.12D)
 
-            For Each lineDto In dto.Lines
-                Dim lineTotal = lineDto.UnitCost * lineDto.QuantityReceived
-                Dim vatableSales As Decimal
-                Dim vatAmount As Decimal
+            Dim receipt As GoodsReceipt = Nothing
+            Dim saved As Boolean = False
+            Dim maxRetries = 3
 
-                If lineDto.VatClassification = VatTreatment.Vatable Then
-                    vatableSales = Math.Round(lineTotal / vatDivisor, 2, MidpointRounding.ToEven)
-                    vatAmount = lineTotal - vatableSales
-                Else
-                    vatableSales = lineTotal
-                    vatAmount = 0
-                End If
+            For attempt = 1 To maxRetries
+                Dim existingReceipts = Await _db.GoodsReceipts.Select(Function(r) r.ReceiptNumber).ToListAsync()
+                Dim receiptNumber = SequentialNumberGenerator.Generate("GR", DateTime.Now.Year, existingReceipts)
 
-                Dim line = New GoodsReceiptLine With {
-                    .ProductId = lineDto.ProductId,
-                    .UnitCost = lineDto.UnitCost,
-                    .ExpiryDate = lineDto.ExpiryDate,
-                    .QuantityReceived = lineDto.QuantityReceived,
-                    .DiscrepancyNotes = lineDto.DiscrepancyNotes,
-                    .HasDiscrepancy = (lineDto.QuantityReceived <> lineDto.QuantityOrdered),
-                    .VatClassification = lineDto.VatClassification,
-                    .VatableSales = vatableSales,
-                    .VatAmount = vatAmount
+                receipt = New GoodsReceipt With {
+                    .PurchaseOrderId = po.Id,
+                    .ReceiptNumber = receiptNumber,
+                    .Lines = New List(Of GoodsReceiptLine)()
                 }
 
-                ' Also update the dto so the calculator uses the server-computed values
-                lineDto.VatableSales = vatableSales
-                lineDto.VatAmount = vatAmount
+                For Each lineDto In dto.Lines
+                    Dim lineTotal = lineDto.UnitCost * lineDto.QuantityReceived
+                    Dim vatableSales As Decimal
+                    Dim vatAmount As Decimal
 
-                receipt.Lines.Add(line)
+                    If lineDto.VatClassification = VatTreatment.Vatable Then
+                        vatableSales = Math.Round(lineTotal / vatDivisor, 2, MidpointRounding.ToEven)
+                        vatAmount = lineTotal - vatableSales
+                    Else
+                        vatableSales = lineTotal
+                        vatAmount = 0
+                    End If
+
+                    Dim line = New GoodsReceiptLine With {
+                        .ProductId = lineDto.ProductId,
+                        .UnitCost = lineDto.UnitCost,
+                        .ExpiryDate = lineDto.ExpiryDate,
+                        .QuantityReceived = lineDto.QuantityReceived,
+                        .DiscrepancyNotes = lineDto.DiscrepancyNotes,
+                        .HasDiscrepancy = (lineDto.QuantityReceived <> lineDto.QuantityOrdered),
+                        .VatClassification = lineDto.VatClassification,
+                        .VatableSales = vatableSales,
+                        .VatAmount = vatAmount
+                    }
+
+                    ' Also update the dto so the calculator uses the server-computed values
+                    lineDto.VatableSales = vatableSales
+                    lineDto.VatAmount = vatAmount
+
+                    receipt.Lines.Add(line)
+                Next
+
+                _db.GoodsReceipts.Add(receipt)
+                po.Status = PurchaseOrderStatus.Received
+
+                Dim isRace As Boolean = False
+                Try
+                    Await _db.SaveChangesAsync()
+                    saved = True
+                Catch ex As DbUpdateException
+                    isRace = True
+                    _db.Entry(receipt).State = EntityState.Detached
+                    For Each line In receipt.Lines
+                        _db.Entry(line).State = EntityState.Detached
+                    Next
+                End Try
+
+                If saved Then
+                    Exit For
+                End If
+                If Not isRace AndAlso Not saved Then
+                    Throw New Exception("Failed to save goods receipt due to unknown error.")
+                End If
             Next
 
-            _db.GoodsReceipts.Add(receipt)
-            po.Status = PurchaseOrderStatus.Received
-
-            Await _db.SaveChangesAsync()
+            If Not saved Then
+                Throw New Exception("Failed to save goods receipt after multiple retries due to receipt number collision.")
+            End If
 
             Dim receivedEvent = New GoodsReceivedEvent With {
                 .SourcePurchaseOrderId = po.Id,

@@ -11,6 +11,15 @@ Imports MerchSys.SharedKernel.Interfaces
 Public Class DataWriteGuardTests
 
     <Fact>
+    Public Sub NullArguments_ThrowsArgumentNullException()
+        Dim session = New FakeSessionService With {.Role = UserRole.Owner, .Name = "owner"}
+        Dim scope = New WriteContextScope()
+
+        Assert.Throws(Of ArgumentNullException)(Sub() DataWriteGuard.EnsureCanWrite(Nothing, scope, "test"))
+        Assert.Throws(Of ArgumentNullException)(Sub() DataWriteGuard.EnsureCanWrite(session, Nothing, "test"))
+    End Sub
+
+    <Fact>
     Public Sub OwnerInUserContext_IsRejected()
         Dim session = New FakeSessionService With {.Role = UserRole.Owner, .Name = "owner"}
         Dim scope = New WriteContextScope()

@@ -88,7 +88,23 @@ Namespace Services
                 .TaxAmount = vatReturn.InputVatTotal
             })
 
-            Await _dbContext.SaveChangesAsync(cancellationToken)
+            Dim isRace As Boolean = False
+            Try
+                Await _dbContext.SaveChangesAsync(cancellationToken)
+            Catch ex As DbUpdateException
+                isRace = True
+                _dbContext.Entry(vatReturn).State = EntityState.Detached
+                For Each line In vatReturn.Lines
+                    _dbContext.Entry(line).State = EntityState.Detached
+                Next
+            End Try
+
+            If isRace Then
+                vatReturn = Await _dbContext.VatReturns.Include(Function(v) v.Lines).FirstOrDefaultAsync(
+                    Function(v) v.Year = year AndAlso v.Period = period AndAlso v.FormType = formType,
+                    cancellationToken)
+            End If
+
             Return vatReturn
         End Function
 

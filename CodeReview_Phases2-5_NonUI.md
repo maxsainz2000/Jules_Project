@@ -193,17 +193,19 @@ modified or deleted through EF.
 `VatConfiguration`. A rate change requires a code change, and the POS and Purchasing paths cannot
 diverge correctly.
 
-### H6. Data-layer role guard has bypass surfaces **[reported]**
+### H6. Data-layer role guard has bypass surfaces **[Fixed]**
 `RoleGuardInterceptor.vb:21-36` blocks Owner writes only when `WriteContextKind.User` and only on
 `SaveChanges`/`SaveChangesAsync`. `ExecuteUpdateAsync` bypasses `SaveChanges` interception entirely
 (used at `ExpiryTrackingService.vb:110-112`). `DataWriteGuard.vb:28` is opt-in and **fail-open**
 (`If … Is Nothing Then Return`) and is called from only three sites in `AuthenticationService`.
+*Fix:* `RoleGuardInterceptor` now implements `IDbCommandInterceptor` to catch non-query executions, and `DataWriteGuard` throws `ArgumentNullException` on null inputs.
 
-### H7. Find-or-create against unique indexes without handling the race **[reported]**
+### H7. Find-or-create against unique indexes without handling the race **[Fixed]**
 `VatReportingService.vb:24-92` (`VatReturnConfiguration.vb:25`),
 `FinancialOverviewService.vb:106-147` (`FinancialSnapshotConfiguration.vb:20`) and
 `GoodsReceivingService.vb:38-49` (duplicate `ReceiptNumber`) all insert into unique-indexed columns
 without catching the resulting violation. Concurrent first-write loses.
+*Fix:* Added Try/Catch blocks around `SaveChangesAsync` calls in these services to catch `DbUpdateException`. Handled the race condition by detaching failed entities, recovering state, and (for receipts) generating sequential IDs with a bounded retry.
 
 ### H8. `SaleCompletedAccountingHandler` hardcodes `PaymentMethod.Cash` **[Fixed]**
 `SaleCompletedAccountingHandler.vb:40`. Every sale is recorded as cash regardless of actual payment
