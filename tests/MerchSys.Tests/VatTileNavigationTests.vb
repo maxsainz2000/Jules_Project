@@ -37,6 +37,29 @@ Public Class VatTileNavigationTests
     End Sub
 
     <Fact>
+    Public Sub OnVatTileClicked_DeveloperRole_RaisesNavigateToVatReturnRequested()
+        ' Arrange
+        Dim mockSession = New Mock(Of ISessionService)()
+        mockSession.Setup(Function(s) s.CurrentUserRole).Returns(UserRole.Developer)
+
+        Dim mockInner = New Mock(Of IFinancialOverviewService)()
+        Dim mockWhat = New Mock(Of IWhatThisMeansService)()
+        Dim mockNotif = New Mock(Of INotificationService)()
+        Dim mockMed = New Mock(Of IMediator)()
+
+        Dim presenter = New FinancialOverviewPresenter(mockInner.Object, mockWhat.Object, mockNotif.Object, mockMed.Object, mockSession.Object)
+        Dim eventRaised = False
+        AddHandler presenter.NavigateToVatReturnRequested, Sub(s, e) eventRaised = True
+
+        ' Act
+        Dim methodInfo = GetType(FinancialOverviewPresenter).GetMethod("OnVatTileClicked", System.Reflection.BindingFlags.NonPublic Or System.Reflection.BindingFlags.Instance)
+        methodInfo.Invoke(presenter, New Object() {Nothing, EventArgs.Empty})
+
+        ' Assert
+        Assert.True(eventRaised)
+    End Sub
+
+    <Fact>
     Public Sub OnVatTileClicked_OwnerRole_DoesNotRaiseNavigateToVatReturnRequested()
         ' Arrange
         Dim mockSession = New Mock(Of ISessionService)()
@@ -60,7 +83,7 @@ Public Class VatTileNavigationTests
     End Sub
 
     <Fact>
-    Public Async Function SmokeHarness_RunsSuccessfully_AndGeneratesReportWithPass() As Task
+    Public Async Function VatTileSmokeHarness_GeneratesExpectedMarkdownReport() As Task
 #If DEBUG Then
         ' Arrange
         Dim harness = New VatTileSmokeHarness()
