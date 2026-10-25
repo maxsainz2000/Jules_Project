@@ -94,6 +94,16 @@ Namespace Presenters
                 _view.InventoryValueDisplay = $"₱{overview.InventoryValue:N2}"
                 _view.GrossMarginTodayDisplay = $"{overview.GrossMarginToday:N1}%"
 
+                If overview.IsVatRegistered Then
+                    _view.VatPayableDisplay = $"₱{overview.VatPayable:N2}"
+                    _view.VatDueDateDisplay = If(overview.VatFilingDueDate.HasValue, overview.VatFilingDueDate.Value.ToString("MMM dd, yyyy"), "N/A")
+                    _view.VatSeverity = overview.VatPayableSeverity
+                Else
+                    _view.VatPayableDisplay = "N/A"
+                    _view.VatDueDateDisplay = ""
+                    _view.VatSeverity = KpiSeverity.Info
+                End If
+
                 _view.WhatThisMeansText = _whatThisMeansService.GenerateOverviewInterpretation(overview)
 
                 _view.SetTopSellingProducts(overview.TopSellingProducts)

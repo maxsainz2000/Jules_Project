@@ -47,6 +47,7 @@ Namespace Views.Accounting
 
         Public Event RefreshRequested As EventHandler Implements IFinancialOverviewView.RefreshRequested
         Public Event ViewLoaded As EventHandler Implements IFinancialOverviewView.ViewLoaded
+        Public Event VatTileClicked As EventHandler Implements IFinancialOverviewView.VatTileClicked
 
         Private Sub FinancialOverviewView_Load(sender As Object, e As EventArgs) Handles MyBase.Load
             RaiseEvent ViewLoaded(Me, EventArgs.Empty)
@@ -54,6 +55,10 @@ Namespace Views.Accounting
 
         Private Sub btnRefresh_Click(sender As Object, e As EventArgs) Handles btnRefresh.Click
             RaiseEvent RefreshRequested(Me, EventArgs.Empty)
+        End Sub
+
+        Private Sub pnlVatTile_Click(sender As Object, e As EventArgs) Handles pnlVatTile.Click, lblVatPayable.Click, lblVatDueDate.Click
+            RaiseEvent VatTileClicked(Me, EventArgs.Empty)
         End Sub
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
@@ -194,6 +199,45 @@ Namespace Views.Accounting
             End Get
             Set(value As String)
                 lblLastRefreshed.Text = value
+            End Set
+        End Property
+
+        <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
+        Public Property VatPayableDisplay As String Implements IFinancialOverviewView.VatPayableDisplay
+            Get
+                Return lblVatPayable.Text
+            End Get
+            Set(value As String)
+                lblVatPayable.Text = If(value = "N/A", value, $"VAT Payable: {value}")
+            End Set
+        End Property
+
+        <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
+        Public Property VatDueDateDisplay As String Implements IFinancialOverviewView.VatDueDateDisplay
+            Get
+                Return lblVatDueDate.Text
+            End Get
+            Set(value As String)
+                lblVatDueDate.Text = If(String.IsNullOrEmpty(value), "", $"Due: {value}")
+            End Set
+        End Property
+
+        <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
+        Public Property VatSeverity As KpiSeverity Implements IFinancialOverviewView.VatSeverity
+            Get
+                If pnlVatTile.BackColor = System.Drawing.Color.LightCoral Then Return KpiSeverity.Critical
+                If pnlVatTile.BackColor = System.Drawing.Color.LightYellow Then Return KpiSeverity.Warning
+                Return KpiSeverity.Info
+            End Get
+            Set(value As KpiSeverity)
+                Select Case value
+                    Case KpiSeverity.Critical
+                        pnlVatTile.BackColor = System.Drawing.Color.LightCoral
+                    Case KpiSeverity.Warning
+                        pnlVatTile.BackColor = System.Drawing.Color.LightYellow
+                    Case Else
+                        pnlVatTile.BackColor = System.Drawing.Color.LightGray
+                End Select
             End Set
         End Property
 

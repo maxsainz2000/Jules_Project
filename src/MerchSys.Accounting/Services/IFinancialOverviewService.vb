@@ -15,6 +15,13 @@ Namespace Services
         Public Property MonthlyTrends As New List(Of MonthlyTrendDto)
         Public Property TopSellingProducts As New List(Of TopProductDto)
         Public Property SnapshotDate As DateTime
+
+        Public Property VatPayable As Decimal
+        Public Property VatPayableLabel As String
+        Public Property VatFilingDueDate As DateTime?
+        Public Property VatPayableSeverity As KpiSeverity
+        Public Property IsVatRegistered As Boolean
+        Public Property VatPeriodDescription As String
     End Class
 
     Public Class MonthlyTrendDto

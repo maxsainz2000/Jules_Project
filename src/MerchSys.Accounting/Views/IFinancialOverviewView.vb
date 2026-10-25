@@ -18,11 +18,16 @@ Namespace Views
         Property ErrorMessage As String
         Property LastRefreshedText As String
 
+        Property VatPayableDisplay As String
+        Property VatDueDateDisplay As String
+        Property VatSeverity As KpiSeverity
+
         Sub SetTopSellingProducts(products As IEnumerable(Of TopProductDto))
         Sub SetMonthlyTrends(trends As IEnumerable(Of MonthlyTrendDto))
 
         Event RefreshRequested As EventHandler
         Event ViewLoaded As EventHandler
+        Event VatTileClicked As EventHandler
     End Interface
 
 End Namespace
