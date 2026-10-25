@@ -167,20 +167,23 @@ audit log. Successful financial operations log nothing: `PaymentService.vb:21-86
 immutable via triggers. The write could not be an EF entity (see §3 of the design note — `CreateTables()`
 is not idempotent); full design and verification in `Design_Audit_Trail_H1.md`.
 
-### H2. Hardcoded default credentials seeded unconditionally **[reported]**
+### H2. Hardcoded default credentials seeded unconditionally **[Fixed]**
+**Fixed 2026-10-13 (commit `6c75a7c`).** `EnsureDeveloperAccount` is compiled out of Release builds via `#If DEBUG`. Production installs do not receive seeded developer accounts.
 `MariaDbSchemaInitializer.vb:309` hashes `"VistaDeveloper2026!"` and `:330-331` `"Vista2026!"`.
 `EnsureDeveloperAccount` is called at `:56` with **no `#If DEBUG` guard**, so every install —
 including production — gets a `developer` account (role 3, a Manager superset) whose password is
 committed to the repository. A forced first-login change (`LoginPresenter.vb:33`) narrows but does
 not close the window.
 
-### H3. BIR receipt-archive immutability is not active **[verified]**
+### H3. BIR receipt-archive immutability is not active **[Fixed]**
+**Fixed 2026-10-13 (commit `6c75a7c`).** `ReceiptArchiveTriggerBootstrapper.vb` was added to Layer 3 of `DatabaseBootstrapper`. It automatically applies all triggers and verifies presence in `information_schema.TRIGGERS` at startup. Covered by `ReceiptArchiveTriggerBootstrapperTests.vb` and `ReceiptImmutabilityIntegrationTests.vb`.
 `02-pos-receipt-integrity-triggers.sql` defines the two `SIGNAL … 'BIR-archive-immutable'` triggers,
 but `information_schema.TRIGGERS` for `vista_central` is **empty**. The triggers must be applied
 manually after first launch and nothing verifies they exist. NIRC §235 immutability is currently
 unenforced.
 
-### H4. Archive rows are editable in application code **[reported]**
+### H4. Archive rows are editable in application code **[Fixed]**
+**Fixed 2026-10-13 (commit `6c75a7c`).** `ImmutableReceiptInterceptor.vb` now includes `OfficialReceiptArchive` and `ReceiptIntegrityArchive` in `IsImmutable`, throwing `ImmutableEntityException` on any EF edit or delete. Covered by `ReceiptImmutabilityIntegrationTests.vb`.
 `ImmutableReceiptInterceptor.vb:29` guards only `OfficialReceipt` and `ReceiptIntegrity`.
 `OfficialReceiptArchive` and `ReceiptIntegrityArchive` are unguarded, so BIR-retention rows can be
 modified or deleted through EF.
