@@ -15,15 +15,18 @@ Namespace Views.Accounting
         ' Designer constructor
         Public Sub New()
             InitializeComponent()
+            AddHandler pnlVatTile.Click, AddressOf pnlVatTile_Click
+            AddHandler lblVatPayable.Click, AddressOf pnlVatTile_Click
+            AddHandler lblVatDueDate.Click, AddressOf pnlVatTile_Click
             SetupDataGridViews()
         End Sub
 
         ' DI constructor
         Public Sub New(presenter As FinancialOverviewPresenter)
-            InitializeComponent()
+            Me.New()
             _presenter = presenter
             _presenter.View = Me
-            SetupDataGridViews()
+            AddHandler _presenter.NavigateToVatReturnRequested, AddressOf OnNavigateToVatReturnRequested
         End Sub
 
         Private Sub SetupDataGridViews()
@@ -57,8 +60,20 @@ Namespace Views.Accounting
             RaiseEvent RefreshRequested(Me, EventArgs.Empty)
         End Sub
 
-        Private Sub pnlVatTile_Click(sender As Object, e As EventArgs) Handles pnlVatTile.Click, lblVatPayable.Click, lblVatDueDate.Click
+        Private Sub pnlVatTile_Click(sender As Object, e As EventArgs)
             RaiseEvent VatTileClicked(Me, EventArgs.Empty)
+        End Sub
+
+        Public Sub OnNavigateToVatReturnRequested(sender As Object, e As EventArgs)
+            Dim shell = Application.OpenForms.OfType(Of MainWindow)().FirstOrDefault()
+            If shell IsNot Nothing AndAlso shell.Presenter IsNot Nothing Then
+                Dim targetItem = shell.Presenter.NavigationGroups.
+                    SelectMany(Function(g) g.Items).
+                    FirstOrDefault(Function(i) i.Name = "VAT Returns")
+                If targetItem IsNot Nothing Then
+                    shell.Presenter.NavigateTo(targetItem)
+                End If
+            End If
         End Sub
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>

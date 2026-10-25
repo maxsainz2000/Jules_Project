@@ -228,6 +228,7 @@ Namespace Views.Accounting
             Me.pnlVatTile.BackColor = System.Drawing.Color.LightGray
             Me.pnlVatTile.Controls.Add(Me.lblVatPayable)
             Me.pnlVatTile.Controls.Add(Me.lblVatDueDate)
+            Me.pnlVatTile.Cursor = System.Windows.Forms.Cursors.Hand
             Me.pnlVatTile.Location = New System.Drawing.Point(600, 180)
             Me.pnlVatTile.Name = "pnlVatTile"
             Me.pnlVatTile.Size = New System.Drawing.Size(200, 50)
@@ -236,6 +237,7 @@ Namespace Views.Accounting
             'lblVatPayable
             '
             Me.lblVatPayable.AutoSize = True
+            Me.lblVatPayable.Cursor = System.Windows.Forms.Cursors.Hand
             Me.lblVatPayable.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Bold)
             Me.lblVatPayable.Location = New System.Drawing.Point(5, 5)
             Me.lblVatPayable.Name = "lblVatPayable"
@@ -245,6 +247,7 @@ Namespace Views.Accounting
             'lblVatDueDate
             '
             Me.lblVatDueDate.AutoSize = True
+            Me.lblVatDueDate.Cursor = System.Windows.Forms.Cursors.Hand
             Me.lblVatDueDate.Location = New System.Drawing.Point(5, 25)
             Me.lblVatDueDate.Name = "lblVatDueDate"
             Me.lblVatDueDate.Size = New System.Drawing.Size(0, 15)
