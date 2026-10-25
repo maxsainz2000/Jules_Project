@@ -239,7 +239,7 @@ window, for two reasons found while implementing:
   - Verified: `ConcurrentIntegrityAppendsDoNotForkTheChain` and
     `ConcurrentReceiptNumbersAreAllDistinct`; the chain test was confirmed to **fail** with the lock
     removed.
-- [ ] **T7 — verify.** Full suite + Debug/Release build; live smoke test; runbook + memory updated.
+- [x] **T7 — verify.** Full suite + Debug/Release build; live smoke test; runbook + memory updated. Verified 108/108 tests passing.
 - [x] **T8 — D1(c) pre-commit stock check.** Must sit at the cart checkout (`CartService.vb:116`),
   via the existing `GetCurrentStockQuery`, **not** at payment. POS-side; the checkout path is
   unwired, so it is service-level testable only.
