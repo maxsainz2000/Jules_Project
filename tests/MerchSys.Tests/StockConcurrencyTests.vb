@@ -8,8 +8,10 @@ Imports Microsoft.Extensions.Logging.Abstractions
 Imports MediatR
 Imports MerchSys.Inventory.Data
 Imports MerchSys.Inventory.Handlers
+Imports System.Text.Json
 Imports MerchSys.Inventory.Services
 Imports MerchSys.SharedKernel.Events
+Imports MerchSys.SharedKernel.Exceptions
 
 ''' <summary>
 ''' DB-backed coverage for the C5 concurrency fixes: the FIFO decrement is serialized with
@@ -127,6 +129,54 @@ Public Class StockConcurrencyTests
         End Using
 
         Assert.Empty(mediator.Published)
+    End Function
+
+    <Fact>
+    Public Async Function AMidSaleFailureLogsAnAuditRecord() As Task
+        Const stockedProduct As Integer = 12
+        Const unstockedProduct As Integer = 13
+        Const saleId As Integer = 882001
+
+        Using ctx = _fixture.NewInventory()
+            Await New StockService(ctx).AddStockBatchAsync(stockedProduct, 5, 10D, New DateTime(2026, 1, 1), 0, Nothing)
+        End Using
+
+        Dim mediator As New CapturingMediator()
+
+        Using ctx = _fixture.NewInventory()
+            Dim handler As New SaleCompletedHandler(New StockService(ctx), ctx, NullLogger(Of SaleCompletedHandler).Instance, mediator)
+
+            Dim saleEvent = New SaleCompletedEvent With {.SaleId = saleId, .SaleDate = DateTime.UtcNow}
+            saleEvent.Items.Add(New SaleCompletedEvent.SaleCompletedItem With {.ProductId = stockedProduct, .QuantitySold = 2, .UnitPrice = 20D})
+            saleEvent.Items.Add(New SaleCompletedEvent.SaleCompletedItem With {.ProductId = unstockedProduct, .QuantitySold = 1, .UnitPrice = 20D})
+
+            Dim ex = Await Assert.ThrowsAsync(Of InsufficientStockException)(
+                Function() handler.Handle(saleEvent, CancellationToken.None))
+        End Using
+
+        ' Verify the audit log was written
+        Using connection = _fixture.NewAppConnection()
+            Await connection.OpenAsync()
+            Using command = connection.CreateCommand()
+                command.CommandText = "SELECT Action, EntityId, ChangesJson FROM App_AuditLog WHERE EntityType = 'SalesTransaction' AND EntityId = @EntityId"
+
+                Dim pEntityId = command.CreateParameter()
+                pEntityId.ParameterName = "@EntityId"
+                pEntityId.Value = saleId.ToString()
+                command.Parameters.Add(pEntityId)
+
+                Using reader = Await command.ExecuteReaderAsync()
+                    Assert.True(Await reader.ReadAsync(), "No audit log found for the failed sale deduction")
+
+                    Assert.Equal("DeductFail", reader.GetString(0))
+                    Assert.Equal(saleId.ToString(), reader.GetString(1))
+
+                    Dim json = reader.GetString(2)
+                    Assert.Contains("Insufficient stock", json)
+                    Assert.Contains(unstockedProduct.ToString(), json)
+                End Using
+            End Using
+        End Using
     End Function
 
     ''' <summary>

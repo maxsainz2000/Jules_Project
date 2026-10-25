@@ -85,6 +85,10 @@ Public Class TestDatabaseFixture
             New DbContextOptionsBuilder(Of AccountingDbContext)().UseMySQL(ConnectionString).Options)
     End Function
 
+    Public Function NewAppConnection() As System.Data.Common.DbConnection
+        Return New MySqlConnection(ConnectionString)
+    End Function
+
     Public Sub Dispose() Implements IDisposable.Dispose
         Using conn As New MySqlConnection(ServerConnectionString())
             conn.Open()
