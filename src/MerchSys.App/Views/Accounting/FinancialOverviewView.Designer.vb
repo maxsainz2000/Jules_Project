@@ -232,6 +232,7 @@ Namespace Views.Accounting
             Me.pnlVatTile.Name = "pnlVatTile"
             Me.pnlVatTile.Size = New System.Drawing.Size(200, 50)
             Me.pnlVatTile.TabIndex = 17
+            Me.pnlVatTile.Cursor = System.Windows.Forms.Cursors.Hand
             '
             'lblVatPayable
             '
@@ -241,6 +242,7 @@ Namespace Views.Accounting
             Me.lblVatPayable.Name = "lblVatPayable"
             Me.lblVatPayable.Size = New System.Drawing.Size(0, 19)
             Me.lblVatPayable.TabIndex = 0
+            Me.lblVatPayable.Cursor = System.Windows.Forms.Cursors.Hand
             '
             'lblVatDueDate
             '
@@ -249,6 +251,7 @@ Namespace Views.Accounting
             Me.lblVatDueDate.Name = "lblVatDueDate"
             Me.lblVatDueDate.Size = New System.Drawing.Size(0, 15)
             Me.lblVatDueDate.TabIndex = 1
+            Me.lblVatDueDate.Cursor = System.Windows.Forms.Cursors.Hand
             '
             'FinancialOverviewView
             '

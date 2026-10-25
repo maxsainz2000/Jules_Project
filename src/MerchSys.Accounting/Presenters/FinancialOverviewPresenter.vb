@@ -13,16 +13,21 @@ Namespace Presenters
         Private ReadOnly _whatThisMeansService As IWhatThisMeansService
         Private ReadOnly _notificationService As INotificationService
         Private ReadOnly _mediator As IMediator
+        Private ReadOnly _sessionService As ISessionService
         Private ReadOnly _refreshTimer As Timer
+
+        Public Event NavigateToVatReturnRequested As EventHandler
 
         Public Sub New(overviewService As IFinancialOverviewService,
                        whatThisMeansService As IWhatThisMeansService,
                        notificationService As INotificationService,
-                       mediator As IMediator)
+                       mediator As IMediator,
+                       sessionService As ISessionService)
             _overviewService = overviewService
             _whatThisMeansService = whatThisMeansService
             _notificationService = notificationService
             _mediator = mediator
+            _sessionService = sessionService
             _refreshTimer = New Timer(AddressOf OnTimerTick, Nothing, Timeout.Infinite, Timeout.Infinite)
         End Sub
 
@@ -34,14 +39,22 @@ Namespace Presenters
                 If _view IsNot Nothing Then
                     RemoveHandler _view.RefreshRequested, AddressOf OnRefreshRequested
                     RemoveHandler _view.ViewLoaded, AddressOf OnViewLoaded
+                    RemoveHandler _view.VatTileClicked, AddressOf OnVatTileClicked
                 End If
                 _view = value
                 If _view IsNot Nothing Then
                     AddHandler _view.RefreshRequested, AddressOf OnRefreshRequested
                     AddHandler _view.ViewLoaded, AddressOf OnViewLoaded
+                    AddHandler _view.VatTileClicked, AddressOf OnVatTileClicked
                 End If
             End Set
         End Property
+
+        Private Sub OnVatTileClicked(sender As Object, e As EventArgs)
+            If _sessionService.CurrentUserRole = MerchSys.SharedKernel.Enums.UserRole.Manager OrElse _sessionService.CurrentUserRole = MerchSys.SharedKernel.Enums.UserRole.Developer Then
+                RaiseEvent NavigateToVatReturnRequested(Me, EventArgs.Empty)
+            End If
+        End Sub
 
         Private Async Sub OnViewLoaded(sender As Object, e As EventArgs)
             Await LoadOverviewAsync()
