@@ -124,7 +124,9 @@ Namespace Services
 
             Await _mediator.Publish(vatEvent)
 
-            Await _priceChangeService.DetectChangesAsync(receipt.Id)
+            If _priceChangeService IsNot Nothing Then
+                Await _priceChangeService.DetectChangesAsync(receipt.Id)
+            End If
 
             Return receipt
         End Function
