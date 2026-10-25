@@ -23,6 +23,7 @@ Namespace Views.Accounting
             InitializeComponent()
             _presenter = presenter
             _presenter.View = Me
+            AddHandler _presenter.NavigateToVatReturnRequested, AddressOf OnNavigateToVatReturnRequested
             SetupDataGridViews()
         End Sub
 
@@ -59,6 +60,18 @@ Namespace Views.Accounting
 
         Private Sub pnlVatTile_Click(sender As Object, e As EventArgs) Handles pnlVatTile.Click, lblVatPayable.Click, lblVatDueDate.Click
             RaiseEvent VatTileClicked(Me, EventArgs.Empty)
+        End Sub
+
+        Public Sub OnNavigateToVatReturnRequested(sender As Object, e As EventArgs)
+            Dim shell = Application.OpenForms.OfType(Of MainWindow)().FirstOrDefault()
+            If shell IsNot Nothing AndAlso shell.Presenter IsNot Nothing Then
+                Dim targetItem = shell.Presenter.NavigationGroups.
+                    SelectMany(Function(g) g.Items).
+                    FirstOrDefault(Function(i) i.Name = "VAT Returns")
+                If targetItem IsNot Nothing Then
+                    shell.Presenter.NavigateTo(targetItem)
+                End If
+            End If
         End Sub
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>

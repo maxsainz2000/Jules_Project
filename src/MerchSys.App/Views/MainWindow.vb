@@ -11,6 +11,9 @@ Namespace Views
         Public Event ModuleSelected As EventHandler(Of AppModule)
         Public Event NavigationRequested As EventHandler(Of NavigationItem) Implements IMainWindowView.NavigationRequested
 
+        <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
+        Public Property Presenter As MainWindowPresenter
+
         Private _renderedItems As List(Of NavigationItem)
 
         ''' <summary>
