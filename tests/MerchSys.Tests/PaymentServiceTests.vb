@@ -12,6 +12,7 @@ Imports MerchSys.SharedKernel.Interfaces
 <Trait("Category", "Integration")>
 <Collection("IntegrationDatabase")>
 Public Class PaymentServiceTests
+    Implements IClassFixture(Of TestDatabaseFixture)
 
     Private ReadOnly _fixture As TestDatabaseFixture
 
@@ -27,7 +28,7 @@ Public Class PaymentServiceTests
                 .TransactionNumber = "TXN-TEST-1",
                 .TotalAmount = 100D,
                 .Lines = New List(Of SalesTransactionLine) From {
-                    New SalesTransactionLine With { .ProductId = 1, .Quantity = 1, .UnitPrice = 100D }
+                    New SalesTransactionLine With { .ProductId = 1, .ProductName = "Test Product", .Quantity = 1, .UnitPrice = 100D }
                 }
             }
             ctx.SalesTransactions.Add(transaction)
@@ -63,7 +64,7 @@ Public Class PaymentServiceTests
                 .TotalAmount = 100D,
                 .CreditAccount = creditAccount,
                 .Lines = New List(Of SalesTransactionLine) From {
-                    New SalesTransactionLine With { .ProductId = 1, .Quantity = 1, .UnitPrice = 100D }
+                    New SalesTransactionLine With { .ProductId = 1, .ProductName = "Test Product", .Quantity = 1, .UnitPrice = 100D }
                 }
             }
             ctx.SalesTransactions.Add(transaction)
