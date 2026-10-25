@@ -1,3 +1,4 @@
+Imports System.Threading.Tasks
 Imports Xunit
 Imports Microsoft.EntityFrameworkCore.Diagnostics
 Imports MerchSys.SharedKernel.Data
@@ -19,6 +20,18 @@ Public Class RoleGuardInterceptorTests
         Assert.Throws(Of UnauthorizedWriteException)(Sub() interceptor.NonQueryExecuting(command, Nothing, result))
     End Sub
 
+
+    <Fact>
+    Public Async Function OwnerExecutingNonQueryAsyncInUserContext_IsRejected() As Task
+        Dim session = New FakeSessionService With {.Role = UserRole.Owner, .Name = "owner"}
+        Dim scope = New WriteContextScope()
+        Dim interceptor = New RoleGuardInterceptor(session, scope)
+
+        Dim command = New FakeDbCommand()
+        Dim result = New InterceptionResult(Of Integer)()
+
+        Await Assert.ThrowsAsync(Of UnauthorizedWriteException)(Async Function() Await interceptor.NonQueryExecutingAsync(command, Nothing, result))
+    End Function
 End Class
 
 Public Class FakeDbCommand
