@@ -6,6 +6,12 @@ Namespace Services
     Public Class WhatThisMeansService
         Implements IWhatThisMeansService
 
+        Private ReadOnly _insightProviders As IEnumerable(Of Insights.IFinancialInsightProvider)
+
+        Public Sub New(Optional insightProviders As IEnumerable(Of Insights.IFinancialInsightProvider) = Nothing)
+            _insightProviders = insightProviders
+        End Sub
+
         Public Function GenerateOverviewInterpretation(overview As FinancialOverviewDto) As String Implements IWhatThisMeansService.GenerateOverviewInterpretation
             If overview Is Nothing Then Return "No data available to interpret."
 
@@ -44,6 +50,15 @@ Namespace Services
             If overview.TopSellingProducts IsNot Nothing AndAlso overview.TopSellingProducts.Any() Then
                 Dim topProduct = overview.TopSellingProducts.OrderByDescending(Function(p) p.TotalRevenue).First()
                 sb.AppendLine($"Your top-selling product by revenue is {topProduct.ProductName}, generating ₱{topProduct.TotalRevenue:N2} from {topProduct.QuantitySold:N1} units sold.")
+            End If
+
+            If _insightProviders IsNot Nothing Then
+                For Each provider In _insightProviders
+                    Dim insight = provider.GenerateInsight(overview)
+                    If Not String.IsNullOrWhiteSpace(insight) Then
+                        sb.AppendLine(insight)
+                    End If
+                Next
             End If
 
             Return sb.ToString().TrimEnd()

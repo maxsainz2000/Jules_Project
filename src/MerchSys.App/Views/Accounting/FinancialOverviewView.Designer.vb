@@ -223,10 +223,38 @@ Namespace Views.Accounting
             Me.lblLowStockAlertCount.Size = New System.Drawing.Size(0, 15)
             Me.lblLowStockAlertCount.TabIndex = 16
             '
+            'pnlVatTile
+            '
+            Me.pnlVatTile.BackColor = System.Drawing.Color.LightGray
+            Me.pnlVatTile.Controls.Add(Me.lblVatPayable)
+            Me.pnlVatTile.Controls.Add(Me.lblVatDueDate)
+            Me.pnlVatTile.Location = New System.Drawing.Point(600, 180)
+            Me.pnlVatTile.Name = "pnlVatTile"
+            Me.pnlVatTile.Size = New System.Drawing.Size(200, 50)
+            Me.pnlVatTile.TabIndex = 17
+            '
+            'lblVatPayable
+            '
+            Me.lblVatPayable.AutoSize = True
+            Me.lblVatPayable.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Bold)
+            Me.lblVatPayable.Location = New System.Drawing.Point(5, 5)
+            Me.lblVatPayable.Name = "lblVatPayable"
+            Me.lblVatPayable.Size = New System.Drawing.Size(0, 19)
+            Me.lblVatPayable.TabIndex = 0
+            '
+            'lblVatDueDate
+            '
+            Me.lblVatDueDate.AutoSize = True
+            Me.lblVatDueDate.Location = New System.Drawing.Point(5, 25)
+            Me.lblVatDueDate.Name = "lblVatDueDate"
+            Me.lblVatDueDate.Size = New System.Drawing.Size(0, 15)
+            Me.lblVatDueDate.TabIndex = 1
+            '
             'FinancialOverviewView
             '
             Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+            Me.Controls.Add(Me.pnlVatTile)
             Me.Controls.Add(Me.lblLowStockAlertCount)
             Me.Controls.Add(Me.lblOverdueAPCount)
             Me.Controls.Add(Me.lblOverdueARCount)
@@ -274,6 +302,9 @@ Namespace Views.Accounting
         Friend WithEvents lblOverdueARCount As System.Windows.Forms.Label
         Friend WithEvents lblOverdueAPCount As System.Windows.Forms.Label
         Friend WithEvents lblLowStockAlertCount As System.Windows.Forms.Label
+        Friend WithEvents pnlVatTile As System.Windows.Forms.Panel
+        Friend WithEvents lblVatPayable As System.Windows.Forms.Label
+        Friend WithEvents lblVatDueDate As System.Windows.Forms.Label
 
     End Class
 

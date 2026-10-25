@@ -9,7 +9,14 @@ Namespace Extensions
 
         <Extension()>
         Public Sub AddAccountingServices(services As IServiceCollection)
-            services.AddScoped(Of IFinancialOverviewService, FinancialOverviewService)()
+            services.AddScoped(Of FinancialOverviewService)()
+            services.AddScoped(Of IFinancialOverviewService)(Function(sp)
+                                                                 Dim inner = sp.GetRequiredService(Of FinancialOverviewService)()
+                                                                 Dim kpis = sp.GetServices(Of IKpiProvider)()
+                                                                 Return New VatEnrichedFinancialOverviewService(inner, kpis)
+                                                             End Function)
+            services.AddScoped(Of IKpiProvider, VatPayableKpiProvider)()
+            services.AddScoped(Of Insights.IFinancialInsightProvider, Insights.VatPayableInsightProvider)()
             services.AddScoped(Of IIncomeStatementService, IncomeStatementService)()
             services.AddScoped(Of ISalesSummaryService, SalesSummaryService)()
             services.AddScoped(Of IWhatThisMeansService, WhatThisMeansService)()
