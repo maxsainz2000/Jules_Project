@@ -64,9 +64,13 @@ Namespace Services
 
             Dim receiptNumber = transaction.TransactionNumber ' Using TransactionNumber as basic receipt number
 
+            Dim paymentEnum As MerchSys.SharedKernel.Enums.PaymentMethod = MerchSys.SharedKernel.Enums.PaymentMethod.Cash
+            [Enum].TryParse(Of MerchSys.SharedKernel.Enums.PaymentMethod)(method, True, paymentEnum)
+
                   Dim saleCompletedEvent = New SaleCompletedEvent With {
                       .SaleId = transaction.Id,
                       .SaleDate = transaction.TransactionDate,
+                      .PaymentMethod = paymentEnum,
                       .Items = transaction.Lines.Select(Function(l) New SaleCompletedEvent.SaleCompletedItem With {
                           .ProductId = l.ProductId,
                           .QuantitySold = l.Quantity,

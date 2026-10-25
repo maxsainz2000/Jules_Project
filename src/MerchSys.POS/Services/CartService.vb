@@ -68,6 +68,7 @@ Namespace Services
 
         Private Sub RecalculateCart(cart As CartDto)
             cart.TotalAmount = cart.Lines.Sum(Function(l) l.LineTotal)
+            ' This is UI-only recalculation, exact VAT is computed at finalization
             cart.VatableSales = Math.Round(cart.TotalAmount / 1.12D, 2)
             cart.VatAmount = cart.TotalAmount - cart.VatableSales
         End Sub
@@ -101,14 +102,22 @@ Namespace Services
 
             Dim nextTxNumber = Await GenerateNextTransactionNumberAsync()
 
+            Dim vatConfig = Await _mediator.Send(New GetVatConfigurationQuery())
+            Dim vatDivisor As Decimal = If(vatConfig IsNot Nothing AndAlso vatConfig.VatRate > 0, 1D + vatConfig.VatRate, 1.12D)
+
+            Dim vatableSales As Decimal = Math.Round(cart.TotalAmount / vatDivisor, 2, MidpointRounding.ToEven)
+            Dim vatAmount As Decimal = cart.TotalAmount - vatableSales
+
             Dim transaction = New SalesTransaction With {
                 .TransactionNumber = nextTxNumber,
                 .TransactionDate = DateTime.Now,
                 .TotalAmount = cart.TotalAmount,
                 .PaymentMethod = paymentMethod,
                 .IsVoid = False,
-                .CreditAccount = creditAccount
+                .CreditAccount = creditAccount,
+                .VatableSales = vatableSales
             }
+            ' Note: SalesTransaction entity in this codebase does not have VatAmount but has VatableSales, VatExemptSales, ZeroRatedSales.
 
             For Each line In cart.Lines
                 ' ProductId is load-bearing and must not be omitted. It used to be missing here, so

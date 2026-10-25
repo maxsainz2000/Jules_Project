@@ -54,13 +54,16 @@ Namespace Services
                 .Lines = New List(Of GoodsReceiptLine)()
             }
 
+            Dim vatConfig = Await _mediator.Send(New MerchSys.SharedKernel.Queries.GetVatConfigurationQuery())
+            Dim vatDivisor As Decimal = If(vatConfig IsNot Nothing AndAlso vatConfig.VatRate > 0, 1D + vatConfig.VatRate, 1.12D)
+
             For Each lineDto In dto.Lines
                 Dim lineTotal = lineDto.UnitCost * lineDto.QuantityReceived
                 Dim vatableSales As Decimal
                 Dim vatAmount As Decimal
 
                 If lineDto.VatClassification = VatTreatment.Vatable Then
-                    vatableSales = Math.Round(lineTotal / 1.12D, 2)
+                    vatableSales = Math.Round(lineTotal / vatDivisor, 2, MidpointRounding.ToEven)
                     vatAmount = lineTotal - vatableSales
                 Else
                     vatableSales = lineTotal
@@ -121,7 +124,9 @@ Namespace Services
 
             Await _mediator.Publish(vatEvent)
 
-            Await _priceChangeService.DetectChangesAsync(receipt.Id)
+            If _priceChangeService IsNot Nothing Then
+                Await _priceChangeService.DetectChangesAsync(receipt.Id)
+            End If
 
             Return receipt
         End Function

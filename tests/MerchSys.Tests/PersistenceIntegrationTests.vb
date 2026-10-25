@@ -224,6 +224,91 @@ Public Class PersistenceIntegrationTests
         End Using
     End Function
 
+    <Fact>
+    Public Async Function ReceiveGoodsAsyncComputesDynamicVatCorrectly() As Task
+        Using ctx = _fixture.NewPurchasing()
+            ' Setup a minimal PO
+            Dim po As New PurchaseOrder With {
+                .VendorId = 1,
+                .OrderNumber = "PO-TEST",
+                .Status = SharedKernel.Enums.PurchaseOrderStatus.Submitted,
+                .ExpectedDeliveryDate = DateTime.Now,
+                .TotalAmount = 0D
+            }
+            ctx.PurchaseOrders.Add(po)
+            Await ctx.SaveChangesAsync()
+
+            Dim mediator = New FakeVatMediator(0.12D)
+            Dim vatCalculator = New MerchSys.Purchasing.Services.Vat.GoodsReceiptVatCalculator()
+            Dim service As New GoodsReceivingService(ctx, mediator, Nothing, vatCalculator)
+
+            Dim dto = New MerchSys.Purchasing.Dtos.ReceiveGoodsDto With {
+                .PurchaseOrderId = po.Id,
+                .Lines = New List(Of MerchSys.Purchasing.Dtos.ReceiveGoodsLineDto) From {
+                    New MerchSys.Purchasing.Dtos.ReceiveGoodsLineDto With {
+                        .ProductId = 1,
+                        .ProductName = "Test Product",
+                        .QuantityOrdered = 10,
+                        .QuantityReceived = 10,
+                        .UnitCost = 10D,
+                        .VatClassification = SharedKernel.Enums.VatTreatment.Vatable
+                    }
+                }
+            }
+
+            Dim receipt = Await service.ReceiveGoodsAsync(dto)
+
+            ' Total = 100, Rate = 0.12, Divisor = 1.12
+            ' VatableSales = Math.Round(100 / 1.12, 2) = 89.29
+            ' VatAmount = 100 - 89.29 = 10.71
+            Assert.Single(receipt.Lines)
+            Assert.Equal(89.29D, receipt.Lines(0).VatableSales)
+            Assert.Equal(10.71D, receipt.Lines(0).VatAmount)
+        End Using
+    End Function
+
+    <Fact>
+    Public Async Function ReceiveGoodsAsyncComputesDynamicVatFallbackCorrectly() As Task
+        Using ctx = _fixture.NewPurchasing()
+            Dim po As New PurchaseOrder With {
+                .VendorId = 1,
+                .OrderNumber = "PO-TEST-FB",
+                .Status = SharedKernel.Enums.PurchaseOrderStatus.Submitted,
+                .ExpectedDeliveryDate = DateTime.Now,
+                .TotalAmount = 0D
+            }
+            ctx.PurchaseOrders.Add(po)
+            Await ctx.SaveChangesAsync()
+
+            Dim mediator = New FakeVatMediator(0D)
+            Dim vatCalculator = New MerchSys.Purchasing.Services.Vat.GoodsReceiptVatCalculator()
+            Dim service As New GoodsReceivingService(ctx, mediator, Nothing, vatCalculator)
+
+            Dim dto = New MerchSys.Purchasing.Dtos.ReceiveGoodsDto With {
+                .PurchaseOrderId = po.Id,
+                .Lines = New List(Of MerchSys.Purchasing.Dtos.ReceiveGoodsLineDto) From {
+                    New MerchSys.Purchasing.Dtos.ReceiveGoodsLineDto With {
+                        .ProductId = 1,
+                        .ProductName = "Test Product",
+                        .QuantityOrdered = 10,
+                        .QuantityReceived = 10,
+                        .UnitCost = 10D,
+                        .VatClassification = SharedKernel.Enums.VatTreatment.Vatable
+                    }
+                }
+            }
+
+            Dim receipt = Await service.ReceiveGoodsAsync(dto)
+
+            ' Total = 100, Rate = 0, Fallback Divisor = 1.12
+            ' VatableSales = Math.Round(100 / 1.12, 2) = 89.29
+            ' VatAmount = 100 - 89.29 = 10.71
+            Assert.Single(receipt.Lines)
+            Assert.Equal(89.29D, receipt.Lines(0).VatableSales)
+            Assert.Equal(10.71D, receipt.Lines(0).VatAmount)
+        End Using
+    End Function
+
     Private Class ReceiptFixture
         Public Property OrderId As Integer
         Public Property ReceiptId As Integer

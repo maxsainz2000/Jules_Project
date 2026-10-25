@@ -131,6 +131,13 @@ Public Class PosIdentifierConcurrencyTests
                 })
                 Return Task.FromResult(DirectCast(DirectCast(result, Object), TResponse))
             End If
+            If TypeOf request Is GetVatConfigurationQuery Then
+                Dim result = New GetVatConfigurationResult With {
+                    .VatRate = 0.12D,
+                    .IsVatRegistered = True
+                }
+                Return Task.FromResult(DirectCast(DirectCast(result, Object), TResponse))
+            End If
             Throw New NotSupportedException()
         End Function
 

@@ -35,7 +35,7 @@ Namespace Handlers
                 revenueRecord.QuantitySold = CDec(item.QuantitySold)
                 revenueRecord.UnitPrice = item.UnitPrice
                 revenueRecord.TotalRevenue = CDec(item.QuantitySold) * item.UnitPrice
-                revenueRecord.PaymentMethod = PaymentMethod.Cash
+                revenueRecord.PaymentMethod = notification.PaymentMethod
 
                 ' Recompute from whatever is currently persisted. The COGS handler may not have run
                 ' yet, in which case TotalCogs is still 0 and this is corrected when it does — and
