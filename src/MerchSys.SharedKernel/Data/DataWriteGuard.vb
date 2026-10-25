@@ -25,7 +25,8 @@ Namespace Data
         ''' <param name="writeContextScope">Current write context.</param>
         ''' <param name="operation">Short description used in the error message.</param>
         Public Shared Sub EnsureCanWrite(sessionService As ISessionService, writeContextScope As IWriteContextScope, operation As String)
-            If sessionService Is Nothing OrElse writeContextScope Is Nothing Then Return
+            If sessionService Is Nothing Then Throw New ArgumentNullException(NameOf(sessionService))
+            If writeContextScope Is Nothing Then Throw New ArgumentNullException(NameOf(writeContextScope))
 
             If writeContextScope.Current = WriteContextKind.User AndAlso sessionService.CurrentUserRole = UserRole.Owner Then
                 Throw New UnauthorizedWriteException($"Owner accounts are not permitted to perform database writes ({operation}).")

@@ -144,7 +144,18 @@ Namespace Services
                 _dbContext.Set(Of FinancialSnapshot)().Add(snapshot)
             End If
 
-            Await _dbContext.SaveChangesAsync(cancellationToken)
+            Dim isRace As Boolean = False
+            Try
+                Await _dbContext.SaveChangesAsync(cancellationToken)
+            Catch ex As DbUpdateException
+                isRace = True
+                _dbContext.Entry(snapshot).State = EntityState.Detached
+            End Try
+
+            If isRace Then
+                snapshot = Await _dbContext.Set(Of FinancialSnapshot)().
+                    FirstOrDefaultAsync(Function(s) s.SnapshotDate.Date = today, cancellationToken)
+            End If
 
             Return snapshot
         End Function
