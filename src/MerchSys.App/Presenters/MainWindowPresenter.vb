@@ -30,6 +30,11 @@ Namespace Presenters
             _serviceProvider = serviceProvider
             _connectionStatusPresenter = connectionStatusPresenter
 
+            Dim mw = TryCast(_view, MainWindow)
+            If mw IsNot Nothing Then
+                mw.Presenter = Me
+            End If
+
             AddHandler _view.Load, AddressOf OnViewLoad
             AddHandler _view.LogoutRequested, AddressOf OnLogoutRequested
             AddHandler _view.NavigationRequested, AddressOf OnNavigationRequested
