@@ -7,6 +7,7 @@ Namespace Events
 
         Public Property SaleId As Integer
         Public Property SaleDate As DateTime
+        Public Property PaymentMethod As MerchSys.SharedKernel.Enums.PaymentMethod
         Public Property Items As List(Of SaleCompletedItem) = New List(Of SaleCompletedItem)()
 
             Public Class SaleCompletedItem

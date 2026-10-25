@@ -30,7 +30,8 @@ Public Class SaleAccountingHandlerTests
     Private Shared Function RevenueEvent() As SaleCompletedEvent
         Dim completedEvent = New SaleCompletedEvent With {
             .SaleId = TestSaleId,
-            .SaleDate = New DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc)
+            .SaleDate = New DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc),
+            .PaymentMethod = MerchSys.SharedKernel.Enums.PaymentMethod.Credit
         }
         completedEvent.Items.Add(New SaleCompletedEvent.SaleCompletedItem With {
             .ProductId = TestProductId,
@@ -108,6 +109,7 @@ Public Class SaleAccountingHandlerTests
             Assert.Equal(expectedRevenue, revenues(0).TotalRevenue)
             Assert.Equal(TestUnitPrice, revenues(0).UnitPrice)
             Assert.Equal(CDec(TestQuantity), revenues(0).QuantitySold)
+            Assert.Equal(MerchSys.SharedKernel.Enums.PaymentMethod.Credit, revenues(0).PaymentMethod)
             Assert.Equal(TestTotalCost, revenues(0).TotalCogs)
             Assert.Equal(TestTotalCost / CDec(TestQuantity), revenues(0).UnitCost)
 

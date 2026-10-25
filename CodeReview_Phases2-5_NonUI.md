@@ -185,7 +185,7 @@ unenforced.
 `OfficialReceiptArchive` and `ReceiptIntegrityArchive` are unguarded, so BIR-retention rows can be
 modified or deleted through EF.
 
-### H5. VAT rate hardcoded as 1.12 **[reported]**
+### H5. VAT rate hardcoded as 1.12 **[Fixed]**
 `GoodsReceivingService.vb:63` and `CartService.vb:60` divide by `1.12D` instead of reading
 `VatConfiguration`. A rate change requires a code change, and the POS and Purchasing paths cannot
 diverge correctly.
@@ -202,7 +202,7 @@ diverge correctly.
 `GoodsReceivingService.vb:38-49` (duplicate `ReceiptNumber`) all insert into unique-indexed columns
 without catching the resulting violation. Concurrent first-write loses.
 
-### H8. `SaleCompletedAccountingHandler` hardcodes `PaymentMethod.Cash` **[verified]**
+### H8. `SaleCompletedAccountingHandler` hardcodes `PaymentMethod.Cash` **[Fixed]**
 `SaleCompletedAccountingHandler.vb:40`. Every sale is recorded as cash regardless of actual payment
 method, so credit sales are misclassified in the ledger.
 

@@ -75,6 +75,30 @@ Public Class CartServiceTests
     End Function
 
     <Fact>
+    Public Async Function FinalizeTransactionComputesDynamicVatCorrectly() As Task
+        Const productId As Integer = 5
+        Dim cartId = "cart-vat-" & Guid.NewGuid().ToString("N")
+
+        Using fixture As New TestDatabaseFixture()
+            Using ctx = fixture.NewPOS()
+                Dim mediator = New FakeStockMediator(New Dictionary(Of Integer, Integer) From {
+                    {productId, 10}
+                })
+                Dim service As New CartService(ctx, mediator)
+
+                ' Add item with total 100
+                service.AddToCart(cartId, productId, "Vat Test Product", 50D, 2)
+
+                Dim transaction = Await service.FinalizeTransactionAsync(cartId, "Cash")
+
+                ' Total = 100, VatRate = 0.12, VatDivisor = 1.12
+                ' VatableSales = Math.Round(100 / 1.12, 2, ToEven) = 89.29
+                Assert.Equal(89.29D, transaction.VatableSales)
+            End Using
+        End Using
+    End Function
+
+    <Fact>
     Public Async Function FinalizeTransactionThrowsIfStockIsInsufficient() As Task
         Const productId As Integer = 10
         Dim cartId = "cart-insufficient-" & Guid.NewGuid().ToString("N")
@@ -117,6 +141,13 @@ Public Class CartServiceTests
                         .CurrentQuantity = kvp.Value
                     })
                 Next
+                Return Task.FromResult(DirectCast(DirectCast(result, Object), TResponse))
+            End If
+            If TypeOf request Is GetVatConfigurationQuery Then
+                Dim result = New GetVatConfigurationResult With {
+                    .VatRate = 0.12D,
+                    .IsVatRegistered = True
+                }
                 Return Task.FromResult(DirectCast(DirectCast(result, Object), TResponse))
             End If
             Throw New NotSupportedException()
