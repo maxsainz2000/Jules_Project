@@ -30,6 +30,9 @@ Namespace Views
             End RaiseEvent
         End Event
 
+        <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
+        Public Property Presenter As MainWindowPresenter
+
         Public Sub New()
             InitializeComponent()
             Me.KeyPreview = True
