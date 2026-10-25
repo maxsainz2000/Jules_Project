@@ -9,6 +9,7 @@ Namespace Extensions
 
         <Extension()>
         Public Sub AddAccountingServices(services As IServiceCollection)
+            services.AddScoped(Of ITamperAuditQueryService, TamperAuditQueryService)()
             services.AddScoped(Of FinancialOverviewService)()
             services.AddScoped(Of IFinancialOverviewService)(Function(sp)
                                                                  Dim inner = sp.GetRequiredService(Of FinancialOverviewService)()

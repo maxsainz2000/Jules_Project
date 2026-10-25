@@ -56,10 +56,6 @@ Public Class MediatRWiringTests
     ''' Notifications with no handler, each of which needs a decision rather than just a class.
     ''' </summary>
     Private Shared ReadOnly KnownNotificationGaps As New Dictionary(Of String, String) From {
-        {"MerchSys.SharedKernel.Events.ReceiptTamperDetectedEvent",
-         "ReceiptIntegrityService publishes this when a receipt hash fails to verify (line 91) and " &
-         "nothing acts on it, so NIRC s.235 tamper evidence is detected but unactioned. Needs a " &
-         "decision on the response: block, alert, or record."},
         {"MerchSys.SharedKernel.Events.VatConfigurationChangedEvent",
          "Published by IVatConfigurationWriter when the VAT rate changes, but nothing invalidates the " &
          "per-process VatConfigurationLoader cache, so the other client laptops keep the stale rate " &

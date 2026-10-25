@@ -1,0 +1,10 @@
+1. Add explicit constructor in `src/MerchSys.Accounting/Data/AccountingDbContext.vb` taking `DbContextOptions(Of AccountingDbContext)` and passing Nothing for other args.
+2. Add `TamperAuditEntry` class in `src/MerchSys.Accounting/Entities/TamperAuditEntry.vb`.
+3. Add `TamperAuditEntryConfiguration` class in `src/MerchSys.Accounting/Data/Configurations/TamperAuditEntryConfiguration.vb`.
+4. Add `TamperAuditEntries` DbSet to `src/MerchSys.Accounting/Data/AccountingDbContext.vb`.
+5. Implement `ReceiptTamperDetectedHandler` in `src/MerchSys.Accounting/Handlers/ReceiptTamperDetectedHandler.vb`.
+6. Implement `ITamperAuditQueryService` and `TamperAuditQueryService` in `src/MerchSys.Accounting/Services/ITamperAuditQueryService.vb` (could be two files or one).
+7. Register `ITamperAuditQueryService` in `src/MerchSys.Accounting/Extensions/AccountingServiceCollectionExtensions.vb`.
+8. Remove the event from `KnownNotificationGaps` in `tests/MerchSys.Tests/MediatRWiringTests.vb`.
+9. Add `ReceiptTamperDetectedHandlerTests.vb` in `tests/MerchSys.Tests/`.
+10. Run `dotnet build src/MerchSys.slnx` and `dotnet test tests/MerchSys.Tests --filter "Category!=Integration"`.

@@ -6,6 +6,10 @@ Namespace Data
     Public Class AccountingDbContext
         Inherits BaseDbContext
 
+        Public Sub New(options As DbContextOptions(Of AccountingDbContext))
+            Me.New(options, Nothing, Nothing)
+        End Sub
+
         Public Sub New(options As DbContextOptions(Of AccountingDbContext), Optional currentUserProvider As MerchSys.SharedKernel.Interfaces.ICurrentUserProvider = Nothing, Optional writeContextScope As MerchSys.SharedKernel.Interfaces.IWriteContextScope = Nothing)
             MyBase.New(options, currentUserProvider, writeContextScope)
         End Sub
@@ -23,6 +27,7 @@ Namespace Data
         Public Property FinancialSnapshots As DbSet(Of Entities.FinancialSnapshot)
         Public Property VatReturns As DbSet(Of Entities.VatReturn)
         Public Property VatReturnLines As DbSet(Of Entities.VatReturnLine)
+        Public Overridable Property TamperAuditEntries As DbSet(Of Entities.TamperAuditEntry)
 
         Protected Overrides Sub OnModelCreating(modelBuilder As ModelBuilder)
             MyBase.OnModelCreating(modelBuilder)
