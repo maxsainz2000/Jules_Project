@@ -13,22 +13,16 @@ Imports MerchSys.Accounting.Services
 Imports MediatR
 Imports MerchSys.SharedKernel.Interfaces
 
+<Trait("Category", "Integration")>
+<Collection("IntegrationDatabase")>
 Public Class VatReportingServiceRaceTests
-    Implements IDisposable
+    Implements IClassFixture(Of TestDatabaseFixture)
 
     Private _fixture As TestDatabaseFixture
-    Private _dbContext As AccountingDbContext
 
-    Public Sub New()
-        _fixture = New TestDatabaseFixture()
-        _dbContext = New AccountingDbContext(New DbContextOptionsBuilder(Of AccountingDbContext)().UseMySQL(_fixture.ConnectionString).Options)
-        _dbContext.Database.EnsureCreated()
-    End Sub
 
-    Public Sub Dispose() Implements IDisposable.Dispose
-        _dbContext.Database.EnsureDeleted()
-        _dbContext.Dispose()
-        _fixture.Dispose()
+    Public Sub New(fixture As TestDatabaseFixture)
+        _fixture = fixture
     End Sub
 
     Private Class FakeLogger
@@ -52,6 +46,18 @@ Public Class VatReportingServiceRaceTests
 
     <Fact>
     Public Async Function GenerateVatReturnAsync_RaceCondition_RecoversAndReturnsExisting() As Task
+        Dim optionsBuilderForSetup = New DbContextOptionsBuilder(Of AccountingDbContext)()
+        optionsBuilderForSetup.UseMySQL(_fixture.ConnectionString)
+
+        Using setupContext = New AccountingDbContext(optionsBuilderForSetup.Options)
+            ' Ensure the record doesn't already exist from another test
+            Dim old = setupContext.VatReturns.FirstOrDefault(Function(r) r.Year = 2023 AndAlso r.Period = 5 AndAlso r.FormType = VatReturnFormType.Form2550M)
+            If old IsNot Nothing Then
+                setupContext.VatReturns.Remove(old)
+                setupContext.SaveChanges()
+            End If
+        End Using
+
         Dim existing = New VatReturn With {
             .Year = 2023,
             .Period = 5,
@@ -61,8 +67,10 @@ Public Class VatReportingServiceRaceTests
             .PeriodStart = New DateTime(2023, 1, 1),
             .PeriodEnd = New DateTime(2023, 1, 31)
         }
-        _dbContext.VatReturns.Add(existing)
-        Await _dbContext.SaveChangesAsync()
+        Using setupContext = New AccountingDbContext(optionsBuilderForSetup.Options)
+            setupContext.VatReturns.Add(existing)
+            Await setupContext.SaveChangesAsync()
+        End Using
 
         Dim optionsBuilder = New DbContextOptionsBuilder(Of AccountingDbContext)()
         optionsBuilder.UseMySQL(_fixture.ConnectionString)
