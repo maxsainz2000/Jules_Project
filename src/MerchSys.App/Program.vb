@@ -78,6 +78,7 @@ Friend Module Program
                                   services.AddScoped(Of MerchSys.SharedKernel.Data.RoleGuardInterceptor)()
 
                                   services.AddTransient(Of IAuthenticationService, AuthenticationService)()
+                                  services.AddTransient(Of IConflictPresenter, DefaultConflictPresenter)()
 
                                   ' Use Scoped so that within a scope, ILoginView and LoginPresenter share the same view instance
                                   services.AddScoped(Of ILoginView, LoginView)()
