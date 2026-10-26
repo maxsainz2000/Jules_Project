@@ -9,7 +9,7 @@ Imports MerchSys.SharedKernel.Events
 ''' <summary>
 ''' Regression tests for the two accounting handlers that share a RevenueRecord row.
 '''
-''' <c>SaleCompletedAccountingHandler</c> (revenue) and <c>StockDeductedAccountingHandler</c> (COGS)
+''' <c>SaleRevenueHandler</c> (revenue and VAT) and <c>StockDeductedAccountingHandler</c> (COGS)
 ''' are driven by different events, and MediatR gives no ordering guarantee between them. Both upsert
 ''' on (SourceTransactionId, ProductId) and recompute gross profit from the persisted row, so the
 ''' final state must be identical whichever runs first — and a repeat publication must not
@@ -54,6 +54,21 @@ Public Class SaleAccountingHandlerTests
         Return deductedEvent
     End Function
 
+    Private Shared Function VatEvent() As SaleCompletedWithVatEvent
+        Dim vEvent = New SaleCompletedWithVatEvent With {
+            .SaleId = TestSaleId,
+            .VatableSales = 60D,
+            .IsVatRegistered = True
+        }
+        vEvent.Items.Add(New SaleCompletedWithVatEvent.SaleItemWithVat With {
+            .ProductId = TestProductId,
+            .VatableAmount = 60D,
+            .OutputVat = 7.2D,
+            .Treatment = MerchSys.SharedKernel.Enums.VatTreatment.Vatable
+        })
+        Return vEvent
+    End Function
+
     ''' <summary>COGS handler wins the race; each event is also published twice.</summary>
     <Fact>
     Public Async Function CostThenRevenueProducesOneConsistentRow() As Task
@@ -64,11 +79,47 @@ Public Class SaleAccountingHandlerTests
             End Using
 
             Using ctx = fixture.NewAccounting()
-                Await New SaleCompletedAccountingHandler(ctx).Handle(RevenueEvent(), CancellationToken.None)
-                Await New SaleCompletedAccountingHandler(ctx).Handle(RevenueEvent(), CancellationToken.None)
+                Await New SaleRevenueHandler(ctx).Handle(RevenueEvent(), CancellationToken.None)
+                Await New SaleRevenueHandler(ctx).Handle(RevenueEvent(), CancellationToken.None)
             End Using
 
             Await AssertRowIsConsistent(fixture)
+        End Using
+    End Function
+
+    ''' <summary>Both revenue and VAT events from SaleRevenueHandler consolidate to one row regardless of order.</summary>
+    <Fact>
+    Public Async Function BothSaleRevenueEventsProduceOneRow() As Task
+        Using fixture As New TestDatabaseFixture()
+            ' Order 1: Revenue then VAT
+            Using ctx = fixture.NewAccounting()
+                Await New SaleRevenueHandler(ctx).Handle(RevenueEvent(), CancellationToken.None)
+                Await New SaleRevenueHandler(ctx).Handle(VatEvent(), CancellationToken.None)
+            End Using
+
+            Using ctx = fixture.NewAccounting()
+                Dim revenues1 = Await ctx.RevenueRecords.Where(Function(r) r.SourceTransactionId = TestSaleId).ToListAsync()
+                Assert.Single(revenues1)
+                Assert.Equal(60D, revenues1(0).TotalRevenue)
+                Assert.Equal(60D, revenues1(0).VatableAmount)
+                Assert.Equal(7.2D, revenues1(0).OutputVat)
+            End Using
+        End Using
+
+        Using fixture As New TestDatabaseFixture()
+            ' Order 2: VAT then Revenue
+            Using ctx = fixture.NewAccounting()
+                Await New SaleRevenueHandler(ctx).Handle(VatEvent(), CancellationToken.None)
+                Await New SaleRevenueHandler(ctx).Handle(RevenueEvent(), CancellationToken.None)
+            End Using
+
+            Using ctx = fixture.NewAccounting()
+                Dim revenues2 = Await ctx.RevenueRecords.Where(Function(r) r.SourceTransactionId = TestSaleId).ToListAsync()
+                Assert.Single(revenues2)
+                Assert.Equal(60D, revenues2(0).TotalRevenue)
+                Assert.Equal(60D, revenues2(0).VatableAmount)
+                Assert.Equal(7.2D, revenues2(0).OutputVat)
+            End Using
         End Using
     End Function
 
@@ -77,8 +128,8 @@ Public Class SaleAccountingHandlerTests
     Public Async Function RevenueThenCostProducesOneConsistentRow() As Task
         Using fixture As New TestDatabaseFixture()
             Using ctx = fixture.NewAccounting()
-                Await New SaleCompletedAccountingHandler(ctx).Handle(RevenueEvent(), CancellationToken.None)
-                Await New SaleCompletedAccountingHandler(ctx).Handle(RevenueEvent(), CancellationToken.None)
+                Await New SaleRevenueHandler(ctx).Handle(RevenueEvent(), CancellationToken.None)
+                Await New SaleRevenueHandler(ctx).Handle(RevenueEvent(), CancellationToken.None)
             End Using
 
             Using ctx = fixture.NewAccounting()
