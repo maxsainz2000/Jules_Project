@@ -150,7 +150,7 @@ Namespace Data
             ' values — the whole point of the log — are gone.
             Dim auditRows = BuildAuditRows(entries, actor)
 
-            If auditRows.Count = 0 Then
+            If auditRows.Count = 0 OrElse Not Database.IsRelational() Then
                 Return Await MyBase.SaveChangesAsync(cancellationToken)
             End If
 

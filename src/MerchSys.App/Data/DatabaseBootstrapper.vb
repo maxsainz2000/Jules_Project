@@ -55,6 +55,24 @@ Namespace Data
             ' are applied from an embedded script and then verified; a failure here is surfaced to
             ' the operator rather than leaving NIRC sec. 235 immutability silently unenforced.
             ReceiptArchiveTriggerBootstrapper.EnsureTriggers(connectionString, logger)
+
+            ' Layer 4 — Manual schema updates for new tables without full EF migrations.
+            EnsureInvSaleCogsTable(connectionString, logger)
+        End Sub
+
+        Private Shared Sub EnsureInvSaleCogsTable(connectionString As String, logger As ILogger)
+            Try
+                Using conn As New MySqlConnection(connectionString)
+                    conn.Open()
+                    Using cmd = conn.CreateCommand()
+                        cmd.CommandText = "CREATE TABLE IF NOT EXISTS Inv_SaleCogs (Id INT AUTO_INCREMENT PRIMARY KEY, SaleId INT NOT NULL, ProductId INT NOT NULL, BatchId INT NOT NULL, QuantityDeducted INT NOT NULL, UnitCost DECIMAL(18,4) NOT NULL, TotalCost DECIMAL(18,4) NOT NULL, DeductedAt DATETIME(6) NOT NULL, INDEX IX_Inv_SaleCogs_SaleId (SaleId));"
+                        cmd.ExecuteNonQuery()
+                    End Using
+                End Using
+            Catch ex As Exception
+                If logger IsNot Nothing Then logger.LogError(ex, "Failed to ensure Inv_SaleCogs table.")
+                Throw
+            End Try
         End Sub
 
         ''' <summary>
