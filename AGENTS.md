@@ -36,6 +36,7 @@
 | **Theme service subscription in Presenters** | Any presenter injecting `IThemeService` to style its view must subscribe to `ThemeChanged` so views update dynamically when theme switches at runtime, and symmetrically unhook in `Dispose()`. | UI theme desync at runtime |
 | **Mock verification with constructor calls** | If a presenter constructor invokes a view method during initial setup, tests raising events that call that same method must account for the constructor invocation (e.g. `Times.Exactly(2)` or configure distinct initial mock state). | `Moq.MockException` |
 | **ServiceProvider Mocking with Scopes** | When testing components that call `_serviceProvider.CreateScope()`, never use a bare unconfigured `Mock(Of IServiceProvider)()`. Use `New ServiceCollection().BuildServiceProvider()` or mock `IServiceScopeFactory` and `IServiceScope`. | `InvalidOperationException` in tests |
+| **Non-overridable Service Mocking** | Never use `Mock(Of LoginSessionService)()` with `.Setup(...)`. Concrete classes with non-overridable members throw `NotSupportedException` in Moq. Instantiate real instances (`New LoginSessionService()`) and set test state via `session.SetUser(...)`. | `NotSupportedException` in tests |
 
 ## Additional Architecture Rules
 
