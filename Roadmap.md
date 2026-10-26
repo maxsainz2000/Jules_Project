@@ -141,7 +141,7 @@
 ## Phase 7: User Experience (UX)
 - [x] UX-01
 - [x] UX-02
-- [ ] UX-03
+- [x] UX-03
 - [ ] UX-04
 - [ ] UX-05
 - [ ] UX-06
