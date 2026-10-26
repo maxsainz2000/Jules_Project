@@ -73,6 +73,8 @@ Namespace Views.Accounting
             'pnlFilter
             '
             Me.pnlFilter.BackColor = System.Drawing.Color.WhiteSmoke
+            Me.pnlFilter.Controls.Add(Me.btnExportPdf)
+            Me.pnlFilter.Controls.Add(Me.btnExportCsv)
             Me.pnlFilter.Controls.Add(Me.lblTo)
             Me.pnlFilter.Controls.Add(Me.dtpTo)
             Me.pnlFilter.Controls.Add(Me.lblFrom)
@@ -127,6 +129,28 @@ Namespace Views.Accounting
             Me.btnRefresh.TabIndex = 0
             Me.btnRefresh.Text = "Refresh"
             Me.btnRefresh.UseVisualStyleBackColor = True
+            '
+            'btnExportCsv
+            '
+            Me.btnExportCsv.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+            Me.btnExportCsv.Cursor = System.Windows.Forms.Cursors.Hand
+            Me.btnExportCsv.Location = New System.Drawing.Point(680, 12)
+            Me.btnExportCsv.Name = "btnExportCsv"
+            Me.btnExportCsv.Size = New System.Drawing.Size(90, 26)
+            Me.btnExportCsv.TabIndex = 5
+            Me.btnExportCsv.Text = "Export CSV"
+            Me.btnExportCsv.UseVisualStyleBackColor = True
+            '
+            'btnExportPdf
+            '
+            Me.btnExportPdf.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+            Me.btnExportPdf.Cursor = System.Windows.Forms.Cursors.Hand
+            Me.btnExportPdf.Location = New System.Drawing.Point(780, 12)
+            Me.btnExportPdf.Name = "btnExportPdf"
+            Me.btnExportPdf.Size = New System.Drawing.Size(90, 26)
+            Me.btnExportPdf.TabIndex = 6
+            Me.btnExportPdf.Text = "Export PDF"
+            Me.btnExportPdf.UseVisualStyleBackColor = True
             '
             'pnlContent
             '
@@ -243,6 +267,8 @@ Namespace Views.Accounting
         Friend WithEvents lblFrom As Label
         Friend WithEvents dtpFrom As DateTimePicker
         Friend WithEvents btnRefresh As Button
+        Friend WithEvents btnExportCsv As Button
+        Friend WithEvents btnExportPdf As Button
         Friend WithEvents dgvIncidents As DataGridView
         Friend WithEvents lblEmptyState As Label
         Friend WithEvents colDetectedAt As DataGridViewTextBoxColumn

@@ -4,7 +4,10 @@ Imports System.Linq
 Imports System.Threading.Tasks
 Imports MerchSys.Accounting.Services
 Imports MerchSys.Accounting.Views
+Imports System.IO
+Imports MediatR
 Imports MerchSys.SharedKernel.Interfaces
+Imports MerchSys.SharedKernel.Queries
 
 Namespace Presenters
 
@@ -23,10 +26,18 @@ Namespace Presenters
         Private _view As ITamperAuditReportView
         Private ReadOnly _queryService As ITamperAuditQueryService
         Private ReadOnly _notificationService As INotificationService
+        Private ReadOnly _exporter As ITamperReportExporter
+        Private ReadOnly _mediator As IMediator
 
         Public Sub New(queryService As ITamperAuditQueryService, Optional notificationService As INotificationService = Nothing)
+            Me.New(queryService, Nothing, notificationService, Nothing)
+        End Sub
+
+        Public Sub New(queryService As ITamperAuditQueryService, exporter As ITamperReportExporter, Optional notificationService As INotificationService = Nothing, Optional mediator As IMediator = Nothing)
             _queryService = queryService
+            _exporter = exporter
             _notificationService = notificationService
+            _mediator = mediator
         End Sub
 
         Public Property View As ITamperAuditReportView
@@ -49,9 +60,80 @@ Namespace Presenters
                     AddHandler _view.ViewLoaded, AddressOf OnViewLoaded
                     AddHandler _view.RefreshRequested, AddressOf OnRefreshRequested
                     AddHandler _view.FilterChanged, AddressOf OnFilterChanged
+                    AddHandler _view.ExportCsvRequested, AddressOf OnExportCsvRequested
+                    AddHandler _view.ExportPdfRequested, AddressOf OnExportPdfRequested
                 End If
             End Set
         End Property
+
+        Private Async Sub OnExportCsvRequested(sender As Object, filePath As String)
+            Await PerformExportAsync(filePath, TamperReportFormat.Csv)
+        End Sub
+
+        Private Async Sub OnExportPdfRequested(sender As Object, filePath As String)
+            Await PerformExportAsync(filePath, TamperReportFormat.Pdf)
+        End Sub
+
+        Private Async Function PerformExportAsync(filePath As String, format As TamperReportFormat) As Task
+            If _exporter Is Nothing Then
+                If _notificationService IsNot Nothing Then
+                    _notificationService.ShowError("Export feature is not configured.")
+                End If
+                Return
+            End If
+
+            _view.IsLoading = True
+
+            Dim incidents As List(Of Entities.TamperAuditEntry) = Nothing
+            Dim errorMsg As String = Nothing
+            Dim success As Boolean = False
+
+            Try
+                incidents = Await _queryService.GetIncidentsAsync()
+                Dim filtered = incidents.Where(Function(x) x.DetectedAt.Date >= _view.FromDate.Date AndAlso x.DetectedAt.Date <= _view.ToDate.Date).ToList()
+
+                Dim dtos = filtered.Select(Function(x) New TamperAuditEntryDto With {
+                    .DetectedAt = x.DetectedAt,
+                    .ReceiptNumber = x.ReceiptNumber,
+                    .ExpectedHash = x.ExpectedHash,
+                    .ExpectedHashShort = TruncateHash(x.ExpectedHash),
+                    .ActualHash = x.ActualHash,
+                    .ActualHashShort = TruncateHash(x.ActualHash),
+                    .TamperKind = x.TamperKind,
+                    .Details = $"Detected on {x.MachineName} by {x.WindowsUser}"
+                }).ToList()
+
+                Dim options = New TamperReportExportOptions With {
+                    .FromDate = _view.FromDate,
+                    .ToDate = _view.ToDate
+                }
+
+                If _mediator IsNot Nothing Then
+                    Dim vatConfig = Await _mediator.Send(New GetVatConfigurationQuery())
+                    If vatConfig IsNot Nothing Then
+                        options.BusinessName = vatConfig.BusinessName
+                        options.BusinessAddress = vatConfig.BusinessAddress
+                        options.BusinessTIN = vatConfig.BusinessTIN
+                    End If
+                End If
+
+                Dim bytes = _exporter.Export(dtos, format, options)
+                Await File.WriteAllBytesAsync(filePath, bytes)
+                success = True
+            Catch ex As Exception
+                errorMsg = $"Failed to export {format}: {ex.Message}"
+            End Try
+
+            _view.IsLoading = False
+
+            If _notificationService IsNot Nothing Then
+                If success Then
+                    _notificationService.ShowInfo($"Exported successfully to {filePath}")
+                ElseIf errorMsg IsNot Nothing Then
+                    _notificationService.ShowError(errorMsg)
+                End If
+            End If
+        End Function
 
         Private Async Sub OnViewLoaded(sender As Object, e As EventArgs)
             Await LoadIncidentsAsync()
