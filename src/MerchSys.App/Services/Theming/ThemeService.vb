@@ -63,8 +63,12 @@ Namespace Services.Theming
                 root.BackColor = _tokens.WindowBackground
                 root.ForeColor = _tokens.PrimaryText
             ElseIf TypeOf root Is Panel OrElse TypeOf root Is UserControl OrElse TypeOf root Is SplitContainer OrElse TypeOf root Is TabPage Then
-                root.BackColor = _tokens.SurfaceBackground
-                root.ForeColor = _tokens.PrimaryText
+                If TypeOf root Is Panel AndAlso root.Tag IsNot Nothing AndAlso root.Tag.ToString() = "Card" Then
+                    ComponentStyler.ApplyCard(DirectCast(root, Panel), _tokens)
+                Else
+                    root.BackColor = _tokens.SurfaceBackground
+                    root.ForeColor = _tokens.PrimaryText
+                End If
             ElseIf TypeOf root Is GroupBox Then
                 Dim grp = DirectCast(root, GroupBox)
                 grp.FlatStyle = FlatStyle.Flat
@@ -75,31 +79,51 @@ Namespace Services.Theming
                 tc.Appearance = TabAppearance.Normal
             ElseIf TypeOf root Is Button Then
                 Dim btn = DirectCast(root, Button)
-                btn.FlatStyle = FlatStyle.Flat
+                Dim tagStr = If(btn.Tag IsNot Nothing, btn.Tag.ToString(), String.Empty)
 
-                Dim isAccent = (btn.Tag IsNot Nothing AndAlso btn.Tag.ToString() = "Accent") OrElse
-                               btn.Name.Contains("Primary") OrElse btn.Name.Contains("Save") OrElse
-                               btn.Name.Contains("Submit") OrElse btn.Name.Contains("Confirm")
-
-                Dim isDanger = (btn.Tag IsNot Nothing AndAlso btn.Tag.ToString() = "Danger") OrElse
-                               btn.Name.Contains("Delete") OrElse btn.Name.Contains("Cancel") OrElse
-                               btn.Name.Contains("Logout")
-
-                If isAccent Then
-                    btn.BackColor = _tokens.Accent
-                    btn.ForeColor = System.Drawing.Color.White
-                ElseIf isDanger Then
-                    btn.BackColor = _tokens.Danger
-                    btn.ForeColor = System.Drawing.Color.White
+                If tagStr = "Primary" OrElse tagStr = "Accent" OrElse
+                   btn.Name.Contains("Primary") OrElse btn.Name.Contains("Save") OrElse
+                   btn.Name.Contains("Submit") OrElse btn.Name.Contains("Confirm") Then
+                    ComponentStyler.ApplyPrimaryButton(btn, _tokens)
+                ElseIf tagStr = "Success" Then
+                    ComponentStyler.ApplySuccessButton(btn, _tokens)
+                ElseIf tagStr = "Danger" OrElse
+                       btn.Name.Contains("Delete") OrElse btn.Name.Contains("Cancel") OrElse
+                       btn.Name.Contains("Logout") Then
+                    ComponentStyler.ApplyDangerButton(btn, _tokens)
+                ElseIf tagStr = "Warning" Then
+                    ComponentStyler.ApplyWarningButton(btn, _tokens)
+                ElseIf tagStr = "Secondary" Then
+                    ComponentStyler.ApplySecondaryButton(btn, _tokens)
+                ElseIf tagStr = "Subtle" OrElse tagStr = "Link" Then
+                    ComponentStyler.ApplySubtleButton(btn, _tokens)
                 Else
-                    btn.BackColor = _tokens.SurfaceBackground
-                    btn.ForeColor = _tokens.PrimaryText
-                    btn.FlatAppearance.BorderColor = _tokens.Border
-                    btn.FlatAppearance.BorderSize = 1
+                    ' Default button fallback is similar to secondary but follows old logic closely
+                    ComponentStyler.ApplySecondaryButton(btn, _tokens)
                 End If
             ElseIf TypeOf root Is Label Then
-                root.BackColor = System.Drawing.Color.Transparent
-                root.ForeColor = _tokens.PrimaryText
+                Dim lbl = DirectCast(root, Label)
+                Dim tagStr = If(lbl.Tag IsNot Nothing, lbl.Tag.ToString(), String.Empty)
+
+                If tagStr = "PageTitle" Then
+                    ComponentStyler.ApplyPageTitle(lbl, _tokens)
+                    lbl.BackColor = System.Drawing.Color.Transparent
+                ElseIf tagStr = "SectionHeader" Then
+                    ComponentStyler.ApplySectionHeader(lbl, _tokens)
+                    lbl.BackColor = System.Drawing.Color.Transparent
+                ElseIf tagStr = "Subtitle" Then
+                    ComponentStyler.ApplySubtitle(lbl, _tokens)
+                    lbl.BackColor = System.Drawing.Color.Transparent
+                ElseIf tagStr = "Caption" Then
+                    ComponentStyler.ApplyCaption(lbl, _tokens)
+                    lbl.BackColor = System.Drawing.Color.Transparent
+                ElseIf tagStr = "MetricValue" Then
+                    ComponentStyler.ApplyMetricValue(lbl, _tokens)
+                    lbl.BackColor = System.Drawing.Color.Transparent
+                Else
+                    lbl.BackColor = System.Drawing.Color.Transparent
+                    lbl.ForeColor = _tokens.PrimaryText
+                End If
             ElseIf TypeOf root Is TextBoxBase Then
                 Dim txt = DirectCast(root, TextBoxBase)
                 txt.BackColor = _tokens.CardBackground
