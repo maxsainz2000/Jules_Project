@@ -60,6 +60,7 @@ Namespace Views
             Me.btnStaySignedIn.FlatStyle = System.Windows.Forms.FlatStyle.Flat
             Me.btnStaySignedIn.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
             Me.btnStaySignedIn.Location = New System.Drawing.Point(50, 160)
+            Me.btnStaySignedIn.Tag = "Accent"
             Me.btnStaySignedIn.Name = "btnStaySignedIn"
             Me.btnStaySignedIn.Size = New System.Drawing.Size(140, 40)
             Me.btnStaySignedIn.TabIndex = 2

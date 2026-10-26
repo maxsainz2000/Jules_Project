@@ -133,4 +133,103 @@ Imports MerchSys.App.Models
             End Sub
         End Class
 
+
+        <Fact>
+        Public Sub MainWindowPresenter_NavigateTo_AppliesThemeToResolvedView()
+            ' Arrange
+            Dim viewMock As New Mock(Of IMainWindowView)()
+            viewMock.SetupAllProperties()
+
+            Dim sessionService As New LoginSessionService()
+            sessionService.SetUser(New UserAccount With {
+                .Id = 1,
+                .Username = "test_owner",
+                .Role = UserRole.Owner
+            })
+
+            Dim sc As New ServiceCollection()
+            sc.AddTransient(Of IOwnerDashboardView, DummyOwnerDashboardView)()
+            Dim sp As IServiceProvider = sc.BuildServiceProvider()
+
+            Dim monitorMock As New Mock(Of IConnectionHealthMonitor)()
+            Dim statusViewMock As New Mock(Of IConnectionStatusView)()
+            Dim statusPresenter As New ConnectionStatusPresenter(monitorMock.Object, statusViewMock.Object)
+
+            Dim themeServiceMock As New Mock(Of IThemeService)()
+            Dim testTokens As ThemeTokens = ThemeTokens.GetTokens(AppTheme.Light)
+            themeServiceMock.Setup(Function(ts) ts.Tokens).Returns(testTokens)
+
+            Dim presenter As New MainWindowPresenter(viewMock.Object, sessionService, sp, statusPresenter, themeServiceMock.Object)
+
+            ' Act
+            viewMock.Raise(Sub(v) AddHandler v.Load, Nothing, Nothing, EventArgs.Empty)
+            Dim allItems = presenter.NavigationGroups.SelectMany(Function(g) g.Items).ToList()
+            Dim ownerItem = allItems.FirstOrDefault(Function(i) i.Name = "Owner Dashboard")
+
+            ' Navigation triggers ApplyTheme on the resolved control
+            viewMock.Raise(Sub(v) AddHandler v.NavigationRequested, Nothing, Nothing, ownerItem)
+
+            ' Assert
+            themeServiceMock.Verify(Sub(ts) ts.ApplyTheme(It.IsAny(Of Control)()), Times.AtLeastOnce())
+            presenter.Dispose()
+        End Sub
+
+        <Fact>
+        Public Sub MainWindowPresenter_OnThemeChanged_AppliesThemeToHostedView()
+            ' Arrange
+            Dim viewMock As New Mock(Of IMainWindowView)()
+            viewMock.SetupAllProperties()
+
+            Dim sessionService As New LoginSessionService()
+            sessionService.SetUser(New UserAccount With {
+                .Id = 1,
+                .Username = "test_owner",
+                .Role = UserRole.Owner
+            })
+
+            Dim sc As New ServiceCollection()
+            sc.AddTransient(Of IOwnerDashboardView, DummyOwnerDashboardView)()
+            Dim sp As IServiceProvider = sc.BuildServiceProvider()
+
+            Dim monitorMock As New Mock(Of IConnectionHealthMonitor)()
+            Dim statusViewMock As New Mock(Of IConnectionStatusView)()
+            Dim statusPresenter As New ConnectionStatusPresenter(monitorMock.Object, statusViewMock.Object)
+
+            Dim themeServiceMock As New Mock(Of IThemeService)()
+            Dim testTokens As ThemeTokens = ThemeTokens.GetTokens(AppTheme.Light)
+            themeServiceMock.Setup(Function(ts) ts.Tokens).Returns(testTokens)
+
+            Dim presenter As New MainWindowPresenter(viewMock.Object, sessionService, sp, statusPresenter, themeServiceMock.Object)
+
+            viewMock.Raise(Sub(v) AddHandler v.Load, Nothing, Nothing, EventArgs.Empty)
+            Dim allItems = presenter.NavigationGroups.SelectMany(Function(g) g.Items).ToList()
+            Dim ownerItem = allItems.FirstOrDefault(Function(i) i.Name = "Owner Dashboard")
+            viewMock.Raise(Sub(v) AddHandler v.NavigationRequested, Nothing, Nothing, ownerItem)
+
+            ' Act
+            ' Raise ThemeChanged event to call ApplyThemeTokens and ApplyTheme on _currentViewInstance
+            themeServiceMock.Raise(Sub(ts) AddHandler ts.ThemeChanged, Nothing, Nothing, AppTheme.Dark)
+
+            ' Assert
+            themeServiceMock.Verify(Sub(ts) ts.ApplyTheme(It.IsAny(Of Control)()), Times.AtLeast(2)) ' Once for NavigateTo, once for ThemeChanged
+            presenter.Dispose()
+        End Sub
+
+        <Fact>
+        Public Sub LoginView_CanHaveThemeApplied_WithoutExceptions()
+            ' Arrange
+            Dim loginView As New LoginView()
+            Dim themeService As New ThemeService()
+
+            ' Act & Assert
+            Dim ex = Record.Exception(Sub()
+                themeService.ApplyTheme(loginView)
+                themeService.ToggleTheme()
+                themeService.ApplyTheme(loginView)
+            End Sub)
+
+            Assert.Null(ex)
+            loginView.Dispose()
+        End Sub
+
     End Class

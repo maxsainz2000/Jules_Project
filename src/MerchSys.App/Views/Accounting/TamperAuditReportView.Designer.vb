@@ -126,6 +126,7 @@ Namespace Views.Accounting
             '
             Me.btnRefresh.Cursor = System.Windows.Forms.Cursors.Hand
             Me.btnRefresh.Location = New System.Drawing.Point(400, 12)
+            Me.btnRefresh.Tag = "Accent"
             Me.btnRefresh.Name = "btnRefresh"
             Me.btnRefresh.Size = New System.Drawing.Size(90, 26)
             Me.btnRefresh.TabIndex = 0
@@ -136,6 +137,7 @@ Namespace Views.Accounting
             '
             Me.btnExportCsv.Cursor = System.Windows.Forms.Cursors.Hand
             Me.btnExportCsv.Location = New System.Drawing.Point(500, 12)
+            Me.btnExportCsv.Tag = "Accent"
             Me.btnExportCsv.Name = "btnExportCsv"
             Me.btnExportCsv.Size = New System.Drawing.Size(90, 26)
             Me.btnExportCsv.TabIndex = 5
@@ -146,6 +148,7 @@ Namespace Views.Accounting
             '
             Me.btnExportPdf.Cursor = System.Windows.Forms.Cursors.Hand
             Me.btnExportPdf.Location = New System.Drawing.Point(600, 12)
+            Me.btnExportPdf.Tag = "Accent"
             Me.btnExportPdf.Name = "btnExportPdf"
             Me.btnExportPdf.Size = New System.Drawing.Size(90, 26)
             Me.btnExportPdf.TabIndex = 6
@@ -189,6 +192,7 @@ Namespace Views.Accounting
             Me.dgvIncidents.Dock = System.Windows.Forms.DockStyle.Fill
             Me.dgvIncidents.Location = New System.Drawing.Point(20, 20)
             Me.dgvIncidents.Name = "dgvIncidents"
+            Me.dgvIncidents.EnableHeadersVisualStyles = False
             Me.dgvIncidents.ReadOnly = True
             Me.dgvIncidents.RowHeadersVisible = False
             Me.dgvIncidents.RowTemplate.Height = 25

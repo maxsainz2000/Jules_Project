@@ -138,6 +138,7 @@ Namespace Views.Accounting
             'btnRefresh
             '
             Me.btnRefresh.Location = New System.Drawing.Point(540, 20)
+            Me.btnRefresh.Tag = "Accent"
             Me.btnRefresh.Name = "btnRefresh"
             Me.btnRefresh.Size = New System.Drawing.Size(75, 23)
             Me.btnRefresh.TabIndex = 7
@@ -352,6 +353,7 @@ Namespace Views.Accounting
             Me.dgvPaymentBreakdowns.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
             Me.dgvPaymentBreakdowns.Location = New System.Drawing.Point(6, 6)
             Me.dgvPaymentBreakdowns.Name = "dgvPaymentBreakdowns"
+            Me.dgvPaymentBreakdowns.EnableHeadersVisualStyles = False
             Me.dgvPaymentBreakdowns.ReadOnly = True
             Me.dgvPaymentBreakdowns.RowTemplate.Height = 25
             Me.dgvPaymentBreakdowns.Size = New System.Drawing.Size(740, 230)
@@ -396,6 +398,7 @@ Namespace Views.Accounting
             Me.dgvDailyBreakdown.Dock = System.Windows.Forms.DockStyle.Fill
             Me.dgvDailyBreakdown.Location = New System.Drawing.Point(3, 3)
             Me.dgvDailyBreakdown.Name = "dgvDailyBreakdown"
+            Me.dgvDailyBreakdown.EnableHeadersVisualStyles = False
             Me.dgvDailyBreakdown.ReadOnly = True
             Me.dgvDailyBreakdown.RowTemplate.Height = 25
             Me.dgvDailyBreakdown.Size = New System.Drawing.Size(746, 266)
@@ -420,6 +423,7 @@ Namespace Views.Accounting
             Me.dgvPaymentTrends.Dock = System.Windows.Forms.DockStyle.Fill
             Me.dgvPaymentTrends.Location = New System.Drawing.Point(3, 3)
             Me.dgvPaymentTrends.Name = "dgvPaymentTrends"
+            Me.dgvPaymentTrends.EnableHeadersVisualStyles = False
             Me.dgvPaymentTrends.ReadOnly = True
             Me.dgvPaymentTrends.RowTemplate.Height = 25
             Me.dgvPaymentTrends.Size = New System.Drawing.Size(746, 266)

@@ -84,6 +84,7 @@ Namespace Views.Accounting
             Me.btnRefresh.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
             Me.btnRefresh.Cursor = System.Windows.Forms.Cursors.Hand
             Me.btnRefresh.Location = New System.Drawing.Point(800, 18)
+            Me.btnRefresh.Tag = "Accent"
             Me.btnRefresh.Name = "btnRefresh"
             Me.btnRefresh.Size = New System.Drawing.Size(75, 25)
             Me.btnRefresh.TabIndex = 5
@@ -95,6 +96,7 @@ Namespace Views.Accounting
             Me.btnExportPdf.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
             Me.btnExportPdf.Cursor = System.Windows.Forms.Cursors.Hand
             Me.btnExportPdf.Location = New System.Drawing.Point(885, 18)
+            Me.btnExportPdf.Tag = "Accent"
             Me.btnExportPdf.Name = "btnExportPdf"
             Me.btnExportPdf.Size = New System.Drawing.Size(85, 25)
             Me.btnExportPdf.TabIndex = 6
@@ -351,6 +353,7 @@ Namespace Views.Accounting
             Me.dgvTrailingMonths.Dock = System.Windows.Forms.DockStyle.Fill
             Me.dgvTrailingMonths.Location = New System.Drawing.Point(0, 320)
             Me.dgvTrailingMonths.Name = "dgvTrailingMonths"
+            Me.dgvTrailingMonths.EnableHeadersVisualStyles = False
             Me.dgvTrailingMonths.ReadOnly = True
             Me.dgvTrailingMonths.RowHeadersVisible = False
             Me.dgvTrailingMonths.RowTemplate.Height = 25

@@ -154,7 +154,8 @@ Partial Class IncomeStatementView
         'btnRefresh
         '
         Me.btnRefresh.Location = New System.Drawing.Point(550, 7)
-        Me.btnRefresh.Name = "btnRefresh"
+        Me.btnRefresh.Tag = "Accent"
+            Me.btnRefresh.Name = "btnRefresh"
         Me.btnRefresh.Size = New System.Drawing.Size(75, 25)
         Me.btnRefresh.TabIndex = 6
         Me.btnRefresh.Text = "Refresh"
@@ -164,7 +165,8 @@ Partial Class IncomeStatementView
         '
         Me.btnExportPdf.Cursor = System.Windows.Forms.Cursors.Hand
         Me.btnExportPdf.Location = New System.Drawing.Point(630, 7)
-        Me.btnExportPdf.Name = "btnExportPdf"
+        Me.btnExportPdf.Tag = "Accent"
+            Me.btnExportPdf.Name = "btnExportPdf"
         Me.btnExportPdf.Size = New System.Drawing.Size(85, 25)
         Me.btnExportPdf.TabIndex = 7
         Me.btnExportPdf.Text = "Export PDF"
@@ -316,6 +318,7 @@ Partial Class IncomeStatementView
         Me.dgvOperatingExpenses.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.colCategory, Me.colAmount})
         Me.dgvOperatingExpenses.Location = New System.Drawing.Point(400, 20)
         Me.dgvOperatingExpenses.Name = "dgvOperatingExpenses"
+            Me.dgvOperatingExpenses.EnableHeadersVisualStyles = False
         Me.dgvOperatingExpenses.ReadOnly = True
         Me.dgvOperatingExpenses.RowHeadersVisible = False
         Me.dgvOperatingExpenses.Size = New System.Drawing.Size(350, 320)
@@ -355,6 +358,7 @@ Partial Class IncomeStatementView
         Me.dgvProductMargins.Dock = System.Windows.Forms.DockStyle.Fill
         Me.dgvProductMargins.Location = New System.Drawing.Point(3, 3)
         Me.dgvProductMargins.Name = "dgvProductMargins"
+            Me.dgvProductMargins.EnableHeadersVisualStyles = False
         Me.dgvProductMargins.ReadOnly = True
         Me.dgvProductMargins.RowHeadersVisible = False
         Me.dgvProductMargins.Size = New System.Drawing.Size(936, 366)

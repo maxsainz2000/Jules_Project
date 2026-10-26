@@ -79,22 +79,27 @@ Namespace Views.Accounting
             
             ' btnGenerate
             Me.btnGenerate.Text = "Generate"
+            Me.btnGenerate.Tag = "Accent"
             Me.btnGenerate.Location = New System.Drawing.Point(380, 12)
             
             ' btnFile
             Me.btnFile.Text = "File"
+            Me.btnFile.Tag = "Accent"
             Me.btnFile.Location = New System.Drawing.Point(460, 12)
             
             ' btnAmend
             Me.btnAmend.Text = "Amend"
+            Me.btnAmend.Tag = "Accent"
             Me.btnAmend.Location = New System.Drawing.Point(540, 12)
             
             ' btnExportCsv
             Me.btnExportCsv.Text = "Export CSV"
+            Me.btnExportCsv.Tag = "Accent"
             Me.btnExportCsv.Location = New System.Drawing.Point(620, 12)
             
             ' btnExportPdf
             Me.btnExportPdf.Text = "Export PDF"
+            Me.btnExportPdf.Tag = "Accent"
             Me.btnExportPdf.Location = New System.Drawing.Point(700, 12)
             
             ' pnlWhatThisMeans
@@ -131,9 +136,11 @@ Namespace Views.Accounting
             Me.lblError.AutoSize = True
             
             ' dgvLines
+            Me.dgvLines.EnableHeadersVisualStyles = False
             Me.dgvLines.Dock = System.Windows.Forms.DockStyle.Fill
             
             ' dgvHistory
+            Me.dgvHistory.EnableHeadersVisualStyles = False
             Me.dgvHistory.Dock = System.Windows.Forms.DockStyle.Right
             Me.dgvHistory.Width = 300
             

@@ -65,6 +65,7 @@ Namespace Views.Accounting
             'btnRefresh
             '
             Me.btnRefresh.Location = New System.Drawing.Point(850, 15)
+            Me.btnRefresh.Tag = "Accent"
             Me.btnRefresh.Name = "btnRefresh"
             Me.btnRefresh.Size = New System.Drawing.Size(75, 23)
             Me.btnRefresh.TabIndex = 1
@@ -125,6 +126,7 @@ Namespace Views.Accounting
             Me.dgvTopProducts.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
             Me.dgvTopProducts.Location = New System.Drawing.Point(17, 240)
             Me.dgvTopProducts.Name = "dgvTopProducts"
+            Me.dgvTopProducts.EnableHeadersVisualStyles = False
             Me.dgvTopProducts.ReadOnly = True
             Me.dgvTopProducts.Size = New System.Drawing.Size(440, 200)
             Me.dgvTopProducts.TabIndex = 5
@@ -136,6 +138,7 @@ Namespace Views.Accounting
             Me.dgvMonthlyTrends.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
             Me.dgvMonthlyTrends.Location = New System.Drawing.Point(485, 240)
             Me.dgvMonthlyTrends.Name = "dgvMonthlyTrends"
+            Me.dgvMonthlyTrends.EnableHeadersVisualStyles = False
             Me.dgvMonthlyTrends.ReadOnly = True
             Me.dgvMonthlyTrends.Size = New System.Drawing.Size(440, 200)
             Me.dgvMonthlyTrends.TabIndex = 6

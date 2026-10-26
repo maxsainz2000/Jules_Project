@@ -191,6 +191,11 @@ Friend Module Program
                 Dim loginView = loginScope.ServiceProvider.GetRequiredService(Of ILoginView)()
                 Dim loginPresenter = loginScope.ServiceProvider.GetRequiredService(Of LoginPresenter)()
 
+                Dim themeService = loginScope.ServiceProvider.GetService(Of MerchSys.App.Services.Theming.IThemeService)()
+                If themeService IsNot Nothing Then
+                    themeService.ApplyTheme(DirectCast(loginView, Control))
+                End If
+
                 If DirectCast(loginView, Form).ShowDialog() = DialogResult.OK Then
                     loggedIn = True
                 End If
@@ -239,6 +244,11 @@ Friend Module Program
             _warningScope = _serviceProvider.CreateScope()
             _warningDialog = _warningScope.ServiceProvider.GetRequiredService(Of ISessionTimeoutWarningView)()
             _warningPresenter = _warningScope.ServiceProvider.GetRequiredService(Of SessionTimeoutWarningPresenter)()
+
+            Dim themeService = _warningScope.ServiceProvider.GetService(Of MerchSys.App.Services.Theming.IThemeService)()
+            If themeService IsNot Nothing Then
+                themeService.ApplyTheme(DirectCast(_warningDialog, Control))
+            End If
 
             AddHandler _warningPresenter.StaySignedInRequested, AddressOf OnStaySignedIn
             AddHandler _warningPresenter.SignOutRequested, AddressOf OnSignOut

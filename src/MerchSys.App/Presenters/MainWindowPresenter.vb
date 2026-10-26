@@ -21,6 +21,7 @@ Namespace Presenters
         Public Property NavigationGroups As New List(Of NavigationGroup)
 
         Private _currentViewScope As IServiceScope
+        Private _currentViewInstance As UserControl
         Private _disposed As Boolean
 
         Public Sub New(view As IMainWindowView,
@@ -68,6 +69,9 @@ Namespace Presenters
             If _themeService IsNot Nothing Then
                 _view.ApplyThemeTokens(_themeService.Tokens)
                 _view.SetThemeState(theme)
+                If _currentViewInstance IsNot Nothing Then
+                    _themeService.ApplyTheme(_currentViewInstance)
+                End If
             End If
         End Sub
 
@@ -184,6 +188,10 @@ Namespace Presenters
             DisposeCurrentViewScope()
             _currentViewScope = _serviceProvider.CreateScope()
             Dim viewInstance = item.ViewFactory(_currentViewScope.ServiceProvider)
+            _currentViewInstance = viewInstance
+            If _themeService IsNot Nothing Then
+                _themeService.ApplyTheme(_currentViewInstance)
+            End If
 
             Dim allItems = NavigationGroups.SelectMany(Function(g) g.Items).ToList()
             For Each navItem In allItems
@@ -207,6 +215,7 @@ Namespace Presenters
                 _currentViewScope.Dispose()
                 _currentViewScope = Nothing
             End If
+            _currentViewInstance = Nothing
         End Sub
 
         Public Sub Dispose() Implements IDisposable.Dispose

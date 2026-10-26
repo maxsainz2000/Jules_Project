@@ -89,6 +89,7 @@ Namespace Views
             Me.btnLogin.Font = New System.Drawing.Font("Segoe UI", 12.0!, System.Drawing.FontStyle.Bold)
             Me.btnLogin.ForeColor = System.Drawing.Color.White
             Me.btnLogin.Location = New System.Drawing.Point(58, 200)
+            Me.btnLogin.Tag = "Accent"
             Me.btnLogin.Name = "btnLogin"
             Me.btnLogin.Size = New System.Drawing.Size(284, 40)
             Me.btnLogin.TabIndex = 4
@@ -169,6 +170,7 @@ Namespace Views
             Me.btnChangePassword.Font = New System.Drawing.Font("Segoe UI", 12.0!, System.Drawing.FontStyle.Bold)
             Me.btnChangePassword.ForeColor = System.Drawing.Color.White
             Me.btnChangePassword.Location = New System.Drawing.Point(0, 130)
+            Me.btnChangePassword.Tag = "Accent"
             Me.btnChangePassword.Name = "btnChangePassword"
             Me.btnChangePassword.Size = New System.Drawing.Size(284, 40)
             Me.btnChangePassword.TabIndex = 4
