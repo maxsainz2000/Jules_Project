@@ -8,7 +8,7 @@ Namespace Debug
             Dim harness As New VatLedgerSchemaHarness()
             Dim report = Await harness.ExecuteAsync(context)
 
-            Dim filePath = Path.Combine(Path.GetTempPath(), $"vat-ledger-schema-report-{DateTime.UtcNow:yyyyMMddHHmmss}.md")
+            Dim filePath = Path.Combine(Path.GetTempPath(), $"vat-ledger-schema-report-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid():N}.md")
             File.WriteAllText(filePath, report.ToMarkdown())
 
             Return filePath
