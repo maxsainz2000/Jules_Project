@@ -113,6 +113,9 @@ Friend Module Program
                                   ' Add Low Stock Notifier
                                   services.AddSingleton(Of ILowStockNotifier, WinFormsLowStockNotifier)()
 
+                                  ' Register Theme Service
+                                  services.AddSingleton(Of MerchSys.App.Services.Theming.IThemeService, MerchSys.App.Services.Theming.ThemeService)()
+
                                   ' Register UI Panels
                                   services.AddTransient(Of PurchasingPanel)()
                                   services.AddTransient(Of InventoryPanel)()
@@ -208,6 +211,10 @@ Friend Module Program
                 Dim mainWindow = sessionScope.ServiceProvider.GetRequiredService(Of MainWindow)()
                 _mainWindowForm = mainWindow
                 sessionScope.ServiceProvider.GetRequiredService(Of MainWindowPresenter)()
+
+                ' Apply theme to the main window at startup
+                Dim themeService = sessionScope.ServiceProvider.GetRequiredService(Of MerchSys.App.Services.Theming.IThemeService)()
+                themeService.ApplyTheme(mainWindow)
 
                 Application.Run(mainWindow)
             Finally

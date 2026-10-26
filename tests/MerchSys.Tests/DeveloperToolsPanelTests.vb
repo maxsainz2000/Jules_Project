@@ -5,8 +5,39 @@ Imports MerchSys.Accounting.Data
 Imports Microsoft.EntityFrameworkCore
 Imports Xunit
 Imports System.IO
+Imports Moq
+Imports MerchSys.App.Services.Theming
 
 Public Class DeveloperToolsPanelTests
+
+    <Fact>
+    Public Sub DeveloperToolsPanel_ContainsToggleThemeButton()
+        ' Arrange
+        Dim themeServiceMock = New Mock(Of IThemeService)()
+        Dim panel = New DeveloperToolsPanel(Nothing, themeServiceMock.Object)
+
+        ' Act
+        Dim btnToggleTheme = TryCast(panel.Controls.Find("btnToggleTheme", True).FirstOrDefault(), Button)
+
+        ' Assert
+        Assert.NotNull(btnToggleTheme)
+        Assert.Equal("Toggle Theme", btnToggleTheme.Text)
+    End Sub
+
+    <Fact>
+    Public Async Function DeveloperToolsPanel_ToggleThemeButton_CallsThemeService() As Task
+        ' Arrange
+        Dim themeServiceMock = New Mock(Of IThemeService)()
+        Dim panel = New DeveloperToolsPanel(Nothing, themeServiceMock.Object)
+        Dim btnToggleTheme = TryCast(panel.Controls.Find("btnToggleTheme", True).FirstOrDefault(), Button)
+
+        ' Act
+        btnToggleTheme.PerformClick()
+        Await Task.Yield()
+
+        ' Assert
+        themeServiceMock.Verify(Sub(x) x.ToggleTheme(), Times.Once())
+    End Function
 
     <Fact>
     Public Sub DeveloperToolsPanel_Instantiates_AndButtonExists()

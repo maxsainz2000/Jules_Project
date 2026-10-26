@@ -9,17 +9,19 @@ Namespace Views.Shell.Modules
         Inherits UserControl
 
         Private ReadOnly _dbContext As AccountingDbContext
+        Private ReadOnly _themeService As MerchSys.App.Services.Theming.IThemeService
 
 #If DEBUG Then
         <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
         Public Property ShowNotificationAction As Action(Of String, String, MessageBoxIcon) = Sub(msg, title, icon) MessageBox.Show(msg, title, MessageBoxButtons.OK, icon)
 #End If
 
-        Public Sub New(Optional dbContext As AccountingDbContext = Nothing)
+        Public Sub New(Optional dbContext As AccountingDbContext = Nothing, Optional themeService As MerchSys.App.Services.Theming.IThemeService = Nothing)
             InitializeComponent()
             Dock = DockStyle.Fill
             BackColor = System.Drawing.Color.Transparent
             _dbContext = dbContext
+            _themeService = themeService
 
 #If Not DEBUG Then
             btnRunVatSchemaHarness.Visible = False
@@ -41,6 +43,12 @@ Namespace Views.Shell.Modules
             End Try
         End Sub
 #End If
+
+        Private Sub btnToggleTheme_Click(sender As Object, e As EventArgs) Handles btnToggleTheme.Click
+            If _themeService IsNot Nothing Then
+                _themeService.ToggleTheme()
+            End If
+        End Sub
 
     End Class
 End Namespace
