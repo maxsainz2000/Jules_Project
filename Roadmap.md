@@ -139,7 +139,7 @@
 - [x] ACC-23
 
 ## Phase 7: User Experience (UX)
-- [ ] UX-01
+- [x] UX-01
 - [ ] UX-02
 - [ ] UX-03
 - [ ] UX-04
