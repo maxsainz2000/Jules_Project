@@ -17,6 +17,8 @@ Namespace Views.Accounting
         Public Event ViewLoaded As EventHandler Implements ITamperAuditReportView.ViewLoaded
         Public Event RefreshRequested As EventHandler Implements ITamperAuditReportView.RefreshRequested
         Public Event FilterChanged As EventHandler Implements ITamperAuditReportView.FilterChanged
+        Public Event ExportCsvRequested As EventHandler(Of String) Implements ITamperAuditReportView.ExportCsvRequested
+        Public Event ExportPdfRequested As EventHandler(Of String) Implements ITamperAuditReportView.ExportPdfRequested
 
         Public Sub New(presenter As TamperAuditReportPresenter)
             InitializeComponent()
@@ -28,6 +30,8 @@ Namespace Views.Accounting
             AddHandler dtpTo.ValueChanged, AddressOf OnFilterChanged
             AddHandler btnRefresh.Click, AddressOf OnRefreshRequested
             AddHandler dgvIncidents.CellFormatting, AddressOf dgvIncidents_CellFormatting
+            AddHandler btnExportCsv.Click, AddressOf btnExportCsv_Click
+            AddHandler btnExportPdf.Click, AddressOf btnExportPdf_Click
         End Sub
 
         Private Sub TamperAuditReportView_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -40,6 +44,28 @@ Namespace Views.Accounting
 
         Private Sub OnRefreshRequested(sender As Object, e As EventArgs)
             RaiseEvent RefreshRequested(Me, EventArgs.Empty)
+        End Sub
+
+        Private Sub btnExportCsv_Click(sender As Object, e As EventArgs)
+            Using dialog As New SaveFileDialog()
+                dialog.Filter = "CSV Files (*.csv)|*.csv"
+                dialog.Title = "Export to CSV"
+                dialog.FileName = $"TamperAudit_{DateTime.Now:yyyyMMdd_HHmmss}.csv"
+                If dialog.ShowDialog() = DialogResult.OK Then
+                    RaiseEvent ExportCsvRequested(Me, dialog.FileName)
+                End If
+            End Using
+        End Sub
+
+        Private Sub btnExportPdf_Click(sender As Object, e As EventArgs)
+            Using dialog As New SaveFileDialog()
+                dialog.Filter = "PDF Files (*.pdf)|*.pdf"
+                dialog.Title = "Export to PDF"
+                dialog.FileName = $"TamperAudit_{DateTime.Now:yyyyMMdd_HHmmss}.pdf"
+                If dialog.ShowDialog() = DialogResult.OK Then
+                    RaiseEvent ExportPdfRequested(Me, dialog.FileName)
+                End If
+            End Using
         End Sub
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
