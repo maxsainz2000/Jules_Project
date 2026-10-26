@@ -15,15 +15,22 @@ Namespace Views.Shell.Modules
         Public Property ShowNotificationAction As Action(Of String, String, MessageBoxIcon) = Sub(msg, title, icon) MessageBox.Show(msg, title, MessageBoxButtons.OK, icon)
 #End If
 
-        Public Sub New(Optional dbContext As AccountingDbContext = Nothing)
+        Private ReadOnly _themeService As MerchSys.App.Services.Theming.IThemeService
+
+        Public Sub New(Optional dbContext As AccountingDbContext = Nothing, Optional themeService As MerchSys.App.Services.Theming.IThemeService = Nothing)
             InitializeComponent()
             Dock = DockStyle.Fill
             BackColor = System.Drawing.Color.Transparent
             _dbContext = dbContext
+            _themeService = themeService
 
 #If Not DEBUG Then
             btnRunVatSchemaHarness.Visible = False
 #End If
+        End Sub
+
+        Private Sub btnToggleTheme_Click(sender As Object, e As EventArgs) Handles btnToggleTheme.Click
+            _themeService?.ToggleTheme()
         End Sub
 
 #If DEBUG Then

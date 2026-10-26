@@ -1,0 +1,13 @@
+<<<<<<< SEARCH
+        Private Class ThemeSettings
+            Public Property Theme As AppTheme
+        End Class
+    End Class
+End Namespace
+=======
+        Public Class ThemeSettings
+            Public Property Theme As AppTheme
+        End Class
+    End Class
+End Namespace
+>>>>>>> REPLACE

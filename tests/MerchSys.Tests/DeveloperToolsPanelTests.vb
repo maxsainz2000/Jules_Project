@@ -5,19 +5,43 @@ Imports MerchSys.Accounting.Data
 Imports Microsoft.EntityFrameworkCore
 Imports Xunit
 Imports System.IO
+Imports Moq
+Imports MerchSys.App.Services.Theming
 
 Public Class DeveloperToolsPanelTests
 
     <Fact>
-    Public Sub DeveloperToolsPanel_Instantiates_AndButtonExists()
+    Public Sub DeveloperToolsPanel_Instantiates_AndButtonsExist()
         Dim panel As New DeveloperToolsPanel()
 
         Assert.NotNull(panel)
-        Dim btn = TryCast(panel.GetType().GetProperty("btnRunVatSchemaHarness", Reflection.BindingFlags.NonPublic Or Reflection.BindingFlags.Instance)?.GetValue(panel), Button)
+        Dim btnHarness = TryCast(panel.GetType().GetProperty("btnRunVatSchemaHarness", Reflection.BindingFlags.NonPublic Or Reflection.BindingFlags.Instance)?.GetValue(panel), Button)
+        Assert.NotNull(btnHarness)
+        Assert.Equal("Run VAT Schema Harness", btnHarness.Text)
 
-        Assert.NotNull(btn)
-        Assert.Equal("Run VAT Schema Harness", btn.Text)
+        Dim btnToggle = TryCast(panel.GetType().GetProperty("btnToggleTheme", Reflection.BindingFlags.NonPublic Or Reflection.BindingFlags.Instance)?.GetValue(panel), Button)
+        Assert.NotNull(btnToggle)
+        Assert.Equal("Toggle Theme", btnToggle.Text)
     End Sub
+
+    <Fact>
+    Public Async Function btnToggleTheme_Click_CallsToggleTheme() As Task
+        Dim mockThemeService As New Mock(Of IThemeService)()
+        Dim options = New DbContextOptionsBuilder(Of AccountingDbContext)().
+            UseMySQL("Server=dummy;Database=dummy;Uid=dummy;Pwd=dummy;").
+            Options
+        Dim dbContext As New AccountingDbContext(options)
+
+        Dim panel As New DeveloperToolsPanel(dbContext, mockThemeService.Object)
+
+        Dim btnToggle = TryCast(panel.GetType().GetProperty("btnToggleTheme", Reflection.BindingFlags.NonPublic Or Reflection.BindingFlags.Instance)?.GetValue(panel), Button)
+        Assert.NotNull(btnToggle)
+
+        btnToggle.PerformClick()
+        Await Task.Yield()
+
+        mockThemeService.Verify(Sub(t) t.ToggleTheme(), Times.Once())
+    End Function
 
     <Fact>
     Public Async Function btnRunVatSchemaHarness_Click_ExecutesHarness_AndSilencesDialog() As Task

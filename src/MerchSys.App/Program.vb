@@ -120,6 +120,8 @@ Friend Module Program
                                   services.AddTransient(Of AccountingPanel)()
                                   services.AddTransient(Of DeveloperToolsPanel)()
 
+                                  services.AddSingleton(Of MerchSys.App.Services.Theming.IThemeService, MerchSys.App.Services.Theming.ThemeService)()
+
                                   services.AddSingleton(Of MerchSys.SharedKernel.Interfaces.INotificationService, MerchSys.App.Services.DefaultNotificationService)()
                                   services.AddTransient(Of MerchSys.App.Views.POS.VatSettingsView)()
                                   services.AddTransient(Of MerchSys.POS.Views.IVatSettingsView)(Function(sp) sp.GetRequiredService(Of MerchSys.App.Views.POS.VatSettingsView)())
@@ -159,6 +161,8 @@ Friend Module Program
         _idleMonitor = host.Services.GetRequiredService(Of IIdleMonitor)()
         AddHandler _idleMonitor.IdleWarning, AddressOf HandleIdleWarning
         AddHandler _idleMonitor.SessionExpired, AddressOf HandleSessionExpired
+
+        Dim themeService = _serviceProvider.GetRequiredService(Of MerchSys.App.Services.Theming.IThemeService)()
 
         RunApplicationFlow()
 
