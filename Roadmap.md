@@ -135,7 +135,7 @@
 - [x] ACC-19
 - [x] ACC-20
 - [x] ACC-21
-- [ ] ACC-22
+- [x] ACC-22
 - [ ] ACC-23
 
 ## Phase 7: User Experience (UX)
