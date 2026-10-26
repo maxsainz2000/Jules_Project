@@ -33,6 +33,8 @@
 | **Presenter View unhooking** | Symmetrically unhook events (`RemoveHandler`) in `View.Set` if `_view IsNot Nothing` before assigning and wiring the new view. | memory leak / duplicate calls |
 | **DI Exporter registration** | All exporter services must be registered in `AccountingServiceCollectionExtensions.vb` (or equivalent module extension). | missing dependency at runtime |
 | **Stray diff/patch/temp files** | Never commit patch files (`*.diff`, `*.patch`), search/replace blocks, scratch files, or temporary editor artifacts. Inspect `git status` and clean before pushing. | QA rejection / dirty repo |
+| **Theme service subscription in Presenters** | Any presenter injecting `IThemeService` to style its view must subscribe to `ThemeChanged` so views update dynamically when theme switches at runtime, and symmetrically unhook in `Dispose()`. | UI theme desync at runtime |
+| **Mock verification with constructor calls** | If a presenter constructor invokes a view method during initial setup, tests raising events that call that same method must account for the constructor invocation (e.g. `Times.Exactly(2)` or configure distinct initial mock state). | `Moq.MockException` |
 
 ## Additional Architecture Rules
 
