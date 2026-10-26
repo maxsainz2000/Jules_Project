@@ -39,6 +39,7 @@
 | **Non-overridable Service Mocking** | Never use `Mock(Of LoginSessionService)()` with `.Setup(...)`. Concrete classes with non-overridable members throw `NotSupportedException` in Moq. Instantiate real instances (`New LoginSessionService()`) and set test state via `session.SetUser(...)`. | `NotSupportedException` in tests |
 | **ViewFactory UserControl Cast in Tests** | When registering views in `IServiceCollection` for tests that trigger `MainWindowPresenter` navigation, never register a bare interface mock `Mock(Of IView)().Object` because `ViewFactory` casts the resolved view to `System.Windows.Forms.UserControl`. Register the concrete view (e.g. `services.AddTransient(Of IOwnerDashboardView, OwnerDashboardView)()`) or a test `UserControl` subclass. | `InvalidCastException` in tests |
 | **Legacy Theme Test Alignment** | When refining `ThemeService.ApplyTheme` rules (e.g. differentiating button variants between Accent and SurfaceBackground), update existing test `ThemeService_ApplyTheme_UpdatesControlColors` (e.g. set `button.Tag = "Accent"`) so legacy assertions do not break. | Test assertion failure |
+| **Autonomous PR Completion** | Never pause to prompt for conversational user confirmation before committing changes or opening the PR. Execute all implementation, build, and test steps autonomously, verify `git diff` is non-empty, commit, and push the PR. | Empty PR rejection |
 
 ## Additional Architecture Rules
 
