@@ -18,5 +18,9 @@ Namespace Views
         Event NavigationRequested As EventHandler(Of NavigationItem)
         Event Load As EventHandler
         Event LogoutRequested As EventHandler
+        Event ThemeToggleRequested As EventHandler
+
+        Sub ApplyThemeTokens(tokens As MerchSys.App.Services.Theming.ThemeTokens)
+        Sub SetThemeState(theme As MerchSys.App.Services.Theming.AppTheme)
     End Interface
 End Namespace

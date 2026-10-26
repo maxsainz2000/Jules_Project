@@ -8,6 +8,7 @@ Namespace Views
         Implements IMainWindowView
 
         Public Event LogoutRequested As EventHandler Implements IMainWindowView.LogoutRequested
+        Public Event ThemeToggleRequested As EventHandler Implements IMainWindowView.ThemeToggleRequested
         Public Event ModuleSelected As EventHandler(Of AppModule)
         Public Event NavigationRequested As EventHandler(Of NavigationItem) Implements IMainWindowView.NavigationRequested
 
@@ -15,6 +16,7 @@ Namespace Views
         Public Property Presenter As MainWindowPresenter
 
         Private _renderedItems As List(Of NavigationItem)
+        Private _currentTokens As Services.Theming.ThemeTokens
 
         ''' <summary>
         ''' Explicit interface implementation of <see cref="IMainWindowView.Load"/>.
@@ -97,12 +99,20 @@ Namespace Views
             ' When the item set is unchanged (the common case while navigating), only
             ' refresh the active-state styling instead of disposing and recreating every
             ' button, which caused flicker and handler churn (L8).
+            Dim accentColor As Color = If(_currentTokens IsNot Nothing, _currentTokens.Accent, Color.FromArgb(52, 73, 94))
+            Dim textColor As Color = If(_currentTokens IsNot Nothing, _currentTokens.PrimaryText, Color.White)
+            Dim dangerColor As Color = If(_currentTokens IsNot Nothing, _currentTokens.Danger, Color.FromArgb(192, 57, 43))
+
             If _renderedItems IsNot Nothing AndAlso SameItems(_renderedItems, items) Then
                 For Each ctrl As Control In pnlSidebar.Controls
                     Dim existing = TryCast(ctrl, Button)
                     Dim navItem = If(existing IsNot Nothing, TryCast(existing.Tag, NavigationItem), Nothing)
                     If existing IsNot Nothing AndAlso navItem IsNot Nothing Then
-                        existing.BackColor = If(navItem.IsActive, Color.FromArgb(52, 73, 94), Color.Transparent)
+                        existing.BackColor = If(navItem.IsActive, accentColor, Color.Transparent)
+                        existing.ForeColor = textColor
+                    ElseIf existing IsNot Nothing AndAlso existing.Text = "Logout" Then
+                        existing.BackColor = dangerColor
+                        existing.ForeColor = textColor
                     End If
                 Next
                 _renderedItems = items
@@ -124,8 +134,8 @@ Namespace Views
                 btn.Height = 40
                 btn.Location = New Point(10, currentY)
                 btn.FlatStyle = FlatStyle.Flat
-                btn.ForeColor = Color.White
-                btn.BackColor = If(item.IsActive, Color.FromArgb(52, 73, 94), Color.Transparent)
+                btn.ForeColor = textColor
+                btn.BackColor = If(item.IsActive, accentColor, Color.Transparent)
                 btn.FlatAppearance.BorderSize = 0
                 btn.TextAlign = ContentAlignment.MiddleLeft
                 btn.Padding = New Padding(10, 0, 0, 0)
@@ -143,8 +153,8 @@ Namespace Views
             btnLogout.Height = 40
             btnLogout.Location = New Point(10, Math.Max(currentY, pnlSidebar.Height - 50))
             btnLogout.FlatStyle = FlatStyle.Flat
-            btnLogout.ForeColor = Color.White
-            btnLogout.BackColor = Color.FromArgb(192, 57, 43)
+            btnLogout.ForeColor = textColor
+            btnLogout.BackColor = dangerColor
             btnLogout.FlatAppearance.BorderSize = 0
             btnLogout.Anchor = AnchorStyles.Bottom Or AnchorStyles.Left Or AnchorStyles.Right
 
@@ -173,6 +183,39 @@ Namespace Views
 
         Private Sub btnLogout_Click(sender As Object, e As EventArgs)
             RaiseEvent LogoutRequested(Me, EventArgs.Empty)
+        End Sub
+
+        Private Sub btnToggleThemeShell_Click(sender As Object, e As EventArgs) Handles btnToggleThemeShell.Click
+            RaiseEvent ThemeToggleRequested(Me, EventArgs.Empty)
+        End Sub
+
+        Public Sub ApplyThemeTokens(tokens As Services.Theming.ThemeTokens) Implements IMainWindowView.ApplyThemeTokens
+            _currentTokens = tokens
+            Me.BackColor = tokens.WindowBackground
+            pnlContent.BackColor = tokens.WindowBackground
+
+            pnlLeft.BackColor = tokens.SidebarBackground
+            pnlSidebar.BackColor = tokens.SidebarBackground
+            pnlHeader.BackColor = tokens.SidebarBackground
+            pnlStatusHost.BackColor = tokens.SidebarBackground
+
+            lblUserIdentity.ForeColor = tokens.PrimaryText
+            lblUserIdentity.Font = tokens.HeaderFont
+
+            btnToggleThemeShell.ForeColor = tokens.PrimaryText
+
+            ' Re-render navigation buttons if already loaded
+            If _renderedItems IsNot Nothing Then
+                AddNavigationButtons(_renderedItems)
+            End If
+        End Sub
+
+        Public Sub SetThemeState(theme As Services.Theming.AppTheme) Implements IMainWindowView.SetThemeState
+            If theme = Services.Theming.AppTheme.Dark Then
+                btnToggleThemeShell.Text = "☀️ Light"
+            Else
+                btnToggleThemeShell.Text = "🌙 Dark"
+            End If
         End Sub
     End Class
 End Namespace
