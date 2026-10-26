@@ -44,6 +44,8 @@ Namespace Views.Accounting
             Me.colActualHash = New System.Windows.Forms.DataGridViewTextBoxColumn()
             Me.colTamperKind = New System.Windows.Forms.DataGridViewTextBoxColumn()
             Me.colDetails = New System.Windows.Forms.DataGridViewTextBoxColumn()
+            Me.btnExportPdf = New System.Windows.Forms.Button()
+            Me.btnExportCsv = New System.Windows.Forms.Button()
             Me.pnlHeader.SuspendLayout()
             Me.pnlFilter.SuspendLayout()
             Me.pnlContent.SuspendLayout()
@@ -77,6 +79,8 @@ Namespace Views.Accounting
             Me.pnlFilter.Controls.Add(Me.dtpTo)
             Me.pnlFilter.Controls.Add(Me.lblFrom)
             Me.pnlFilter.Controls.Add(Me.dtpFrom)
+            Me.pnlFilter.Controls.Add(Me.btnExportPdf)
+            Me.pnlFilter.Controls.Add(Me.btnExportCsv)
             Me.pnlFilter.Controls.Add(Me.btnRefresh)
             Me.pnlFilter.Dock = System.Windows.Forms.DockStyle.Top
             Me.pnlFilter.Location = New System.Drawing.Point(0, 60)
@@ -127,6 +131,26 @@ Namespace Views.Accounting
             Me.btnRefresh.TabIndex = 0
             Me.btnRefresh.Text = "Refresh"
             Me.btnRefresh.UseVisualStyleBackColor = True
+            '
+            'btnExportPdf'
+            '
+            Me.btnExportPdf.Cursor = System.Windows.Forms.Cursors.Hand
+            Me.btnExportPdf.Location = New System.Drawing.Point(596, 12)
+            Me.btnExportPdf.Name = "btnExportPdf"
+            Me.btnExportPdf.Size = New System.Drawing.Size(90, 26)
+            Me.btnExportPdf.TabIndex = 6
+            Me.btnExportPdf.Text = "Export PDF"
+            Me.btnExportPdf.UseVisualStyleBackColor = True
+            '
+            'btnExportCsv'
+            '
+            Me.btnExportCsv.Cursor = System.Windows.Forms.Cursors.Hand
+            Me.btnExportCsv.Location = New System.Drawing.Point(500, 12)
+            Me.btnExportCsv.Name = "btnExportCsv"
+            Me.btnExportCsv.Size = New System.Drawing.Size(90, 26)
+            Me.btnExportCsv.TabIndex = 5
+            Me.btnExportCsv.Text = "Export CSV"
+            Me.btnExportCsv.UseVisualStyleBackColor = True
             '
             'pnlContent
             '
@@ -251,6 +275,8 @@ Namespace Views.Accounting
         Friend WithEvents colActualHash As DataGridViewTextBoxColumn
         Friend WithEvents colTamperKind As DataGridViewTextBoxColumn
         Friend WithEvents colDetails As DataGridViewTextBoxColumn
+        Friend WithEvents btnExportCsv As Button
+        Friend WithEvents btnExportPdf As Button
     End Class
 
 End Namespace
