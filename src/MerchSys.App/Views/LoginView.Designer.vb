@@ -78,7 +78,7 @@ Namespace Views
             Me.btnTogglePassword.Name = "btnTogglePassword"
             Me.btnTogglePassword.Size = New System.Drawing.Size(30, 29)
             Me.btnTogglePassword.TabIndex = 3
-            Me.btnTogglePassword.Text = "👁"
+            Me.btnTogglePassword.Text = ""
             Me.btnTogglePassword.UseVisualStyleBackColor = False
             '
             'btnLogin

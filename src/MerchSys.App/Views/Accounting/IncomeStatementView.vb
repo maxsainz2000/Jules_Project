@@ -16,6 +16,8 @@ Namespace Views.Accounting
             InitializeComponent()
             _presenter = presenter
             _presenter.View = Me
+            lblWhatThisMeansIcon.Image = Services.Theming.IconHelper.GetIcon(Services.Theming.AppIcon.Lightbulb, Drawing.Color.Goldenrod, 24)
+            lblWhatThisMeansIcon.ImageAlign = Drawing.ContentAlignment.MiddleCenter
         End Sub
 
         Private Sub IncomeStatementView_Load(sender As Object, e As EventArgs) Handles MyBase.Load

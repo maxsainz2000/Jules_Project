@@ -11,6 +11,8 @@ Namespace Views
 
         Public Sub New()
             InitializeComponent()
+            btnTogglePassword.Image = Services.Theming.IconHelper.GetIcon(Services.Theming.AppIcon.Eye, Drawing.Color.White, 16)
+            btnTogglePassword.ImageAlign = Drawing.ContentAlignment.MiddleCenter
         End Sub
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
@@ -106,6 +108,9 @@ Namespace Views
 
         Private Sub btnTogglePassword_Click(sender As Object, e As EventArgs) Handles btnTogglePassword.Click
             txtPassword.UseSystemPasswordChar = Not txtPassword.UseSystemPasswordChar
+            Dim oldImage = btnTogglePassword.Image
+            btnTogglePassword.Image = Services.Theming.IconHelper.GetIcon(If(txtPassword.UseSystemPasswordChar, Services.Theming.AppIcon.EyeOff, Services.Theming.AppIcon.Eye), Drawing.Color.White, 16)
+            If oldImage IsNot Nothing Then oldImage.Dispose()
         End Sub
 
         ' In order for Enter key to work

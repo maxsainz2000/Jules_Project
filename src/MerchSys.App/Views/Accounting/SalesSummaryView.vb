@@ -23,6 +23,9 @@ Namespace Views.Accounting
             _presenter = presenter
             _presenter.View = Me
 
+            lblWarning.Image = Services.Theming.IconHelper.GetIcon(Services.Theming.AppIcon.Warning, Drawing.Color.Red, 16)
+            lblWarning.ImageAlign = Drawing.ContentAlignment.MiddleLeft
+
             SetupDataGrids()
 
             AddHandler rbDaily.CheckedChanged, AddressOf Selector_Changed

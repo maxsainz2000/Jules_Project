@@ -117,13 +117,26 @@ Namespace Views
                 lblUserIdentity.Font = tokens.HeaderFont
             End If
 
+            ' Determine current theme based on tokens to update the icon
+            Dim isDark As Boolean = tokens.WindowBackground.R < 128
+            Dim oldImageTheme = btnToggleThemeShell.Image
+            btnToggleThemeShell.Image = Services.Theming.IconHelper.GetThemedIcon(If(isDark, Services.Theming.AppIcon.Sun, Services.Theming.AppIcon.Moon), _currentTokens, 16)
+            If oldImageTheme IsNot Nothing Then oldImageTheme.Dispose()
+            btnToggleThemeShell.TextImageRelation = TextImageRelation.ImageBeforeText
+
             If _renderedItems IsNot Nothing Then
                 AddNavigationButtons(_renderedItems)
             End If
         End Sub
 
         Public Sub SetThemeState(theme As AppTheme) Implements IMainWindowView.SetThemeState
-            btnToggleThemeShell.Text = If(theme = AppTheme.Dark, "☀️ Light", "🌙 Dark")
+            btnToggleThemeShell.Text = If(theme = AppTheme.Dark, "Light Mode", "Dark Mode")
+            If _currentTokens IsNot Nothing Then
+                Dim oldImage = btnToggleThemeShell.Image
+                btnToggleThemeShell.Image = Services.Theming.IconHelper.GetThemedIcon(If(theme = AppTheme.Dark, Services.Theming.AppIcon.Sun, Services.Theming.AppIcon.Moon), _currentTokens, 16)
+                If oldImage IsNot Nothing Then oldImage.Dispose()
+                btnToggleThemeShell.TextImageRelation = TextImageRelation.ImageBeforeText
+            End If
         End Sub
 
         Public Sub AddNavigationButtons(items As List(Of NavigationItem)) Implements IMainWindowView.AddNavigationButtons

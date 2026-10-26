@@ -175,7 +175,7 @@ Namespace Views.Accounting
             Me.lblWarning.Name = "lblWarning"
             Me.lblWarning.Size = New System.Drawing.Size(199, 15)
             Me.lblWarning.TabIndex = 1
-            Me.lblWarning.Text = "⚠️ Credit Alert - High AR Exposure"
+            Me.lblWarning.Text = "Credit Alert - High AR Exposure"
             Me.lblWarning.Visible = False
             '
             'lblWhatThisMeans

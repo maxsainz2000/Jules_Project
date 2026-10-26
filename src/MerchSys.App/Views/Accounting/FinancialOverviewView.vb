@@ -16,6 +16,8 @@ Namespace Views.Accounting
         Public Sub New()
             InitializeComponent()
             SetupDataGridViews()
+            lblWhatThisMeansIcon.Image = Services.Theming.IconHelper.GetIcon(Services.Theming.AppIcon.Lightbulb, Drawing.Color.Goldenrod, 24)
+            lblWhatThisMeansIcon.ImageAlign = Drawing.ContentAlignment.MiddleCenter
         End Sub
 
         ' DI constructor
@@ -25,6 +27,8 @@ Namespace Views.Accounting
             _presenter.View = Me
             AddHandler _presenter.NavigateToVatReturnRequested, AddressOf OnNavigateToVatReturnRequested
             SetupDataGridViews()
+            lblWhatThisMeansIcon.Image = Services.Theming.IconHelper.GetIcon(Services.Theming.AppIcon.Lightbulb, Drawing.Color.Goldenrod, 24)
+            lblWhatThisMeansIcon.ImageAlign = Drawing.ContentAlignment.MiddleCenter
         End Sub
 
         Private Sub SetupDataGridViews()

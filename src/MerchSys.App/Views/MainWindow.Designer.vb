@@ -78,7 +78,7 @@ Partial Class MainWindow
         Me.btnToggleThemeShell.Name = "btnToggleThemeShell"
         Me.btnToggleThemeShell.Size = New System.Drawing.Size(80, 48)
         Me.btnToggleThemeShell.TabIndex = 1
-        Me.btnToggleThemeShell.Text = "☀️ Light"
+        Me.btnToggleThemeShell.Text = ""
         Me.btnToggleThemeShell.UseVisualStyleBackColor = True
         '
         ' pnlStatusHost

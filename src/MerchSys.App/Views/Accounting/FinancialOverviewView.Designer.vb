@@ -109,7 +109,7 @@ Namespace Views.Accounting
             Me.lblWhatThisMeansIcon.Name = "lblWhatThisMeansIcon"
             Me.lblWhatThisMeansIcon.Size = New System.Drawing.Size(35, 30)
             Me.lblWhatThisMeansIcon.TabIndex = 0
-            Me.lblWhatThisMeansIcon.Text = "💡"
+            Me.lblWhatThisMeansIcon.Text = ""
             '
             'lblWhatThisMeans
             '

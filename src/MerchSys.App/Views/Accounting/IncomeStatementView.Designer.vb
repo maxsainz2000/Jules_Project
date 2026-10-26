@@ -201,7 +201,7 @@ Partial Class IncomeStatementView
         Me.lblWhatThisMeansIcon.Name = "lblWhatThisMeansIcon"
         Me.lblWhatThisMeansIcon.Size = New System.Drawing.Size(43, 37)
         Me.lblWhatThisMeansIcon.TabIndex = 0
-        Me.lblWhatThisMeansIcon.Text = "💡"
+        Me.lblWhatThisMeansIcon.Text = ""
         '
         'lblWhatThisMeans
         '
