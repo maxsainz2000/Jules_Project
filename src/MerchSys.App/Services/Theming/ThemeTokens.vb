@@ -20,6 +20,7 @@ Namespace Services.Theming
         Public Property Success As Color
 
         Public Property DefaultFont As Font
+        Public Property HeaderFont As Font
 
         Public Shared Function GetTokens(theme As AppTheme) As ThemeTokens
             If theme = AppTheme.Dark Then
@@ -36,7 +37,8 @@ Namespace Services.Theming
                     .Danger = Color.FromArgb(241, 76, 76),
                     .Warning = Color.FromArgb(204, 167, 0),
                     .Success = Color.FromArgb(137, 209, 133),
-                    .DefaultFont = New Font("Segoe UI", 9.0F, FontStyle.Regular, GraphicsUnit.Point)
+                    .DefaultFont = New Font("Segoe UI", 9.0F, FontStyle.Regular, GraphicsUnit.Point),
+                    .HeaderFont = New Font("Segoe UI", 12.0F, FontStyle.Bold, GraphicsUnit.Point)
                 }
             Else
                 Return New ThemeTokens With {
@@ -52,7 +54,8 @@ Namespace Services.Theming
                     .Danger = Color.FromArgb(232, 17, 35),
                     .Warning = Color.FromArgb(255, 140, 0),
                     .Success = Color.FromArgb(16, 124, 16),
-                    .DefaultFont = New Font("Segoe UI", 9.0F, FontStyle.Regular, GraphicsUnit.Point)
+                    .DefaultFont = New Font("Segoe UI", 9.0F, FontStyle.Regular, GraphicsUnit.Point),
+                    .HeaderFont = New Font("Segoe UI", 12.0F, FontStyle.Bold, GraphicsUnit.Point)
                 }
             End If
         End Function
