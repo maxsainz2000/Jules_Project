@@ -17,6 +17,8 @@ Namespace Views.Accounting
         Public Event ViewLoaded As EventHandler Implements ITamperAuditReportView.ViewLoaded
         Public Event RefreshRequested As EventHandler Implements ITamperAuditReportView.RefreshRequested
         Public Event FilterChanged As EventHandler Implements ITamperAuditReportView.FilterChanged
+        Public Event ExportCsvRequested As EventHandler(Of String) Implements ITamperAuditReportView.ExportCsvRequested
+        Public Event ExportPdfRequested As EventHandler(Of String) Implements ITamperAuditReportView.ExportPdfRequested
 
         Public Sub New(presenter As TamperAuditReportPresenter)
             InitializeComponent()
@@ -27,7 +29,31 @@ Namespace Views.Accounting
             AddHandler dtpFrom.ValueChanged, AddressOf OnFilterChanged
             AddHandler dtpTo.ValueChanged, AddressOf OnFilterChanged
             AddHandler btnRefresh.Click, AddressOf OnRefreshRequested
+            AddHandler btnExportCsv.Click, AddressOf OnExportCsvClicked
+            AddHandler btnExportPdf.Click, AddressOf OnExportPdfClicked
             AddHandler dgvIncidents.CellFormatting, AddressOf dgvIncidents_CellFormatting
+        End Sub
+
+        Private Sub OnExportCsvClicked(sender As Object, e As EventArgs)
+            Using sfd As New SaveFileDialog()
+                sfd.Filter = "CSV Files (*.csv)|*.csv"
+                sfd.DefaultExt = "csv"
+                sfd.FileName = $"tamper-incidents-{DateTime.Now:yyyyMMdd}.csv"
+                If sfd.ShowDialog() = DialogResult.OK Then
+                    RaiseEvent ExportCsvRequested(Me, sfd.FileName)
+                End If
+            End Using
+        End Sub
+
+        Private Sub OnExportPdfClicked(sender As Object, e As EventArgs)
+            Using sfd As New SaveFileDialog()
+                sfd.Filter = "PDF Files (*.pdf)|*.pdf"
+                sfd.DefaultExt = "pdf"
+                sfd.FileName = $"tamper-incidents-{DateTime.Now:yyyyMMdd}.pdf"
+                If sfd.ShowDialog() = DialogResult.OK Then
+                    RaiseEvent ExportPdfRequested(Me, sfd.FileName)
+                End If
+            End Using
         End Sub
 
         Private Sub TamperAuditReportView_Load(sender As Object, e As EventArgs) Handles MyBase.Load

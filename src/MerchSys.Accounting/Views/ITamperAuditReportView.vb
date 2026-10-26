@@ -8,6 +8,8 @@ Namespace Views
         Event ViewLoaded As EventHandler
         Event RefreshRequested As EventHandler
         Event FilterChanged As EventHandler
+        Event ExportCsvRequested As EventHandler(Of String)
+        Event ExportPdfRequested As EventHandler(Of String)
 
         Property FromDate As DateTime
         Property ToDate As DateTime
