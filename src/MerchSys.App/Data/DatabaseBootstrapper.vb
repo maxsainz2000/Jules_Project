@@ -50,6 +50,8 @@ Namespace Data
             ' Layer 2 — module schemas from the EF model.
             EnsureModuleSchemas(connectionString, serviceProvider, logger)
 
+            EnsureInvSaleCogsTable(connectionString, logger)
+
             ' Layer 3 — BIR receipt-archive immutability triggers (H3). This must follow Layer 2:
             ' the archive table they guard is created there. EF Core cannot create triggers, so they
             ' are applied from an embedded script and then verified; a failure here is surfaced to
@@ -154,6 +156,16 @@ Namespace Data
             For Each tableName In modelTables
                 existing.Add(tableName)
             Next
+        End Sub
+
+        Private Shared Sub EnsureInvSaleCogsTable(connectionString As String, logger As ILogger)
+            Using conn As New MySqlConnection(connectionString)
+                conn.Open()
+                Using cmd = conn.CreateCommand()
+                    cmd.CommandText = "CREATE TABLE IF NOT EXISTS Inv_SaleCogs (Id INT AUTO_INCREMENT PRIMARY KEY, SaleId INT NOT NULL, ProductId INT NOT NULL, BatchId INT NOT NULL, QuantityDeducted INT NOT NULL, UnitCost DECIMAL(18,4) NOT NULL, TotalCost DECIMAL(18,4) NOT NULL, DeductedAt DATETIME(6) NOT NULL, INDEX IX_Inv_SaleCogs_SaleId (SaleId));"
+                    cmd.ExecuteNonQuery()
+                End Using
+            End Using
         End Sub
 
         ''' <summary>
