@@ -1,5 +1,6 @@
 Imports System
 Imports System.Collections.Generic
+Imports System.IO
 Imports System.Linq
 Imports System.Threading.Tasks
 Imports MerchSys.Accounting.Services
@@ -23,9 +24,17 @@ Namespace Presenters
         Private _view As ITamperAuditReportView
         Private ReadOnly _queryService As ITamperAuditQueryService
         Private ReadOnly _notificationService As INotificationService
+        Private ReadOnly _exporter As ITamperReportExporter
+        Private _lastLoadedIncidents As List(Of TamperAuditEntryDto)
 
         Public Sub New(queryService As ITamperAuditQueryService, Optional notificationService As INotificationService = Nothing)
             _queryService = queryService
+            _notificationService = notificationService
+        End Sub
+
+        Public Sub New(queryService As ITamperAuditQueryService, exporter As ITamperReportExporter, notificationService As INotificationService)
+            _queryService = queryService
+            _exporter = exporter
             _notificationService = notificationService
         End Sub
 
@@ -38,6 +47,8 @@ Namespace Presenters
                     RemoveHandler _view.ViewLoaded, AddressOf OnViewLoaded
                     RemoveHandler _view.RefreshRequested, AddressOf OnRefreshRequested
                     RemoveHandler _view.FilterChanged, AddressOf OnFilterChanged
+                    RemoveHandler _view.ExportCsvRequested, AddressOf OnExportCsvRequested
+                    RemoveHandler _view.ExportPdfRequested, AddressOf OnExportPdfRequested
                 End If
 
                 _view = value
@@ -49,6 +60,8 @@ Namespace Presenters
                     AddHandler _view.ViewLoaded, AddressOf OnViewLoaded
                     AddHandler _view.RefreshRequested, AddressOf OnRefreshRequested
                     AddHandler _view.FilterChanged, AddressOf OnFilterChanged
+                    AddHandler _view.ExportCsvRequested, AddressOf OnExportCsvRequested
+                    AddHandler _view.ExportPdfRequested, AddressOf OnExportPdfRequested
                 End If
             End Set
         End Property
@@ -64,6 +77,57 @@ Namespace Presenters
         Private Async Sub OnFilterChanged(sender As Object, e As EventArgs)
             Await LoadIncidentsAsync()
         End Sub
+
+        Private Async Sub OnExportCsvRequested(sender As Object, e As String)
+            Await ExportReportAsync(e, TamperReportFormat.Csv)
+        End Sub
+
+        Private Async Sub OnExportPdfRequested(sender As Object, e As String)
+            Await ExportReportAsync(e, TamperReportFormat.Pdf)
+        End Sub
+
+        Private Async Function ExportReportAsync(filePath As String, format As TamperReportFormat) As Task
+            If _exporter Is Nothing Then
+                Return
+            End If
+
+            _view.IsLoading = True
+            _view.ErrorMessage = String.Empty
+
+            Dim success As Boolean = False
+            Dim errorMsg As String = Nothing
+
+            Try
+                Dim options As New TamperReportExportOptions With {
+                    .BusinessName = "MerchSys Business",
+                    .BusinessAddress = "123 Business St., City",
+                    .BusinessTIN = "123-456-789",
+                    .Title = "Tamper Audit Report",
+                    .FromDate = _view.FromDate,
+                    .ToDate = _view.ToDate,
+                    .Incidents = _lastLoadedIncidents
+                }
+
+                Dim bytes = Await _exporter.ExportAsync(options, format)
+                Await File.WriteAllBytesAsync(filePath, bytes)
+                success = True
+            Catch ex As Exception
+                errorMsg = $"Failed to export {format} report."
+                If _notificationService IsNot Nothing Then
+                    _notificationService.ShowError(errorMsg)
+                End If
+            End Try
+
+            If errorMsg IsNot Nothing Then
+                _view.ErrorMessage = errorMsg
+            End If
+
+            If success AndAlso _notificationService IsNot Nothing Then
+                _notificationService.ShowInfo($"Report exported successfully to {filePath}")
+            End If
+
+            _view.IsLoading = False
+        End Function
 
         Private Async Function LoadIncidentsAsync() As Task
             _view.IsLoading = True
@@ -102,6 +166,7 @@ Namespace Presenters
                     .Details = $"Detected on {x.MachineName} by {x.WindowsUser}"
                 }).ToList()
 
+                _lastLoadedIncidents = dtos
                 _view.SetIncidents(dtos)
             End If
 

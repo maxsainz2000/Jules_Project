@@ -17,6 +17,8 @@ Namespace Views.Accounting
         Public Event ViewLoaded As EventHandler Implements ITamperAuditReportView.ViewLoaded
         Public Event RefreshRequested As EventHandler Implements ITamperAuditReportView.RefreshRequested
         Public Event FilterChanged As EventHandler Implements ITamperAuditReportView.FilterChanged
+        Public Event ExportCsvRequested As EventHandler(Of String) Implements ITamperAuditReportView.ExportCsvRequested
+        Public Event ExportPdfRequested As EventHandler(Of String) Implements ITamperAuditReportView.ExportPdfRequested
 
         Public Sub New(presenter As TamperAuditReportPresenter)
             InitializeComponent()
@@ -27,6 +29,8 @@ Namespace Views.Accounting
             AddHandler dtpFrom.ValueChanged, AddressOf OnFilterChanged
             AddHandler dtpTo.ValueChanged, AddressOf OnFilterChanged
             AddHandler btnRefresh.Click, AddressOf OnRefreshRequested
+            AddHandler btnExportCsv.Click, AddressOf OnExportCsvClicked
+            AddHandler btnExportPdf.Click, AddressOf OnExportPdfClicked
             AddHandler dgvIncidents.CellFormatting, AddressOf dgvIncidents_CellFormatting
         End Sub
 
@@ -126,6 +130,25 @@ Namespace Views.Accounting
                     End If
                 End If
             End If
+        End Sub
+        Private Sub OnExportCsvClicked(sender As Object, e As EventArgs)
+            Using dialog As New SaveFileDialog()
+                dialog.Filter = "CSV Files (*.csv)|*.csv"
+                dialog.FileName = $"TamperAudit_{DateTime.Now:yyyyMMdd_HHmmss}.csv"
+                If dialog.ShowDialog() = DialogResult.OK Then
+                    RaiseEvent ExportCsvRequested(Me, dialog.FileName)
+                End If
+            End Using
+        End Sub
+
+        Private Sub OnExportPdfClicked(sender As Object, e As EventArgs)
+            Using dialog As New SaveFileDialog()
+                dialog.Filter = "PDF Files (*.pdf)|*.pdf"
+                dialog.FileName = $"TamperAudit_{DateTime.Now:yyyyMMdd_HHmmss}.pdf"
+                If dialog.ShowDialog() = DialogResult.OK Then
+                    RaiseEvent ExportPdfRequested(Me, dialog.FileName)
+                End If
+            End Using
         End Sub
     End Class
 
