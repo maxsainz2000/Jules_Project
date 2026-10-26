@@ -79,9 +79,24 @@ Namespace Handlers
                             .QuantityDeducted = result.DeductedQuantity,
                             .TotalCost = result.TotalCost
                         })
+
+                        If Not _dbContext.SaleCogsRecords.Any(Function(r) r.SaleId = notification.SaleId) Then
+                            For Each bd In result.BatchDeductions
+                                _dbContext.SaleCogsRecords.Add(New Entities.SaleCogsRecord With {
+                                    .SaleId = notification.SaleId,
+                                    .ProductId = item.ProductId,
+                                    .BatchId = bd.BatchId,
+                                    .QuantityDeducted = bd.QuantityDeducted,
+                                    .UnitCost = bd.UnitCost,
+                                    .TotalCost = bd.TotalCost,
+                                    .DeductedAt = DateTime.UtcNow
+                                })
+                            Next
+                        End If
                     Next
 
                     If failureException Is Nothing Then
+                        Await _dbContext.SaveChangesAsync(cancellationToken)
                         Await transaction.CommitAsync(cancellationToken)
                     End If
                 End Using

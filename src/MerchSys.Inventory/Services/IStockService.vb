@@ -18,7 +18,16 @@ Namespace Services
             ''' decremented, the information is gone (nothing records which batches a sale consumed).
             ''' </summary>
             Public Property TotalCost As Decimal
+
+            Public Property BatchDeductions As List(Of FIFOBatchDeduction) = New List(Of FIFOBatchDeduction)()
         End Class
+
+    Public Class FIFOBatchDeduction
+        Public Property BatchId As Integer
+        Public Property QuantityDeducted As Integer
+        Public Property UnitCost As Decimal
+        Public Property TotalCost As Decimal
+    End Class
 
     Public Class StockLevelDto
         Public Property ProductId As Integer
