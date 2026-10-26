@@ -27,6 +27,7 @@ Namespace Extensions
             services.AddTransient(Of IncomeStatementPresenter)()
             services.AddTransient(Of SalesSummaryPresenter)()
             services.AddTransient(Of VatReturnPresenter)()
+            services.AddTransient(Of TamperAuditReportPresenter)()
         End Sub
 
     End Module

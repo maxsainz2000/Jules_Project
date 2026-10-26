@@ -98,6 +98,7 @@ Namespace Presenters
             accountingGroup.Items.Add(Item("Financial Overview", "Accounting", AddressOf ViewFactory(Of MerchSys.Accounting.Views.IFinancialOverviewView)))
             accountingGroup.Items.Add(Item("Income Statement", "Accounting", AddressOf ViewFactory(Of MerchSys.Accounting.Views.IIncomeStatementView)))
             accountingGroup.Items.Add(Item("Sales Summary", "Accounting", AddressOf ViewFactory(Of MerchSys.Accounting.Views.ISalesSummaryView)))
+            accountingGroup.Items.Add(Item("Tamper Audit Report", "Accounting", AddressOf ViewFactory(Of MerchSys.Accounting.Views.ITamperAuditReportView)))
             If isManager Then
                 accountingGroup.Items.Add(Item("VAT Returns", "Accounting", AddressOf ViewFactory(Of MerchSys.Accounting.Views.IVatReturnView)))
                 accountingGroup.Items.Add(Item("VAT Settings", "Accounting", AddressOf ViewFactory(Of MerchSys.POS.Views.IVatSettingsView)))
