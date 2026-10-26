@@ -32,6 +32,7 @@
 | **Moq event raise argument count** | In VB.NET `mockView.Raise(Sub(m) AddHandler m.Event, Nothing, Nothing, arg)`: the first `Nothing` satisfies `AddHandler` delegate syntax; the second `Nothing` represents `sender As Object`. Omitting the second `Nothing` causes `TargetParameterCountException`. | `TargetParameterCountException` |
 | **Presenter View unhooking** | Symmetrically unhook events (`RemoveHandler`) in `View.Set` if `_view IsNot Nothing` before assigning and wiring the new view. | memory leak / duplicate calls |
 | **DI Exporter registration** | All exporter services must be registered in `AccountingServiceCollectionExtensions.vb` (or equivalent module extension). | missing dependency at runtime |
+| **Stray diff/patch/temp files** | Never commit patch files (`*.diff`, `*.patch`), search/replace blocks, scratch files, or temporary editor artifacts. Inspect `git status` and clean before pushing. | QA rejection / dirty repo |
 
 ## Additional Architecture Rules
 
