@@ -12,13 +12,17 @@ Namespace Presenters
 
         Private _view As IIncomeStatementView
 
+        Private ReadOnly _exporter As IIncomeStatementPdfExporter
+
         Public Sub New(
             service As IIncomeStatementService,
             whatThisMeansService As IWhatThisMeansService,
-            notificationService As INotificationService)
+            notificationService As INotificationService,
+            Optional exporter As IIncomeStatementPdfExporter = Nothing)
             _service = service
             _whatThisMeansService = whatThisMeansService
             _notificationService = notificationService
+            _exporter = exporter
         End Sub
 
         Public Property View As IIncomeStatementView
@@ -30,6 +34,7 @@ Namespace Presenters
                     RemoveHandler _view.PeriodChanged, AddressOf OnPeriodChanged
                     RemoveHandler _view.RefreshRequested, AddressOf OnRefreshRequested
                     RemoveHandler _view.ViewLoaded, AddressOf OnViewLoaded
+                    RemoveHandler _view.ExportPdfRequested, AddressOf OnExportPdfRequested
                 End If
 
                 _view = value
@@ -38,6 +43,7 @@ Namespace Presenters
                     AddHandler _view.PeriodChanged, AddressOf OnPeriodChanged
                     AddHandler _view.RefreshRequested, AddressOf OnRefreshRequested
                     AddHandler _view.ViewLoaded, AddressOf OnViewLoaded
+                    AddHandler _view.ExportPdfRequested, AddressOf OnExportPdfRequested
                 End If
             End Set
         End Property
@@ -66,6 +72,62 @@ Namespace Presenters
 
         Private Sub OnRefreshRequested(sender As Object, e As EventArgs)
             Dim dummy = LoadStatementAsync()
+        End Sub
+
+        Private Async Sub OnExportPdfRequested(sender As Object, filePath As String)
+            If _exporter Is Nothing Then Return
+            If _view Is Nothing OrElse _view.IsLoading Then Return
+
+            Try
+                Dim statement As IncomeStatementDto = Nothing
+
+                If _view.PeriodType = IncomeStatementPeriodType.Monthly Then
+                    statement = Await _service.GenerateMonthlyAsync(_view.SelectedYear, _view.SelectedMonth)
+                ElseIf _view.PeriodType = IncomeStatementPeriodType.Quarterly Then
+                    statement = Await _service.GenerateQuarterlyAsync(_view.SelectedYear, _view.SelectedQuarter)
+                ElseIf _view.PeriodType = IncomeStatementPeriodType.Annual Then
+                    statement = Await _service.GenerateAnnualAsync(_view.SelectedYear)
+                End If
+
+                If statement IsNot Nothing Then
+                    Dim interpretation As String = Nothing
+                    Dim previousMargin As Decimal? = Nothing
+
+                    If _view.PeriodType = IncomeStatementPeriodType.Monthly Then
+                        Dim prevMonth = _view.SelectedMonth - 1
+                        Dim prevYear = _view.SelectedYear
+                        If prevMonth = 0 Then
+                            prevMonth = 12
+                            prevYear -= 1
+                        End If
+                        Dim prevStatement = Await _service.GenerateMonthlyAsync(prevYear, prevMonth)
+                        previousMargin = prevStatement.GrossMarginPercent
+                    ElseIf _view.PeriodType = IncomeStatementPeriodType.Quarterly Then
+                        Dim prevQuarter = _view.SelectedQuarter - 1
+                        Dim prevYear = _view.SelectedYear
+                        If prevQuarter = 0 Then
+                            prevQuarter = 4
+                            prevYear -= 1
+                        End If
+                        Dim prevStatement = Await _service.GenerateQuarterlyAsync(prevYear, prevQuarter)
+                        previousMargin = prevStatement.GrossMarginPercent
+                    ElseIf _view.PeriodType = IncomeStatementPeriodType.Annual Then
+                        Dim prevStatement = Await _service.GenerateAnnualAsync(_view.SelectedYear - 1)
+                        previousMargin = prevStatement.GrossMarginPercent
+                    End If
+
+                    interpretation = _whatThisMeansService.GenerateIncomeStatementInterpretation(statement, previousMargin)
+
+                    Dim margins = Await _service.GetPerProductMarginsAsync(statement.StartDate, statement.EndDate)
+                    margins = margins.OrderBy(Function(m) m.GrossMarginPercent).ToList()
+
+                    Dim pdfBytes = _exporter.ExportPdf(statement, margins, interpretation)
+                    Await System.IO.File.WriteAllBytesAsync(filePath, pdfBytes)
+                    _notificationService.ShowInfo("Income Statement PDF exported successfully.")
+                End If
+            Catch ex As Exception
+                _notificationService.ShowError("Failed to export PDF: " & ex.Message)
+            End Try
         End Sub
 
         Public Async Function LoadStatementAsync() As Task

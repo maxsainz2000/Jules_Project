@@ -21,6 +21,7 @@ Namespace Views
         Event ViewLoaded As EventHandler
         Event PeriodChanged As EventHandler
         Event RefreshRequested As EventHandler
+        Event ExportPdfRequested As EventHandler(Of String)
     End Interface
 
 End Namespace

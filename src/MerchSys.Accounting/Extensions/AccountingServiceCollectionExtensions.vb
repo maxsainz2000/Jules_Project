@@ -24,6 +24,8 @@ Namespace Extensions
             services.AddScoped(Of IWhatThisMeansService, WhatThisMeansService)()
             services.AddScoped(Of IVatReportingService, VatReportingService)()
             services.AddScoped(Of IVatReliefReportService, VatReliefReportService)()
+            services.AddScoped(Of IIncomeStatementPdfExporter, IncomeStatementPdfExporter)()
+            services.AddScoped(Of IVatReliefPdfExporter, VatReliefPdfExporter)()
             services.AddScoped(Of IVatReturnExporter, VatReturnExporter)()
             services.AddTransient(Of FinancialOverviewPresenter)()
             services.AddTransient(Of VatReliefReportPresenter)()
