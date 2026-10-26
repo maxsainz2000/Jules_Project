@@ -50,7 +50,7 @@ Public Class SaleReturnedAccountingHandlerTests
         })
 
         Using ctx = fixture.NewAccounting()
-            Await New SaleCompletedAccountingHandler(ctx).Handle(completedEvent, CancellationToken.None)
+            Await New SaleRevenueHandler(ctx).Handle(completedEvent, CancellationToken.None)
         End Using
 
         Dim deductedEvent = New StockDeductedEvent With {
@@ -83,7 +83,7 @@ Public Class SaleReturnedAccountingHandlerTests
         })
 
         Using ctx = fixture.NewAccounting()
-            Await New SaleCompletedWithVatHandler(ctx).Handle(vatEvent, CancellationToken.None)
+            Await New SaleRevenueHandler(ctx).Handle(vatEvent, CancellationToken.None)
         End Using
     End Function
 

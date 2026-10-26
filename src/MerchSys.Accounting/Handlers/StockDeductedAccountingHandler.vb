@@ -16,7 +16,7 @@ Namespace Handlers
     ''' returns the cost of the batches that are left, which is both biased (it is the next cost, not
     ''' the consumed one) and dependent on whether Inventory or Accounting happens to run first.
     '''
-    ''' <see cref="SaleCompletedAccountingHandler"/> owns the revenue columns on the same row; this
+    ''' <see cref="SaleRevenueHandler"/> owns the revenue columns on the same row; this
     ''' handler owns the cost columns. Both upsert on (SourceTransactionId, ProductId) and recompute
     ''' gross profit from the persisted row, so the final value is correct whichever runs last.
     ''' </summary>

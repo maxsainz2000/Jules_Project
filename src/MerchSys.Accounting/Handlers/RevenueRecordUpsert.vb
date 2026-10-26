@@ -9,7 +9,7 @@ Namespace Handlers
     ''' <summary>
     ''' Finds the <see cref="RevenueRecord"/> for a (sale, product) pair, creating it when absent.
     '''
-    ''' Shared by <see cref="SaleCompletedAccountingHandler"/> and
+    ''' Shared by <see cref="SaleRevenueHandler"/> and
     ''' <see cref="StockDeductedAccountingHandler"/>. Both write to the same row, but from different
     ''' events, and MediatR does not order handlers — so either may run first. Upserting on the same
     ''' natural key is what makes the pair order-independent; a blind Add in either one produced a
