@@ -10,12 +10,14 @@ Namespace Presenters
         Private ReadOnly _service As IVatReliefReportService
         Private ReadOnly _whatThisMeansService As IWhatThisMeansService
         Private ReadOnly _notificationService As INotificationService
+        Private ReadOnly _exporter As IVatReliefPdfExporter
         Private _view As IVatReliefReportView
 
-        Public Sub New(service As IVatReliefReportService, whatThisMeansService As IWhatThisMeansService, notificationService As INotificationService)
+        Public Sub New(service As IVatReliefReportService, whatThisMeansService As IWhatThisMeansService, notificationService As INotificationService, Optional exporter As IVatReliefPdfExporter = Nothing)
             _service = service
             _whatThisMeansService = whatThisMeansService
             _notificationService = notificationService
+            _exporter = exporter
         End Sub
 
         Public Property View As IVatReliefReportView
@@ -23,11 +25,18 @@ Namespace Presenters
                 Return _view
             End Get
             Set(value As IVatReliefReportView)
+                If _view IsNot Nothing Then
+                    RemoveHandler _view.ViewLoaded, AddressOf OnViewLoaded
+                    RemoveHandler _view.PeriodChanged, AddressOf OnPeriodChanged
+                    RemoveHandler _view.RefreshRequested, AddressOf OnRefreshRequested
+                    RemoveHandler _view.ExportPdfRequested, AddressOf OnExportPdfRequested
+                End If
                 _view = value
                 If _view IsNot Nothing Then
                     AddHandler _view.ViewLoaded, AddressOf OnViewLoaded
                     AddHandler _view.PeriodChanged, AddressOf OnPeriodChanged
                     AddHandler _view.RefreshRequested, AddressOf OnRefreshRequested
+                    AddHandler _view.ExportPdfRequested, AddressOf OnExportPdfRequested
                 End If
             End Set
         End Property
@@ -52,6 +61,23 @@ Namespace Presenters
 
         Private Async Sub OnRefreshRequested(sender As Object, e As EventArgs)
             Await LoadDataAsync()
+        End Sub
+
+        Private Async Sub OnExportPdfRequested(sender As Object, filePath As String)
+            If _exporter Is Nothing Then Return
+            If _view Is Nothing OrElse _view.IsLoading Then Return
+
+            Try
+                Dim summary As VatReliefSummary = Await _service.GetMonthlySummaryAsync(_view.SelectedYear, _view.SelectedMonth)
+                Dim trailing As List(Of VatReliefSummary) = Await _service.GetTrailingMonthsAsync(_view.SelectedYear, _view.SelectedMonth, 12)
+                Dim interpretation As String = _whatThisMeansService.GenerateVatReliefInterpretation(summary)
+
+                Dim pdfBytes = _exporter.ExportPdf(summary, trailing, interpretation)
+                Await System.IO.File.WriteAllBytesAsync(filePath, pdfBytes)
+                _notificationService.ShowInfo("VAT Relief Report PDF exported successfully.")
+            Catch ex As Exception
+                _notificationService.ShowError("Failed to export PDF: " & ex.Message)
+            End Try
         End Sub
 
         Private Async Function LoadDataAsync() As Task

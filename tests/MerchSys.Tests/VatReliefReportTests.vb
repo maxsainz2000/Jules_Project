@@ -13,6 +13,7 @@ Public Class VatReliefReportTests
     Private ReadOnly _notificationMock As Mock(Of INotificationService)
     Private ReadOnly _viewMock As Mock(Of IVatReliefReportView)
     Private ReadOnly _presenter As VatReliefReportPresenter
+    Private ReadOnly _exporterMock As Mock(Of IVatReliefPdfExporter)
 
     Public Sub New()
         _serviceMock = New Mock(Of IVatReliefReportService)()
@@ -20,8 +21,9 @@ Public Class VatReliefReportTests
         _notificationMock = New Mock(Of INotificationService)()
         _viewMock = New Mock(Of IVatReliefReportView)()
         _viewMock.SetupAllProperties()
+        _exporterMock = New Mock(Of IVatReliefPdfExporter)()
 
-        _presenter = New VatReliefReportPresenter(_serviceMock.Object, _whatThisMeansMock.Object, _notificationMock.Object)
+        _presenter = New VatReliefReportPresenter(_serviceMock.Object, _whatThisMeansMock.Object, _notificationMock.Object, _exporterMock.Object)
         _presenter.View = _viewMock.Object
     End Sub
 
@@ -129,4 +131,49 @@ Public Class VatReliefReportTests
         ' Assert
         _serviceMock.Verify(Function(s) s.GetMonthlySummaryAsync(2023, 5, It.IsAny(Of CancellationToken)()), Times.Once())
     End Sub
+
+    <Fact>
+    Public Async Function ExportPdfRequested_GeneratesPdfAndShowsNotification() As System.Threading.Tasks.Task
+        ' Arrange
+        _viewMock.Object.SelectedYear = 2026
+        _viewMock.Object.SelectedMonth = 3
+        _viewMock.Object.IsLoading = False
+
+        Dim summary = New VatReliefSummary()
+        _serviceMock.Setup(Function(s) s.GetMonthlySummaryAsync(2026, 3, It.IsAny(Of CancellationToken)())).ReturnsAsync(summary)
+
+        Dim trailing = New List(Of VatReliefSummary)()
+        _serviceMock.Setup(Function(s) s.GetTrailingMonthsAsync(2026, 3, 12, It.IsAny(Of CancellationToken)())).ReturnsAsync(trailing)
+
+        _whatThisMeansMock.Setup(Function(s) s.GenerateVatReliefInterpretation(It.IsAny(Of VatReliefSummary)())).Returns("Interp")
+
+        Dim pdfBytes = New Byte() {&H25, &H50, &H44, &H46}
+        _exporterMock.Setup(Function(e) e.ExportPdf(It.IsAny(Of VatReliefSummary)(), It.IsAny(Of List(Of VatReliefSummary))(), It.IsAny(Of String)())).Returns(pdfBytes)
+
+        Dim testFilePath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"test_vat_relief_{Guid.NewGuid()}.pdf")
+        Dim tcs As New System.Threading.Tasks.TaskCompletionSource(Of Boolean)()
+
+        _notificationMock.Setup(Sub(n) n.ShowInfo(It.IsAny(Of String)())).Callback(Sub(msg As String) tcs.TrySetResult(True))
+
+        Try
+            ' Act
+            _viewMock.Raise(Sub(m) AddHandler m.ExportPdfRequested, Nothing, Nothing, testFilePath)
+
+            ' Wait for fire-and-forget handler
+            Await System.Threading.Tasks.Task.WhenAny(tcs.Task, System.Threading.Tasks.Task.Delay(2000))
+
+            ' Assert
+            _exporterMock.Verify(Function(e) e.ExportPdf(summary, trailing, "Interp"), Times.Once())
+            _notificationMock.Verify(Sub(n) n.ShowInfo("VAT Relief Report PDF exported successfully."), Times.Once())
+            Assert.True(System.IO.File.Exists(testFilePath))
+
+            Dim savedBytes = System.IO.File.ReadAllBytes(testFilePath)
+            Assert.Equal(pdfBytes, savedBytes)
+        Finally
+            If System.IO.File.Exists(testFilePath) Then
+                System.IO.File.Delete(testFilePath)
+            End If
+        End Try
+    End Function
+
 End Class

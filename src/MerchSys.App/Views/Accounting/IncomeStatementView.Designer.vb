@@ -33,6 +33,7 @@ Partial Class IncomeStatementView
         Me.cboMonth = New System.Windows.Forms.ComboBox()
         Me.cboQuarter = New System.Windows.Forms.ComboBox()
         Me.btnRefresh = New System.Windows.Forms.Button()
+        Me.btnExportPdf = New System.Windows.Forms.Button()
         Me.lblLoading = New System.Windows.Forms.Label()
         Me.pnlWhatThisMeans = New System.Windows.Forms.Panel()
         Me.lblWhatThisMeansIcon = New System.Windows.Forms.Label()
@@ -86,6 +87,7 @@ Partial Class IncomeStatementView
         Me.pnlHeader.Controls.Add(Me.cboMonth)
         Me.pnlHeader.Controls.Add(Me.cboQuarter)
         Me.pnlHeader.Controls.Add(Me.btnRefresh)
+        Me.pnlHeader.Controls.Add(Me.btnExportPdf)
         Me.pnlHeader.Controls.Add(Me.lblLoading)
         Me.pnlHeader.Location = New System.Drawing.Point(17, 50)
         Me.pnlHeader.Name = "pnlHeader"
@@ -157,6 +159,16 @@ Partial Class IncomeStatementView
         Me.btnRefresh.TabIndex = 6
         Me.btnRefresh.Text = "Refresh"
         Me.btnRefresh.UseVisualStyleBackColor = True
+        '
+        'btnExportPdf
+        '
+        Me.btnExportPdf.Cursor = System.Windows.Forms.Cursors.Hand
+        Me.btnExportPdf.Location = New System.Drawing.Point(630, 7)
+        Me.btnExportPdf.Name = "btnExportPdf"
+        Me.btnExportPdf.Size = New System.Drawing.Size(85, 25)
+        Me.btnExportPdf.TabIndex = 7
+        Me.btnExportPdf.Text = "Export PDF"
+        Me.btnExportPdf.UseVisualStyleBackColor = True
         '
         'lblLoading
         '
@@ -425,6 +437,7 @@ Partial Class IncomeStatementView
     Friend WithEvents cboMonth As System.Windows.Forms.ComboBox
     Friend WithEvents cboQuarter As System.Windows.Forms.ComboBox
     Friend WithEvents btnRefresh As System.Windows.Forms.Button
+    Friend WithEvents btnExportPdf As System.Windows.Forms.Button
     Friend WithEvents lblLoading As System.Windows.Forms.Label
     Friend WithEvents pnlWhatThisMeans As System.Windows.Forms.Panel
     Friend WithEvents lblWhatThisMeansIcon As System.Windows.Forms.Label
