@@ -28,6 +28,10 @@
 | **Parameter shadows property** | A parameter named `vendors` shadows a property `Vendors`. Name parameters distinctly: `vendorList`, `inputItems`, etc. | silent |
 | **EF connection is not a MySqlConnector** | The EF provider is Oracle's `MySql.EntityFrameworkCore`, built on `MySql.Data`, so `Database.GetDbConnection()` returns a `MySql.Data` connection. Never cast it to `MySqlConnector.MySqlConnection`; if you need raw ADO, use the provider-agnostic `DbConnection`/`DbCommand` API with `DbCommandExtensions.AddParameter`. | `InvalidCastException` |
 | **`ToListAsync` empty list** | *Re-tested 2026-10-12: did not reproduce.* The original note blamed "the Pomelo provider" (`Infrastructure-Spec.md`), but this project uses Oracle's `MySql.EntityFrameworkCore`. Against MariaDB on EF Core 10 / 10.0.7, `CountAsync`, `ToListAsync` on a full entity, `AsNoTracking().ToListAsync`, scalar projections and a raw-ADO baseline all returned the same rows. Prefer plain EF queries; the legacy raw-ADO reader loops exist only for this disproven reason and can be retired. | silent |
+| **QuestPDF font loading** | Never use `.FontFamily("Segoe UI")` or external font family names unless bundled. Omit `.FontFamily(...)` so QuestPDF uses its embedded default font. | `DocumentDrawingException` |
+| **Moq event raise argument count** | In VB.NET `mockView.Raise(Sub(m) AddHandler m.Event, Nothing, Nothing, arg)`: the first `Nothing` satisfies `AddHandler` delegate syntax; the second `Nothing` represents `sender As Object`. Omitting the second `Nothing` causes `TargetParameterCountException`. | `TargetParameterCountException` |
+| **Presenter View unhooking** | Symmetrically unhook events (`RemoveHandler`) in `View.Set` if `_view IsNot Nothing` before assigning and wiring the new view. | memory leak / duplicate calls |
+| **DI Exporter registration** | All exporter services must be registered in `AccountingServiceCollectionExtensions.vb` (or equivalent module extension). | missing dependency at runtime |
 
 ## Additional Architecture Rules
 
