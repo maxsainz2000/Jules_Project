@@ -129,6 +129,18 @@ Namespace Services
             End If
         End Function
 
+        Public Function GenerateVatReliefInterpretation(summary As VatReliefSummary) As String Implements IWhatThisMeansService.GenerateVatReliefInterpretation
+            If summary Is Nothing Then Return "No data available to interpret."
+
+            If summary.NetVatPayable > 0 Then
+                Return $"For {summary.PeriodLabel}, the business generated more Output VAT (₱{summary.OutputVat:N2}) from sales than Input VAT (₱{summary.InputVat:N2}) from purchases. This means you have a Net VAT Payable of ₱{summary.NetVatPayable:N2} due to the BIR."
+            ElseIf summary.NetVatPayable < 0 Then
+                Return $"For {summary.PeriodLabel}, the business incurred more Input VAT (₱{summary.InputVat:N2}) from purchases than Output VAT (₱{summary.OutputVat:N2}) from sales. This results in a Tax Credit of ₱{Math.Abs(summary.NetVatPayable):N2}, which can be carried over to the next period."
+            Else
+                Return $"For {summary.PeriodLabel}, Output VAT exactly matches Input VAT. There is no Net VAT Payable."
+            End If
+        End Function
+
     End Class
 
 End Namespace
