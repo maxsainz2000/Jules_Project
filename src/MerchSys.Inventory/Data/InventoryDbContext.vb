@@ -12,6 +12,7 @@ Namespace Data
         Public Property ShrinkageRecords As DbSet(Of Entities.ShrinkageRecord)
         Public Property StockAlertConfigs As DbSet(Of Entities.StockAlertConfig)
         Public Property ProductPriceHistories As DbSet(Of Entities.ProductPriceHistory)
+        Public Overridable Property SaleCogsRecords As DbSet(Of Entities.SaleCogsRecord)
 
         Public Sub New(options As DbContextOptions(Of InventoryDbContext), Optional currentUserProvider As MerchSys.SharedKernel.Interfaces.ICurrentUserProvider = Nothing, Optional writeContextScope As MerchSys.SharedKernel.Interfaces.IWriteContextScope = Nothing)
             MyBase.New(options, currentUserProvider, writeContextScope)

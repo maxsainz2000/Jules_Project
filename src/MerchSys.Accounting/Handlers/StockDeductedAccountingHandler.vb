@@ -23,19 +23,38 @@ Namespace Handlers
         Implements INotificationHandler(Of StockDeductedEvent)
 
         Private ReadOnly _dbContext As AccountingDbContext
+        Private ReadOnly _mediator As IMediator
 
-        Public Sub New(dbContext As AccountingDbContext)
+        Public Sub New(dbContext As AccountingDbContext, Optional mediator As IMediator = Nothing)
             _dbContext = dbContext
+            _mediator = mediator
         End Sub
 
         Public Async Function Handle(notification As StockDeductedEvent, cancellationToken As CancellationToken) As Task Implements INotificationHandler(Of StockDeductedEvent).Handle
+            Dim breakdown As List(Of SharedKernel.Queries.SaleCogsBreakdownDto) = Nothing
+            If _mediator IsNot Nothing Then
+                Try
+                    breakdown = Await _mediator.Send(New SharedKernel.Queries.GetSaleCogsBreakdownQuery With {.SaleId = notification.SaleId}, cancellationToken)
+                Catch ex As Exception
+                    ' Defensively fall back
+                End Try
+            End If
+
             For Each item In notification.Items
                 If item.QuantityDeducted <= 0 Then Continue For
 
+                Dim trueCost = item.TotalCost
+                If breakdown IsNot Nothing Then
+                    Dim itemBreakdown = breakdown.Where(Function(b) b.ProductId = item.ProductId).ToList()
+                    If itemBreakdown.Any() Then
+                        trueCost = itemBreakdown.Sum(Function(b) b.TotalCost)
+                    End If
+                End If
+
                 Dim revenueRecord = Await RevenueRecordUpsert.FindOrCreateAsync(_dbContext, notification.SaleId, item.ProductId, cancellationToken)
 
-                revenueRecord.UnitCost = item.TotalCost / CDec(item.QuantityDeducted)
-                revenueRecord.TotalCogs = item.TotalCost
+                revenueRecord.UnitCost = trueCost / CDec(item.QuantityDeducted)
+                revenueRecord.TotalCogs = trueCost
 
                 ' Revenue may not have been recorded yet if this handler won the race — in that case
                 ' TotalRevenue is still 0 here and the revenue handler corrects gross profit when it
@@ -63,7 +82,7 @@ Namespace Handlers
                 End If
 
                 expenseRecord.ExpenseDate = notification.DeductedAt
-                expenseRecord.Amount = item.TotalCost
+                expenseRecord.Amount = trueCost
                 expenseRecord.SourceModule = "POS"
             Next
 
