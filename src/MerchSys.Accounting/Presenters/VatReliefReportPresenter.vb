@@ -10,12 +10,15 @@ Namespace Presenters
         Private ReadOnly _service As IVatReliefReportService
         Private ReadOnly _whatThisMeansService As IWhatThisMeansService
         Private ReadOnly _notificationService As INotificationService
+        Private ReadOnly _exporter As IVatReliefPdfExporter
         Private _view As IVatReliefReportView
 
-        Public Sub New(service As IVatReliefReportService, whatThisMeansService As IWhatThisMeansService, notificationService As INotificationService)
+        Public Sub New(service As IVatReliefReportService, whatThisMeansService As IWhatThisMeansService, notificationService As INotificationService,
+            Optional exporter As IVatReliefPdfExporter = Nothing)
             _service = service
             _whatThisMeansService = whatThisMeansService
             _notificationService = notificationService
+            _exporter = exporter
         End Sub
 
         Public Property View As IVatReliefReportView
@@ -28,6 +31,7 @@ Namespace Presenters
                     AddHandler _view.ViewLoaded, AddressOf OnViewLoaded
                     AddHandler _view.PeriodChanged, AddressOf OnPeriodChanged
                     AddHandler _view.RefreshRequested, AddressOf OnRefreshRequested
+                    AddHandler _view.ExportPdfRequested, AddressOf OnExportPdfRequested
                 End If
             End Set
         End Property
@@ -100,6 +104,32 @@ Namespace Presenters
             _view.WhatThisMeansText = interpretation
             _view.IsLoading = False
         End Function
+
+        Private Async Sub OnExportPdfRequested(sender As Object, filePath As String)
+            If _exporter Is Nothing Then
+                _notificationService?.ShowError("PDF export is not supported.")
+                Return
+            End If
+
+            If _view Is Nothing OrElse String.IsNullOrEmpty(filePath) Then Return
+
+            _view.IsLoading = True
+
+            Try
+                Dim year = _view.SelectedYear
+                Dim month = _view.SelectedMonth
+                Dim summary = Await _service.GetMonthlySummaryAsync(year, month)
+                Dim trailing = Await _service.GetTrailingMonthsAsync(year, month, 12)
+                Dim interpretation = _whatThisMeansService.GenerateVatReliefInterpretation(summary)
+                Dim pdfBytes = _exporter.ExportPdf(summary, trailing, interpretation)
+                Await System.IO.File.WriteAllBytesAsync(filePath, pdfBytes)
+                _notificationService?.ShowInfo("VAT Relief Report PDF exported successfully.")
+            Catch ex As Exception
+                _notificationService?.ShowError("Failed to export PDF: " & ex.Message)
+            Finally
+                _view.IsLoading = False
+            End Try
+        End Sub
 
     End Class
 

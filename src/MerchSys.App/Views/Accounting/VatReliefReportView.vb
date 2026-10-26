@@ -188,6 +188,7 @@ Namespace Views.Accounting
         Public Event ViewLoaded As EventHandler Implements IVatReliefReportView.ViewLoaded
         Public Event PeriodChanged As EventHandler Implements IVatReliefReportView.PeriodChanged
         Public Event RefreshRequested As EventHandler Implements IVatReliefReportView.RefreshRequested
+        Public Event ExportPdfRequested As EventHandler(Of String) Implements IVatReliefReportView.ExportPdfRequested
 
         Private Sub cboYear_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cboYear.SelectedIndexChanged
             If Not _isInitializing Then
@@ -210,6 +211,16 @@ Namespace Views.Accounting
             Public Property DisplayName As String
         End Class
 
+
+        Private Sub btnExportPdf_Click(sender As Object, e As EventArgs) Handles btnExportPdf.Click
+            Using dialog As New SaveFileDialog()
+                dialog.Filter = "PDF files (*.pdf)|*.pdf"
+                dialog.FileName = $"VatReliefReport_{DateTime.Now:yyyyMMdd}.pdf"
+                If dialog.ShowDialog() = DialogResult.OK Then
+                    RaiseEvent ExportPdfRequested(Me, dialog.FileName)
+                End If
+            End Using
+        End Sub
     End Class
 
 End Namespace

@@ -28,6 +28,7 @@ Namespace Views.Accounting
 
         Public Event PeriodChanged As EventHandler Implements IIncomeStatementView.PeriodChanged
         Public Event RefreshRequested As EventHandler Implements IIncomeStatementView.RefreshRequested
+        Public Event ExportPdfRequested As EventHandler(Of String) Implements IIncomeStatementView.ExportPdfRequested
         Public Event ViewLoaded As EventHandler Implements IIncomeStatementView.ViewLoaded
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
@@ -279,6 +280,16 @@ Namespace Views.Accounting
             End If
         End Sub
 
+
+        Private Sub btnExportPdf_Click(sender As Object, e As EventArgs) Handles btnExportPdf.Click
+            Using dialog As New SaveFileDialog()
+                dialog.Filter = "PDF files (*.pdf)|*.pdf"
+                dialog.FileName = $"IncomeStatement_{DateTime.Now:yyyyMMdd}.pdf"
+                If dialog.ShowDialog() = DialogResult.OK Then
+                    RaiseEvent ExportPdfRequested(Me, dialog.FileName)
+                End If
+            End Using
+        End Sub
     End Class
 
 End Namespace

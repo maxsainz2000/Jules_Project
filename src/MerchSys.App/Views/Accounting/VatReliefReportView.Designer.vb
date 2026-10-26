@@ -27,6 +27,7 @@ Namespace Views.Accounting
         Private Sub InitializeComponent()
             Me.pnlHeader = New System.Windows.Forms.Panel()
             Me.btnRefresh = New System.Windows.Forms.Button()
+            Me.btnExportPdf = New System.Windows.Forms.Button()
             Me.cboMonth = New System.Windows.Forms.ComboBox()
             Me.lblMonth = New System.Windows.Forms.Label()
             Me.cboYear = New System.Windows.Forms.ComboBox()
@@ -66,6 +67,7 @@ Namespace Views.Accounting
             'pnlHeader
             '
             Me.pnlHeader.Controls.Add(Me.btnRefresh)
+            Me.pnlHeader.Controls.Add(Me.btnExportPdf)
             Me.pnlHeader.Controls.Add(Me.cboMonth)
             Me.pnlHeader.Controls.Add(Me.lblMonth)
             Me.pnlHeader.Controls.Add(Me.cboYear)
@@ -87,6 +89,17 @@ Namespace Views.Accounting
             Me.btnRefresh.TabIndex = 5
             Me.btnRefresh.Text = "Refresh"
             Me.btnRefresh.UseVisualStyleBackColor = True
+            '
+            'btnExportPdf
+            '
+            Me.btnExportPdf.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+            Me.btnExportPdf.Cursor = System.Windows.Forms.Cursors.Hand
+            Me.btnExportPdf.Location = New System.Drawing.Point(880, 18)
+            Me.btnExportPdf.Name = "btnExportPdf"
+            Me.btnExportPdf.Size = New System.Drawing.Size(75, 25)
+            Me.btnExportPdf.TabIndex = 6
+            Me.btnExportPdf.Text = "Export PDF"
+            Me.btnExportPdf.UseVisualStyleBackColor = True
             '
             'cboMonth
             '
@@ -406,6 +419,7 @@ Namespace Views.Accounting
         Friend WithEvents pnlHeader As Panel
         Friend WithEvents lblTitle As Label
         Friend WithEvents btnRefresh As Button
+        Friend WithEvents btnExportPdf As Button
         Friend WithEvents cboMonth As ComboBox
         Friend WithEvents lblMonth As Label
         Friend WithEvents cboYear As ComboBox
