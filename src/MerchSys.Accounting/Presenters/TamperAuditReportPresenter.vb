@@ -23,10 +23,20 @@ Namespace Presenters
         Private _view As ITamperAuditReportView
         Private ReadOnly _queryService As ITamperAuditQueryService
         Private ReadOnly _notificationService As INotificationService
+        Private ReadOnly _exporter As ITamperReportExporter
+        Private ReadOnly _mediator As MediatR.IMediator
+
+        Private _currentDtos As List(Of TamperAuditEntryDto)
 
         Public Sub New(queryService As ITamperAuditQueryService, Optional notificationService As INotificationService = Nothing)
+            Me.New(queryService, Nothing, notificationService, Nothing)
+        End Sub
+
+        Public Sub New(queryService As ITamperAuditQueryService, exporter As ITamperReportExporter, Optional notificationService As INotificationService = Nothing, Optional mediator As MediatR.IMediator = Nothing)
             _queryService = queryService
+            _exporter = exporter
             _notificationService = notificationService
+            _mediator = mediator
         End Sub
 
         Public Property View As ITamperAuditReportView
@@ -38,6 +48,8 @@ Namespace Presenters
                     RemoveHandler _view.ViewLoaded, AddressOf OnViewLoaded
                     RemoveHandler _view.RefreshRequested, AddressOf OnRefreshRequested
                     RemoveHandler _view.FilterChanged, AddressOf OnFilterChanged
+                    RemoveHandler _view.ExportCsvRequested, AddressOf OnExportCsvRequested
+                    RemoveHandler _view.ExportPdfRequested, AddressOf OnExportPdfRequested
                 End If
 
                 _view = value
@@ -49,6 +61,8 @@ Namespace Presenters
                     AddHandler _view.ViewLoaded, AddressOf OnViewLoaded
                     AddHandler _view.RefreshRequested, AddressOf OnRefreshRequested
                     AddHandler _view.FilterChanged, AddressOf OnFilterChanged
+                    AddHandler _view.ExportCsvRequested, AddressOf OnExportCsvRequested
+                    AddHandler _view.ExportPdfRequested, AddressOf OnExportPdfRequested
                 End If
             End Set
         End Property
@@ -102,11 +116,64 @@ Namespace Presenters
                     .Details = $"Detected on {x.MachineName} by {x.WindowsUser}"
                 }).ToList()
 
+                _currentDtos = dtos
                 _view.SetIncidents(dtos)
             End If
 
             _view.IsLoading = False
         End Function
+
+        Private Async Sub OnExportCsvRequested(sender As Object, filePath As String)
+            If _exporter Is Nothing Then
+                _notificationService?.ShowError("Exporter is not configured.")
+                Return
+            End If
+
+            Dim success = False
+            Try
+                Dim options = New TamperReportExportOptions With {
+                    .BusinessName = "My Business",
+                    .Title = "Tamper Audit Report",
+                    .FromDate = _view.FromDate,
+                    .ToDate = _view.ToDate
+                }
+                Dim bytes = Await _exporter.ExportAsync(_currentDtos, TamperReportFormat.Csv, options)
+                Await System.IO.File.WriteAllBytesAsync(filePath, bytes)
+                success = True
+            Catch ex As Exception
+                _notificationService?.ShowError($"Failed to export CSV: {ex.Message}")
+            End Try
+
+            If success Then
+                _notificationService?.ShowInfo("CSV exported successfully.")
+            End If
+        End Sub
+
+        Private Async Sub OnExportPdfRequested(sender As Object, filePath As String)
+            If _exporter Is Nothing Then
+                _notificationService?.ShowError("Exporter is not configured.")
+                Return
+            End If
+
+            Dim success = False
+            Try
+                Dim options = New TamperReportExportOptions With {
+                    .BusinessName = "My Business",
+                    .Title = "Tamper Audit Report",
+                    .FromDate = _view.FromDate,
+                    .ToDate = _view.ToDate
+                }
+                Dim bytes = Await _exporter.ExportAsync(_currentDtos, TamperReportFormat.Pdf, options)
+                Await System.IO.File.WriteAllBytesAsync(filePath, bytes)
+                success = True
+            Catch ex As Exception
+                _notificationService?.ShowError($"Failed to export PDF: {ex.Message}")
+            End Try
+
+            If success Then
+                _notificationService?.ShowInfo("PDF exported successfully.")
+            End If
+        End Sub
 
         Private Function TruncateHash(hash As String) As String
             If String.IsNullOrEmpty(hash) Then Return String.Empty
