@@ -27,6 +27,7 @@ Partial Class MainWindow
         Me.pnlContent = New System.Windows.Forms.Panel()
         Me.pnlLeft = New System.Windows.Forms.Panel()
         Me.pnlHeader = New System.Windows.Forms.Panel()
+        Me.btnToggleThemeShell = New System.Windows.Forms.Button()
         Me.lblUserIdentity = New System.Windows.Forms.Label()
         Me.pnlStatusHost = New System.Windows.Forms.Panel()
         Me.pnlLeft.SuspendLayout()
@@ -46,12 +47,27 @@ Partial Class MainWindow
         ' pnlHeader
         '
         Me.pnlHeader.BackColor = System.Drawing.Color.FromArgb(CType(CType(30, Byte), Integer), CType(CType(44, Byte), Integer), CType(CType(58, Byte), Integer))
+        Me.pnlHeader.Controls.Add(Me.btnToggleThemeShell)
         Me.pnlHeader.Controls.Add(Me.lblUserIdentity)
         Me.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top
         Me.pnlHeader.Location = New System.Drawing.Point(0, 0)
         Me.pnlHeader.Name = "pnlHeader"
         Me.pnlHeader.Size = New System.Drawing.Size(200, 48)
         Me.pnlHeader.TabIndex = 3
+        '
+        ' btnToggleThemeShell
+        '
+        Me.btnToggleThemeShell.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnToggleThemeShell.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.btnToggleThemeShell.FlatAppearance.BorderSize = 0
+        Me.btnToggleThemeShell.ForeColor = System.Drawing.Color.White
+        Me.btnToggleThemeShell.Location = New System.Drawing.Point(120, 10)
+        Me.btnToggleThemeShell.Name = "btnToggleThemeShell"
+        Me.btnToggleThemeShell.Size = New System.Drawing.Size(70, 28)
+        Me.btnToggleThemeShell.TabIndex = 1
+        Me.btnToggleThemeShell.Text = "☀️ Light"
+        Me.btnToggleThemeShell.UseVisualStyleBackColor = True
+        Me.btnToggleThemeShell.Cursor = System.Windows.Forms.Cursors.Hand
         '
         ' lblUserIdentity
         '
@@ -113,6 +129,7 @@ Partial Class MainWindow
     Friend WithEvents pnlContent As System.Windows.Forms.Panel
     Friend WithEvents pnlLeft As System.Windows.Forms.Panel
     Friend WithEvents pnlHeader As System.Windows.Forms.Panel
+    Friend WithEvents btnToggleThemeShell As System.Windows.Forms.Button
     Friend WithEvents lblUserIdentity As System.Windows.Forms.Label
     Friend WithEvents pnlStatusHost As System.Windows.Forms.Panel
 

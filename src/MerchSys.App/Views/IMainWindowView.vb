@@ -15,6 +15,10 @@ Namespace Views
         ''' <summary>Sidebar header text showing the signed-in user and role.</summary>
         Property UserIdentityText As String
 
+        Sub ApplyThemeTokens(tokens As MerchSys.App.Services.Theming.ThemeTokens)
+        Sub SetThemeState(theme As MerchSys.App.Services.Theming.AppTheme)
+
+        Event ThemeToggleRequested As EventHandler
         Event NavigationRequested As EventHandler(Of NavigationItem)
         Event Load As EventHandler
         Event LogoutRequested As EventHandler
