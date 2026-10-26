@@ -10,7 +10,7 @@ Namespace Views
         ''' <summary>The underlying control, so the shell can host it.</summary>
         ReadOnly Property Control As Control
 
-        Sub SetState(statusText As String, indicatorColor As Color, isRetryVisible As Boolean)
+        Sub SetState(statusText As String, indicatorColor As Color, isRetryVisible As Boolean, foreColor As Color)
 
         Event RetryClicked As EventHandler
     End Interface

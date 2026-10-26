@@ -15,6 +15,7 @@ Namespace Presenters
         Private ReadOnly _sessionService As LoginSessionService
         Private ReadOnly _serviceProvider As IServiceProvider
         Private ReadOnly _connectionStatusPresenter As ConnectionStatusPresenter
+        Private ReadOnly _themeService As MerchSys.App.Services.Theming.IThemeService
 
         Public Property NavigationGroups As New List(Of NavigationGroup)
 
@@ -25,10 +26,19 @@ Namespace Presenters
                        sessionService As LoginSessionService,
                        serviceProvider As IServiceProvider,
                        connectionStatusPresenter As ConnectionStatusPresenter)
+            Me.New(view, sessionService, serviceProvider, connectionStatusPresenter, Nothing)
+        End Sub
+
+        Public Sub New(view As IMainWindowView,
+                       sessionService As LoginSessionService,
+                       serviceProvider As IServiceProvider,
+                       connectionStatusPresenter As ConnectionStatusPresenter,
+                       themeService As MerchSys.App.Services.Theming.IThemeService)
             _view = view
             _sessionService = sessionService
             _serviceProvider = serviceProvider
             _connectionStatusPresenter = connectionStatusPresenter
+            _themeService = themeService
 
             Dim mw = TryCast(_view, MainWindow)
             If mw IsNot Nothing Then
@@ -38,6 +48,25 @@ Namespace Presenters
             AddHandler _view.Load, AddressOf OnViewLoad
             AddHandler _view.LogoutRequested, AddressOf OnLogoutRequested
             AddHandler _view.NavigationRequested, AddressOf OnNavigationRequested
+            AddHandler _view.ThemeToggleRequested, AddressOf OnThemeToggleRequested
+
+            If _themeService IsNot Nothing Then
+                AddHandler _themeService.ThemeChanged, AddressOf OnThemeChanged
+                _view.ApplyThemeTokens(_themeService.Tokens)
+                _view.SetThemeState(_themeService.CurrentTheme)
+            End If
+        End Sub
+
+
+        Private Sub OnThemeToggleRequested(sender As Object, e As EventArgs)
+            If _themeService IsNot Nothing Then
+                _themeService.ToggleTheme()
+            End If
+        End Sub
+
+        Private Sub OnThemeChanged(sender As Object, theme As MerchSys.App.Services.Theming.AppTheme)
+            _view.ApplyThemeTokens(_themeService.Tokens)
+            _view.SetThemeState(theme)
         End Sub
 
         Private Sub OnViewLoad(sender As Object, e As EventArgs)
@@ -185,6 +214,11 @@ Namespace Presenters
             RemoveHandler _view.Load, AddressOf OnViewLoad
             RemoveHandler _view.LogoutRequested, AddressOf OnLogoutRequested
             RemoveHandler _view.NavigationRequested, AddressOf OnNavigationRequested
+            RemoveHandler _view.ThemeToggleRequested, AddressOf OnThemeToggleRequested
+
+            If _themeService IsNot Nothing Then
+                RemoveHandler _themeService.ThemeChanged, AddressOf OnThemeChanged
+            End If
 
             ' Previously the current view scope leaked until the next navigation (L9).
             DisposeCurrentViewScope()

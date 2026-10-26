@@ -18,13 +18,14 @@ Namespace Views
             End Get
         End Property
 
-        Public Sub SetState(statusText As String, indicatorColor As Color, isRetryVisible As Boolean) Implements IConnectionStatusView.SetState
+        Public Sub SetState(statusText As String, indicatorColor As Color, isRetryVisible As Boolean, foreColor As Color) Implements IConnectionStatusView.SetState
             If Me.InvokeRequired Then
-                Me.Invoke(Sub() SetState(statusText, indicatorColor, isRetryVisible))
+                Me.Invoke(Sub() SetState(statusText, indicatorColor, isRetryVisible, foreColor))
                 Return
             End If
 
             lblStatus.Text = statusText
+            lblStatus.ForeColor = foreColor
             pnlIndicator.BackColor = indicatorColor
             btnRetry.Visible = isRetryVisible
         End Sub
