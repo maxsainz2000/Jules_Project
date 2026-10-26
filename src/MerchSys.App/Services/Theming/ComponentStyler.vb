@@ -50,6 +50,21 @@ Namespace Services.Theming
             pnl.Padding = New Padding(12)
         End Sub
 
+        Public Shared Sub ApplyPrimaryMetricCard(pnl As Panel, tokens As ThemeTokens)
+            pnl.BackColor = tokens.CardBackground
+            pnl.Padding = New Padding(16)
+        End Sub
+
+        Public Shared Sub ApplySecondaryMetricCard(pnl As Panel, tokens As ThemeTokens)
+            pnl.BackColor = tokens.CardBackground
+            pnl.Padding = New Padding(12)
+        End Sub
+
+        Public Shared Sub ApplyTertiaryMetricCard(pnl As Panel, tokens As ThemeTokens)
+            pnl.BackColor = tokens.SurfaceBackground
+            pnl.Padding = New Padding(8)
+        End Sub
+
         Public Shared Sub ApplyAlertCard(pnl As Panel, tokens As ThemeTokens, severity As String)
             ApplyCard(pnl, tokens)
             ' Adjust styling based on severity
@@ -100,6 +115,37 @@ Namespace Services.Theming
                 lbl.Font = New Font(tokens.DefaultFont.FontFamily, fontSize, FontStyle.Bold)
             End If
             lbl.ForeColor = tokens.PrimaryText
+        End Sub
+
+        Public Shared Sub ApplyPrimaryMetricValue(lbl As Label, tokens As ThemeTokens)
+            If tokens.DefaultFont IsNot Nothing Then
+                lbl.Font = New Font(tokens.DefaultFont.FontFamily, 24.0F, FontStyle.Bold)
+            End If
+            lbl.ForeColor = tokens.PrimaryText
+        End Sub
+
+        Public Shared Sub ApplySecondaryMetricValue(lbl As Label, tokens As ThemeTokens)
+            If tokens.DefaultFont IsNot Nothing Then
+                lbl.Font = New Font(tokens.DefaultFont.FontFamily, 16.0F, FontStyle.Bold)
+            End If
+            lbl.ForeColor = tokens.PrimaryText
+        End Sub
+
+        Public Shared Sub ApplyMetricCaption(lbl As Label, tokens As ThemeTokens)
+            If tokens.DefaultFont IsNot Nothing Then
+                lbl.Font = New Font(tokens.DefaultFont.FontFamily, 9.0F, FontStyle.Regular)
+            End If
+            lbl.ForeColor = tokens.MutedText
+        End Sub
+
+        ' FilterBar Containers
+        Public Shared Sub ApplyFilterBar(pnl As Panel, tokens As ThemeTokens)
+            pnl.BackColor = tokens.SurfaceBackground
+            pnl.Padding = New Padding(8)
+        End Sub
+
+        Public Shared Sub ApplyFilterBarItem(ctrl As Control, tokens As ThemeTokens)
+            ctrl.Margin = New Padding(4, 2, 4, 2)
         End Sub
 
         ' DataGridView Helpers

@@ -112,6 +112,29 @@ Public Class ComponentStylerTests
     End Sub
 
     <Fact>
+    Public Sub ApplyMetricCards_SetsCorrectStyles()
+        ' Arrange
+        Dim pnlPrimary = New Panel()
+        Dim pnlSecondary = New Panel()
+        Dim pnlTertiary = New Panel()
+
+        ' Act
+        ComponentStyler.ApplyPrimaryMetricCard(pnlPrimary, _tokens)
+        ComponentStyler.ApplySecondaryMetricCard(pnlSecondary, _tokens)
+        ComponentStyler.ApplyTertiaryMetricCard(pnlTertiary, _tokens)
+
+        ' Assert
+        Assert.Equal(_tokens.CardBackground, pnlPrimary.BackColor)
+        Assert.Equal(New Padding(16), pnlPrimary.Padding)
+
+        Assert.Equal(_tokens.CardBackground, pnlSecondary.BackColor)
+        Assert.Equal(New Padding(12), pnlSecondary.Padding)
+
+        Assert.Equal(_tokens.SurfaceBackground, pnlTertiary.BackColor)
+        Assert.Equal(New Padding(8), pnlTertiary.Padding)
+    End Sub
+
+    <Fact>
     Public Sub ApplyAlertCard_SetsCorrectStyles()
         ' Arrange
         Dim pnlDanger = New Panel()
@@ -132,6 +155,32 @@ Public Class ComponentStylerTests
 
         Assert.Equal(Color.FromArgb(40, _tokens.Success.R, _tokens.Success.G, _tokens.Success.B), pnlSuccess.BackColor)
         Assert.Equal(New Padding(12), pnlSuccess.Padding)
+    End Sub
+
+    <Fact>
+    Public Sub ApplyMetricTypography_SetsCorrectFontsAndColors()
+        ' Arrange
+        Dim lblPrimary = New Label()
+        Dim lblSecondary = New Label()
+        Dim lblCaption = New Label()
+
+        ' Act
+        ComponentStyler.ApplyPrimaryMetricValue(lblPrimary, _tokens)
+        ComponentStyler.ApplySecondaryMetricValue(lblSecondary, _tokens)
+        ComponentStyler.ApplyMetricCaption(lblCaption, _tokens)
+
+        ' Assert
+        Assert.Equal(_tokens.PrimaryText, lblPrimary.ForeColor)
+        Assert.Equal(24.0F, lblPrimary.Font.Size)
+        Assert.Equal(FontStyle.Bold, lblPrimary.Font.Style And FontStyle.Bold)
+
+        Assert.Equal(_tokens.PrimaryText, lblSecondary.ForeColor)
+        Assert.Equal(16.0F, lblSecondary.Font.Size)
+        Assert.Equal(FontStyle.Bold, lblSecondary.Font.Style And FontStyle.Bold)
+
+        Assert.Equal(_tokens.MutedText, lblCaption.ForeColor)
+        Assert.Equal(9.0F, lblCaption.Font.Size)
+        Assert.Equal(FontStyle.Regular, lblCaption.Font.Style And FontStyle.Regular)
     End Sub
 
     <Fact>
@@ -192,6 +241,23 @@ Public Class ComponentStylerTests
     End Sub
 
     <Fact>
+    Public Sub ApplyFilterBar_SetsCorrectStyles()
+        ' Arrange
+        Dim pnl = New Panel()
+        Dim ctrl = New Button()
+
+        ' Act
+        ComponentStyler.ApplyFilterBar(pnl, _tokens)
+        ComponentStyler.ApplyFilterBarItem(ctrl, _tokens)
+
+        ' Assert
+        Assert.Equal(_tokens.SurfaceBackground, pnl.BackColor)
+        Assert.Equal(New Padding(8), pnl.Padding)
+
+        Assert.Equal(New Padding(4, 2, 4, 2), ctrl.Margin)
+    End Sub
+
+    <Fact>
     Public Sub ApplySemanticStatusRow_SetsCorrectColors()
         ' Arrange
         Dim dgv = New DataGridView()
@@ -221,6 +287,49 @@ Public Class ComponentStylerTests
 
         Assert.Equal(Color.FromArgb(40, _tokens.Danger.R, _tokens.Danger.G, _tokens.Danger.B), rowDanger.DefaultCellStyle.BackColor)
         Assert.Equal(_tokens.Danger, rowDanger.DefaultCellStyle.ForeColor)
+    End Sub
+
+    <Fact>
+    Public Sub ThemeService_ApplyTheme_RoutesMetricAndFilterBarTags()
+        ' Arrange
+        Dim tempPath = System.IO.Path.GetTempFileName()
+        System.IO.File.Delete(tempPath)
+        Dim service = New ThemeService(tempPath)
+
+        Dim root = New Panel()
+
+        Dim pnlPrimary = New Panel() With { .Tag = "PrimaryMetricCard" }
+        Dim lblPrimary = New Label() With { .Tag = "PrimaryMetricValue" }
+        Dim pnlFilterBar = New Panel() With { .Tag = "FilterBar" }
+        Dim btnFilterItem = New Button() With { .Tag = "FilterBarItem" }
+
+        root.Controls.Add(pnlPrimary)
+        root.Controls.Add(lblPrimary)
+        root.Controls.Add(pnlFilterBar)
+        root.Controls.Add(btnFilterItem)
+
+        ' Act
+        service.ApplyTheme(root)
+
+        ' Assert
+        ' Metric Card
+        Assert.Equal(service.Tokens.CardBackground, pnlPrimary.BackColor)
+        Assert.Equal(New Padding(16), pnlPrimary.Padding)
+
+        ' Metric Value
+        Assert.Equal(service.Tokens.PrimaryText, lblPrimary.ForeColor)
+        Assert.Equal(24.0F, lblPrimary.Font.Size)
+        Assert.Equal(FontStyle.Bold, lblPrimary.Font.Style And FontStyle.Bold)
+
+        ' FilterBar
+        Assert.Equal(service.Tokens.SurfaceBackground, pnlFilterBar.BackColor)
+        Assert.Equal(New Padding(8), pnlFilterBar.Padding)
+
+        ' FilterBarItem
+        Assert.Equal(New Padding(4, 2, 4, 2), btnFilterItem.Margin)
+
+        ' Cleanup
+        System.IO.File.Delete(tempPath)
     End Sub
 
     <Fact>

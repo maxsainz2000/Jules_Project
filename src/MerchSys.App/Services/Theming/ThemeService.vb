@@ -58,13 +58,33 @@ Namespace Services.Theming
         Public Sub ApplyTheme(root As Control) Implements IThemeService.ApplyTheme
             If root Is Nothing Then Return
 
+            Dim tagStrTop = If(root.Tag IsNot Nothing, root.Tag.ToString(), String.Empty)
+            If tagStrTop = "FilterBarItem" Then
+                ComponentStyler.ApplyFilterBarItem(root, _tokens)
+            End If
+
             ' Apply styles based on control type
             If TypeOf root Is Form Then
                 root.BackColor = _tokens.WindowBackground
                 root.ForeColor = _tokens.PrimaryText
             ElseIf TypeOf root Is Panel OrElse TypeOf root Is UserControl OrElse TypeOf root Is SplitContainer OrElse TypeOf root Is TabPage Then
-                If TypeOf root Is Panel AndAlso root.Tag IsNot Nothing AndAlso root.Tag.ToString() = "Card" Then
-                    ComponentStyler.ApplyCard(DirectCast(root, Panel), _tokens)
+                If TypeOf root Is Panel AndAlso root.Tag IsNot Nothing Then
+                    Dim pnlTag = root.Tag.ToString()
+                    Dim pnl = DirectCast(root, Panel)
+                    If pnlTag = "Card" Then
+                        ComponentStyler.ApplyCard(pnl, _tokens)
+                    ElseIf pnlTag = "PrimaryMetricCard" Then
+                        ComponentStyler.ApplyPrimaryMetricCard(pnl, _tokens)
+                    ElseIf pnlTag = "SecondaryMetricCard" Then
+                        ComponentStyler.ApplySecondaryMetricCard(pnl, _tokens)
+                    ElseIf pnlTag = "TertiaryMetricCard" Then
+                        ComponentStyler.ApplyTertiaryMetricCard(pnl, _tokens)
+                    ElseIf pnlTag = "FilterBar" Then
+                        ComponentStyler.ApplyFilterBar(pnl, _tokens)
+                    Else
+                        root.BackColor = _tokens.SurfaceBackground
+                        root.ForeColor = _tokens.PrimaryText
+                    End If
                 Else
                     root.BackColor = _tokens.SurfaceBackground
                     root.ForeColor = _tokens.PrimaryText
@@ -119,6 +139,15 @@ Namespace Services.Theming
                     lbl.BackColor = System.Drawing.Color.Transparent
                 ElseIf tagStr = "MetricValue" Then
                     ComponentStyler.ApplyMetricValue(lbl, _tokens)
+                    lbl.BackColor = System.Drawing.Color.Transparent
+                ElseIf tagStr = "PrimaryMetricValue" Then
+                    ComponentStyler.ApplyPrimaryMetricValue(lbl, _tokens)
+                    lbl.BackColor = System.Drawing.Color.Transparent
+                ElseIf tagStr = "SecondaryMetricValue" Then
+                    ComponentStyler.ApplySecondaryMetricValue(lbl, _tokens)
+                    lbl.BackColor = System.Drawing.Color.Transparent
+                ElseIf tagStr = "MetricCaption" Then
+                    ComponentStyler.ApplyMetricCaption(lbl, _tokens)
                     lbl.BackColor = System.Drawing.Color.Transparent
                 Else
                     lbl.BackColor = System.Drawing.Color.Transparent
