@@ -62,22 +62,87 @@ Namespace Services.Theming
             If TypeOf root Is Form Then
                 root.BackColor = _tokens.WindowBackground
                 root.ForeColor = _tokens.PrimaryText
-            ElseIf TypeOf root Is Panel Then
+            ElseIf TypeOf root Is Panel OrElse TypeOf root Is UserControl OrElse TypeOf root Is SplitContainer OrElse TypeOf root Is TabPage Then
                 root.BackColor = _tokens.SurfaceBackground
                 root.ForeColor = _tokens.PrimaryText
+            ElseIf TypeOf root Is GroupBox Then
+                Dim grp = DirectCast(root, GroupBox)
+                grp.FlatStyle = FlatStyle.Flat
+                grp.BackColor = _tokens.SurfaceBackground
+                grp.ForeColor = _tokens.PrimaryText
+            ElseIf TypeOf root Is TabControl Then
+                Dim tc = DirectCast(root, TabControl)
+                tc.Appearance = TabAppearance.Normal
             ElseIf TypeOf root Is Button Then
                 Dim btn = DirectCast(root, Button)
-                btn.BackColor = _tokens.Accent
-                btn.ForeColor = _tokens.PrimaryText
                 btn.FlatStyle = FlatStyle.Flat
-                btn.FlatAppearance.BorderColor = _tokens.Border
+
+                Dim isAccent = (btn.Tag IsNot Nothing AndAlso btn.Tag.ToString() = "Accent") OrElse
+                               btn.Name.Contains("Primary") OrElse btn.Name.Contains("Save") OrElse
+                               btn.Name.Contains("Submit") OrElse btn.Name.Contains("Confirm")
+
+                Dim isDanger = (btn.Tag IsNot Nothing AndAlso btn.Tag.ToString() = "Danger") OrElse
+                               btn.Name.Contains("Delete") OrElse btn.Name.Contains("Cancel") OrElse
+                               btn.Name.Contains("Logout")
+
+                If isAccent Then
+                    btn.BackColor = _tokens.Accent
+                    btn.ForeColor = System.Drawing.Color.White
+                ElseIf isDanger Then
+                    btn.BackColor = _tokens.Danger
+                    btn.ForeColor = System.Drawing.Color.White
+                Else
+                    btn.BackColor = _tokens.SurfaceBackground
+                    btn.ForeColor = _tokens.PrimaryText
+                    btn.FlatAppearance.BorderColor = _tokens.Border
+                    btn.FlatAppearance.BorderSize = 1
+                End If
             ElseIf TypeOf root Is Label Then
                 root.BackColor = System.Drawing.Color.Transparent
                 root.ForeColor = _tokens.PrimaryText
-            ElseIf TypeOf root Is TextBox Then
+            ElseIf TypeOf root Is TextBoxBase Then
+                Dim txt = DirectCast(root, TextBoxBase)
+                txt.BackColor = _tokens.CardBackground
+                txt.ForeColor = _tokens.PrimaryText
+                txt.BorderStyle = BorderStyle.FixedSingle
+            ElseIf TypeOf root Is ComboBox Then
+                Dim cmb = DirectCast(root, ComboBox)
+                cmb.FlatStyle = FlatStyle.Flat
+                cmb.BackColor = _tokens.CardBackground
+                cmb.ForeColor = _tokens.PrimaryText
+            ElseIf TypeOf root Is CheckBox OrElse TypeOf root Is RadioButton Then
+                Dim btn = DirectCast(root, ButtonBase)
+                btn.FlatStyle = FlatStyle.Flat
+                btn.BackColor = System.Drawing.Color.Transparent
+                btn.ForeColor = _tokens.PrimaryText
+            ElseIf TypeOf root Is ListBox OrElse TypeOf root Is ListView Then
                 root.BackColor = _tokens.CardBackground
                 root.ForeColor = _tokens.PrimaryText
-                ' Optional: Set border if using specialized text box
+                If TypeOf root Is ListBox Then
+                    DirectCast(root, ListBox).BorderStyle = BorderStyle.FixedSingle
+                Else
+                    DirectCast(root, ListView).BorderStyle = BorderStyle.FixedSingle
+                End If
+            ElseIf TypeOf root Is DataGridView Then
+                Dim dgv = DirectCast(root, DataGridView)
+                dgv.BackgroundColor = _tokens.WindowBackground
+                dgv.GridColor = _tokens.Border
+                dgv.BorderStyle = BorderStyle.None
+                dgv.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal
+                dgv.EnableHeadersVisualStyles = False
+
+                dgv.ColumnHeadersDefaultCellStyle.BackColor = _tokens.SidebarBackground
+                dgv.ColumnHeadersDefaultCellStyle.ForeColor = _tokens.PrimaryText
+                dgv.ColumnHeadersDefaultCellStyle.SelectionBackColor = _tokens.SidebarBackground
+                dgv.ColumnHeadersDefaultCellStyle.SelectionForeColor = _tokens.PrimaryText
+
+                dgv.DefaultCellStyle.BackColor = _tokens.CardBackground
+                dgv.DefaultCellStyle.ForeColor = _tokens.PrimaryText
+                dgv.DefaultCellStyle.SelectionBackColor = _tokens.Accent
+                dgv.DefaultCellStyle.SelectionForeColor = System.Drawing.Color.White
+
+                dgv.AlternatingRowsDefaultCellStyle.BackColor = _tokens.SurfaceBackground
+                dgv.AlternatingRowsDefaultCellStyle.ForeColor = _tokens.PrimaryText
             End If
 
             ' Recursively apply theme to child controls
