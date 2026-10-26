@@ -1,5 +1,6 @@
 Imports System.Windows.Forms
 Imports MerchSys.App.Models
+Imports MerchSys.App.Services.Theming
 
 Namespace Views
     Public Interface IMainWindowView
@@ -15,6 +16,10 @@ Namespace Views
         ''' <summary>Sidebar header text showing the signed-in user and role.</summary>
         Property UserIdentityText As String
 
+        Sub ApplyThemeTokens(tokens As ThemeTokens)
+        Sub SetThemeState(theme As AppTheme)
+
+        Event ThemeToggleRequested As EventHandler
         Event NavigationRequested As EventHandler(Of NavigationItem)
         Event Load As EventHandler
         Event LogoutRequested As EventHandler

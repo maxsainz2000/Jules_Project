@@ -2,11 +2,13 @@ Imports MerchSys.App.Presenters
 Imports MerchSys.App.Models
 Imports System.Windows.Forms
 Imports System.Drawing
+Imports MerchSys.App.Services.Theming
 
 Namespace Views
     Public Class MainWindow
         Implements IMainWindowView
 
+        Public Event ThemeToggleRequested As EventHandler Implements IMainWindowView.ThemeToggleRequested
         Public Event LogoutRequested As EventHandler Implements IMainWindowView.LogoutRequested
         Public Event ModuleSelected As EventHandler(Of AppModule)
         Public Event NavigationRequested As EventHandler(Of NavigationItem) Implements IMainWindowView.NavigationRequested
@@ -15,6 +17,7 @@ Namespace Views
         Public Property Presenter As MainWindowPresenter
 
         Private _renderedItems As List(Of NavigationItem)
+        Private _currentTokens As ThemeTokens
 
         ''' <summary>
         ''' Explicit interface implementation of <see cref="IMainWindowView.Load"/>.
@@ -93,6 +96,36 @@ Namespace Views
             pnlContent.Controls.Add(view)
         End Sub
 
+        Public Sub ApplyThemeTokens(tokens As ThemeTokens) Implements IMainWindowView.ApplyThemeTokens
+            _currentTokens = tokens
+
+            pnlLeft.BackColor = tokens.SidebarBackground
+            pnlSidebar.BackColor = tokens.SidebarBackground
+            pnlHeader.BackColor = tokens.SidebarBackground
+            pnlStatusHost.BackColor = tokens.SidebarBackground
+
+            pnlContent.BackColor = tokens.WindowBackground
+            Me.BackColor = tokens.WindowBackground
+
+            lblUserIdentity.ForeColor = tokens.PrimaryText
+
+            ' Try to find HeaderFont on ThemeTokens, fallback to DefaultFont if not present
+            Dim headerFontProp = tokens.GetType().GetProperty("HeaderFont")
+            If headerFontProp IsNot Nothing Then
+                lblUserIdentity.Font = DirectCast(headerFontProp.GetValue(tokens), Font)
+            Else
+                lblUserIdentity.Font = tokens.HeaderFont
+            End If
+
+            If _renderedItems IsNot Nothing Then
+                AddNavigationButtons(_renderedItems)
+            End If
+        End Sub
+
+        Public Sub SetThemeState(theme As AppTheme) Implements IMainWindowView.SetThemeState
+            btnToggleThemeShell.Text = If(theme = AppTheme.Dark, "☀️ Light", "🌙 Dark")
+        End Sub
+
         Public Sub AddNavigationButtons(items As List(Of NavigationItem)) Implements IMainWindowView.AddNavigationButtons
             ' When the item set is unchanged (the common case while navigating), only
             ' refresh the active-state styling instead of disposing and recreating every
@@ -102,7 +135,12 @@ Namespace Views
                     Dim existing = TryCast(ctrl, Button)
                     Dim navItem = If(existing IsNot Nothing, TryCast(existing.Tag, NavigationItem), Nothing)
                     If existing IsNot Nothing AndAlso navItem IsNot Nothing Then
-                        existing.BackColor = If(navItem.IsActive, Color.FromArgb(52, 73, 94), Color.Transparent)
+                        If _currentTokens IsNot Nothing Then
+                            existing.BackColor = If(navItem.IsActive, _currentTokens.Accent, Color.Transparent)
+                            existing.ForeColor = If(navItem.IsActive, Color.White, _currentTokens.PrimaryText)
+                        Else
+                            existing.BackColor = If(navItem.IsActive, Color.FromArgb(52, 73, 94), Color.Transparent)
+                        End If
                     End If
                 Next
                 _renderedItems = items
@@ -124,8 +162,13 @@ Namespace Views
                 btn.Height = 40
                 btn.Location = New Point(10, currentY)
                 btn.FlatStyle = FlatStyle.Flat
-                btn.ForeColor = Color.White
-                btn.BackColor = If(item.IsActive, Color.FromArgb(52, 73, 94), Color.Transparent)
+                If _currentTokens IsNot Nothing Then
+                    btn.ForeColor = If(item.IsActive, Color.White, _currentTokens.PrimaryText)
+                    btn.BackColor = If(item.IsActive, _currentTokens.Accent, Color.Transparent)
+                Else
+                    btn.ForeColor = Color.White
+                    btn.BackColor = If(item.IsActive, Color.FromArgb(52, 73, 94), Color.Transparent)
+                End If
                 btn.FlatAppearance.BorderSize = 0
                 btn.TextAlign = ContentAlignment.MiddleLeft
                 btn.Padding = New Padding(10, 0, 0, 0)
@@ -143,8 +186,13 @@ Namespace Views
             btnLogout.Height = 40
             btnLogout.Location = New Point(10, Math.Max(currentY, pnlSidebar.Height - 50))
             btnLogout.FlatStyle = FlatStyle.Flat
-            btnLogout.ForeColor = Color.White
-            btnLogout.BackColor = Color.FromArgb(192, 57, 43)
+            If _currentTokens IsNot Nothing Then
+                btnLogout.ForeColor = Color.White
+                btnLogout.BackColor = _currentTokens.Danger
+            Else
+                btnLogout.ForeColor = Color.White
+                btnLogout.BackColor = Color.FromArgb(192, 57, 43)
+            End If
             btnLogout.FlatAppearance.BorderSize = 0
             btnLogout.Anchor = AnchorStyles.Bottom Or AnchorStyles.Left Or AnchorStyles.Right
 
@@ -173,6 +221,10 @@ Namespace Views
 
         Private Sub btnLogout_Click(sender As Object, e As EventArgs)
             RaiseEvent LogoutRequested(Me, EventArgs.Empty)
+        End Sub
+
+        Private Sub btnToggleThemeShell_Click(sender As Object, e As EventArgs) Handles btnToggleThemeShell.Click
+            RaiseEvent ThemeToggleRequested(Me, EventArgs.Empty)
         End Sub
     End Class
 End Namespace

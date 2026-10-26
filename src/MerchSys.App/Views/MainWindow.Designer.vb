@@ -29,6 +29,7 @@ Partial Class MainWindow
         Me.pnlHeader = New System.Windows.Forms.Panel()
         Me.lblUserIdentity = New System.Windows.Forms.Label()
         Me.pnlStatusHost = New System.Windows.Forms.Panel()
+        Me.btnToggleThemeShell = New System.Windows.Forms.Button()
         Me.pnlLeft.SuspendLayout()
         Me.pnlHeader.SuspendLayout()
         Me.SuspendLayout()
@@ -47,6 +48,7 @@ Partial Class MainWindow
         '
         Me.pnlHeader.BackColor = System.Drawing.Color.FromArgb(CType(CType(30, Byte), Integer), CType(CType(44, Byte), Integer), CType(CType(58, Byte), Integer))
         Me.pnlHeader.Controls.Add(Me.lblUserIdentity)
+        Me.pnlHeader.Controls.Add(Me.btnToggleThemeShell)
         Me.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top
         Me.pnlHeader.Location = New System.Drawing.Point(0, 0)
         Me.pnlHeader.Name = "pnlHeader"
@@ -61,10 +63,23 @@ Partial Class MainWindow
         Me.lblUserIdentity.Location = New System.Drawing.Point(0, 0)
         Me.lblUserIdentity.Name = "lblUserIdentity"
         Me.lblUserIdentity.Padding = New System.Windows.Forms.Padding(10, 0, 0, 0)
-        Me.lblUserIdentity.Size = New System.Drawing.Size(200, 48)
+        Me.lblUserIdentity.Size = New System.Drawing.Size(120, 48)
         Me.lblUserIdentity.TabIndex = 0
         Me.lblUserIdentity.Text = "Not signed in"
         Me.lblUserIdentity.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        ' btnToggleThemeShell
+        '
+        Me.btnToggleThemeShell.Dock = System.Windows.Forms.DockStyle.Right
+        Me.btnToggleThemeShell.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.btnToggleThemeShell.FlatAppearance.BorderSize = 0
+        Me.btnToggleThemeShell.ForeColor = System.Drawing.Color.White
+        Me.btnToggleThemeShell.Location = New System.Drawing.Point(120, 0)
+        Me.btnToggleThemeShell.Name = "btnToggleThemeShell"
+        Me.btnToggleThemeShell.Size = New System.Drawing.Size(80, 48)
+        Me.btnToggleThemeShell.TabIndex = 1
+        Me.btnToggleThemeShell.Text = "☀️ Light"
+        Me.btnToggleThemeShell.UseVisualStyleBackColor = True
         '
         ' pnlStatusHost
         '
@@ -115,6 +130,7 @@ Partial Class MainWindow
     Friend WithEvents pnlHeader As System.Windows.Forms.Panel
     Friend WithEvents lblUserIdentity As System.Windows.Forms.Label
     Friend WithEvents pnlStatusHost As System.Windows.Forms.Panel
+    Friend WithEvents btnToggleThemeShell As System.Windows.Forms.Button
 
 End Class
 End Namespace
