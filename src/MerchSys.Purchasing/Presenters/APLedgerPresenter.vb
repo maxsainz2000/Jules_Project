@@ -8,6 +8,7 @@ Imports MerchSys.Purchasing.Views
 Imports MerchSys.Purchasing.Views.Dialogs
 Imports MerchSys.SharedKernel.Interfaces
 Imports MerchSys.SharedKernel.Enums
+Imports MerchSys.SharedKernel.Persistence
 Imports Microsoft.Extensions.DependencyInjection
 Imports Microsoft.EntityFrameworkCore
 
@@ -40,6 +41,7 @@ Namespace Presenters
         Private ReadOnly _vendorService As IVendorService
         Private ReadOnly _sessionService As ISessionService
         Private ReadOnly _serviceProvider As IServiceProvider
+        Private ReadOnly _conflictPresenter As IConflictPresenter
 
         Private _view As IAPLedgerView
         Private _allEntries As List(Of AccountsPayableDto) = New List(Of AccountsPayableDto)()
@@ -59,11 +61,16 @@ Namespace Presenters
             End Set
         End Property
 
-        Public Sub New(apService As IAccountsPayableService, vendorService As IVendorService, sessionService As ISessionService, serviceProvider As IServiceProvider)
+        Public Sub New(apService As IAccountsPayableService, vendorService As IVendorService, sessionService As ISessionService, serviceProvider As IServiceProvider, Optional conflictPresenter As IConflictPresenter = Nothing)
             _apService = apService
             _vendorService = vendorService
             _sessionService = sessionService
             _serviceProvider = serviceProvider
+            _conflictPresenter = conflictPresenter
+        End Sub
+
+        Public Sub New(apService As IAccountsPayableService, vendorService As IVendorService, sessionService As ISessionService, serviceProvider As IServiceProvider)
+            Me.New(apService, vendorService, sessionService, serviceProvider, Nothing)
         End Sub
 
         Private Async Sub OnViewLoad(sender As Object, e As EventArgs)
@@ -155,20 +162,9 @@ Namespace Presenters
                         Return
                     End If
 
-                    Dim concurrencyConflict As Boolean = False
-                    Try
-                        Await _apService.RecordPaymentAsync(selectedId, amount)
-                    Catch ex As DbUpdateConcurrencyException
-                        concurrencyConflict = True
-                    End Try
-
-                    ' Never silently overwrite: the balance changed on another client between
-                    ' load and save, so the user must refresh and retry (AGENTS.md).
-                    If concurrencyConflict Then
-                        MessageBox.Show("Data changed elsewhere — refresh and retry.",
-                                        "Concurrency Conflict", MessageBoxButtons.OK, MessageBoxIcon.Warning)
-                    End If
-
+                    Dim success = Await ConcurrencyHelper.ExecuteWithConflictPromptAsync(
+                        Function() _apService.RecordPaymentAsync(selectedId, amount),
+                        AddressOf LoadDataAsync, _conflictPresenter)
                     Await LoadDataAsync()
                 End If
             End Using
