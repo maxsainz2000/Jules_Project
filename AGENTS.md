@@ -42,6 +42,7 @@
 | **Autonomous PR Completion** | Never pause to prompt for conversational user confirmation before committing changes or opening the PR. Execute all implementation, build, and test steps autonomously, verify `git diff` is non-empty, commit, and push the PR. | Empty PR rejection |
 | **View Constructor Presenter Guard** | View constructors taking a presenter dependency or optional presenter must guard `_presenter.View = Me` with `If _presenter IsNot Nothing Then` (and preferably provide a parameterless `Public Sub New()` constructor calling `InitializeComponent()`) so the view can be instantiated in tests and at design-time without `NullReferenceException`. | `NullReferenceException` in tests |
 | **Designer Control Instantiation** | All controls declared in a Form/UserControl Designer (e.g. `pnlVatTile`, `lblVatPayable`, `lblVatDueDate`) must be instantiated (`Me.myControl = New System.Windows.Forms.Panel()`) at the start of `InitializeComponent()` before assigning their properties. | `NullReferenceException` in `InitializeComponent` |
+| **Form.ShowDialog in Unit Tests** | `System.Windows.Forms.Form.ShowDialog()` is non-virtual. Shadowing `ShowDialog()` on a `Form` subclass does NOT prevent `Form.ShowDialog()` from opening a blocking modal message loop when cast to `Form`. Never trigger `Form.ShowDialog()` in unit tests; test logic via mocks without modal windows. | `testhost` hangs indefinitely in tests |
 
 ## Additional Architecture Rules
 
