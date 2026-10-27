@@ -122,6 +122,20 @@ Namespace Presenters
                 _view.SetTopSellingProducts(overview.TopSellingProducts)
                 _view.SetMonthlyTrends(overview.MonthlyTrends)
 
+                If overview.MonthlyTrends IsNot Nothing AndAlso overview.MonthlyTrends.Count >= 2 Then
+                    Dim latestMonth = overview.MonthlyTrends.Last()
+                    Dim prevMonth = overview.MonthlyTrends.Skip(overview.MonthlyTrends.Count - 2).First()
+                    If prevMonth.Revenue > 0 Then
+                        _view.RevenueDeltaPercent = ((latestMonth.Revenue - prevMonth.Revenue) / prevMonth.Revenue) * 100D
+                    Else
+                        _view.RevenueDeltaPercent = Nothing
+                    End If
+                    _view.RevenueSparkPoints = overview.MonthlyTrends.Select(Function(m) m.Revenue).ToList()
+                Else
+                    _view.RevenueDeltaPercent = Nothing
+                    _view.RevenueSparkPoints = New List(Of Decimal)()
+                End If
+
                 Dim lowStock = Await _mediator.Send(New GetLowStockAlertCountQuery())
                 _view.LowStockAlertCount = lowStock
                 _view.OverdueARCount = 0

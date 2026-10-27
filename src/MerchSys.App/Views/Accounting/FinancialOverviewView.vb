@@ -273,6 +273,26 @@ Namespace Views.Accounting
         Public Sub SetMonthlyTrends(trends As IEnumerable(Of MonthlyTrendDto)) Implements IFinancialOverviewView.SetMonthlyTrends
             dgvMonthlyTrends.DataSource = trends.ToList()
         End Sub
+
+        <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
+        Public Property RevenueDeltaPercent As Decimal? Implements IFinancialOverviewView.RevenueDeltaPercent
+            Get
+                Return deltaIndicator.Percent
+            End Get
+            Set(value As Decimal?)
+                deltaIndicator.Percent = value
+            End Set
+        End Property
+
+        <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
+        Public Property RevenueSparkPoints As List(Of Decimal) Implements IFinancialOverviewView.RevenueSparkPoints
+            Get
+                Return sparkline.Points
+            End Get
+            Set(value As List(Of Decimal))
+                sparkline.Points = value
+            End Set
+        End Property
     End Class
 
 End Namespace

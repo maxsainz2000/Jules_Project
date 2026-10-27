@@ -76,17 +76,28 @@ Namespace Presenters
 
             Select Case _view.CurrentMode
                 Case SummaryPeriodMode.Daily
-                    _service.GetDailySummaryAsync(_view.CurrentDate).ContinueWith(
+                    Dim taskCurrent = _service.GetDailySummaryAsync(_view.CurrentDate)
+                    Dim taskPrev = _service.GetDailySummaryAsync(_view.CurrentDate.AddDays(-1))
+
+                    Task.WhenAll(taskCurrent, taskPrev).ContinueWith(
                         Sub(t)
                             If t.IsFaulted Then
                                 _view.ErrorMessage = "Error loading daily summary: " & t.Exception.GetBaseException().Message
                                 Return
                             End If
 
-                            Dim result = t.Result
+                            Dim result = taskCurrent.Result
+                            Dim prevResult = taskPrev.Result
+
                             If result IsNot Nothing Then
                                 _view.DateRangeDisplay = result.TargetDate.ToString("MMMM dd, yyyy")
                                 _view.TotalSales = result.TotalSalesAmount
+
+                                If prevResult IsNot Nothing AndAlso prevResult.TotalSalesAmount > 0 Then
+                                    _view.SalesDeltaPercent = ((result.TotalSalesAmount - prevResult.TotalSalesAmount) / prevResult.TotalSalesAmount) * 100D
+                                Else
+                                    _view.SalesDeltaPercent = Nothing
+                                End If
                                 _view.TotalTransactions = result.TotalTransactions
                                 _view.VoidedTransactions = result.VoidedTransactions
                                 _view.VoidedAmount = result.VoidedAmount
@@ -101,17 +112,27 @@ Namespace Presenters
                         End Sub, scheduler)
 
                 Case SummaryPeriodMode.Weekly
-                    _service.GetWeeklySummaryAsync(_view.CurrentDate).ContinueWith(
+                    Dim taskCurrent = _service.GetWeeklySummaryAsync(_view.CurrentDate)
+                    Dim taskPrev = _service.GetWeeklySummaryAsync(_view.CurrentDate.AddDays(-7))
+
+                    Task.WhenAll(taskCurrent, taskPrev).ContinueWith(
                         Sub(t)
                             If t.IsFaulted Then
                                 _view.ErrorMessage = "Error loading weekly summary: " & t.Exception.GetBaseException().Message
                                 Return
                             End If
 
-                            Dim result = t.Result
+                            Dim result = taskCurrent.Result
+                            Dim prevResult = taskPrev.Result
                             If result IsNot Nothing Then
                                 _view.DateRangeDisplay = $"{result.StartDate.ToString("MMM d")} - {result.EndDate.ToString("MMM d, yyyy")}"
                                 _view.TotalSales = result.TotalSalesAmount
+
+                                If prevResult IsNot Nothing AndAlso prevResult.TotalSalesAmount > 0 Then
+                                    _view.SalesDeltaPercent = ((result.TotalSalesAmount - prevResult.TotalSalesAmount) / prevResult.TotalSalesAmount) * 100D
+                                Else
+                                    _view.SalesDeltaPercent = Nothing
+                                End If
                                 _view.TotalTransactions = result.TotalTransactions
                                 _view.AverageDailySales = result.AverageDailySales
 
@@ -142,17 +163,28 @@ Namespace Presenters
                         End Sub, scheduler)
 
                 Case SummaryPeriodMode.Monthly
-                    _service.GetMonthlySummaryAsync(_view.CurrentDate.Year, _view.CurrentDate.Month).ContinueWith(
+                    Dim prevDate = _view.CurrentDate.AddMonths(-1)
+                    Dim taskCurrent = _service.GetMonthlySummaryAsync(_view.CurrentDate.Year, _view.CurrentDate.Month)
+                    Dim taskPrev = _service.GetMonthlySummaryAsync(prevDate.Year, prevDate.Month)
+
+                    Task.WhenAll(taskCurrent, taskPrev).ContinueWith(
                         Sub(t)
                             If t.IsFaulted Then
                                 _view.ErrorMessage = "Error loading monthly summary: " & t.Exception.GetBaseException().Message
                                 Return
                             End If
 
-                            Dim result = t.Result
+                            Dim result = taskCurrent.Result
+                            Dim prevResult = taskPrev.Result
                             If result IsNot Nothing Then
                                 _view.DateRangeDisplay = result.StartDate.ToString("MMMM yyyy")
                                 _view.TotalSales = result.TotalSalesAmount
+
+                                If prevResult IsNot Nothing AndAlso prevResult.TotalSalesAmount > 0 Then
+                                    _view.SalesDeltaPercent = ((result.TotalSalesAmount - prevResult.TotalSalesAmount) / prevResult.TotalSalesAmount) * 100D
+                                Else
+                                    _view.SalesDeltaPercent = Nothing
+                                End If
                                 _view.TotalTransactions = result.TotalTransactions
                                 _view.AverageDailySales = result.AverageDailySales
 

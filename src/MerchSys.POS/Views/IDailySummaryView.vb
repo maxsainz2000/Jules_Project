@@ -36,6 +36,8 @@ Namespace Views
         Property Message As String
         Property ErrorMessage As String
 
+        Property SalesDeltaPercent As Decimal?
+
     End Interface
 
 End Namespace

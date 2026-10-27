@@ -21,6 +21,8 @@ Namespace Views
 
         <System.Diagnostics.DebuggerStepThrough()>
         Private Sub InitializeComponent()
+            Me.deltaIndicatorToday = New MerchSys.App.Controls.DeltaIndicator()
+            Me.deltaIndicatorWeek = New MerchSys.App.Controls.DeltaIndicator()
             Me.pnlLoading = New System.Windows.Forms.Panel()
             Me.lblLoading = New System.Windows.Forms.Label()
             Me.tableLayoutPanel1 = New System.Windows.Forms.TableLayoutPanel()
@@ -189,6 +191,8 @@ Namespace Views
             Me.pnlKpi3.Controls.Add(Me.lblKpi3Interpretation)
             Me.pnlKpi3.Controls.Add(Me.lblKpi3Value)
             Me.pnlKpi3.Controls.Add(Me.lblKpi3Title)
+            Me.pnlKpi3.Controls.Add(Me.deltaIndicatorToday)
+            Me.pnlKpi3.Controls.Add(Me.deltaIndicatorWeek)
             Me.pnlKpi3.Dock = System.Windows.Forms.DockStyle.Fill
             Me.pnlKpi3.Location = New System.Drawing.Point(3, 203)
             Me.pnlKpi3.Name = "pnlKpi3"
@@ -216,6 +220,20 @@ Namespace Views
             Me.lblKpi3Value.TabIndex = 1
             Me.lblKpi3Value.Text = "$0.00"
             Me.lblKpi3Value.Tag = "SecondaryMetricValue"
+            '
+            'deltaIndicatorToday
+            '
+            Me.deltaIndicatorToday.Location = New System.Drawing.Point(10, 80)
+            Me.deltaIndicatorToday.Name = "deltaIndicatorToday"
+            Me.deltaIndicatorToday.Size = New System.Drawing.Size(80, 20)
+            Me.deltaIndicatorToday.TabIndex = 10
+            '
+            'deltaIndicatorWeek
+            '
+            Me.deltaIndicatorWeek.Location = New System.Drawing.Point(100, 80)
+            Me.deltaIndicatorWeek.Name = "deltaIndicatorWeek"
+            Me.deltaIndicatorWeek.Size = New System.Drawing.Size(80, 20)
+            Me.deltaIndicatorWeek.TabIndex = 11
             '
             'lblKpi3Interpretation
             '
@@ -314,5 +332,7 @@ Namespace Views
         Friend WithEvents lblKpi4Title As System.Windows.Forms.Label
         Friend WithEvents lblKpi4Value As System.Windows.Forms.Label
         Friend WithEvents lblKpi4Interpretation As System.Windows.Forms.Label
+        Friend WithEvents deltaIndicatorToday As MerchSys.App.Controls.DeltaIndicator
+        Friend WithEvents deltaIndicatorWeek As MerchSys.App.Controls.DeltaIndicator
     End Class
 End Namespace

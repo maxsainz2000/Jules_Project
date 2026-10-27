@@ -28,6 +28,8 @@ Namespace Views.Accounting
         'Do not modify it using the code editor.
         <System.Diagnostics.DebuggerStepThrough()>
         Private Sub InitializeComponent()
+            Me.deltaIndicator = New MerchSys.App.Controls.DeltaIndicator()
+            Me.sparkline = New MerchSys.App.Controls.Sparkline()
             Me.pnlVatTile = New System.Windows.Forms.Panel()
             Me.lblVatPayable = New System.Windows.Forms.Label()
             Me.lblVatDueDate = New System.Windows.Forms.Label()
@@ -164,6 +166,20 @@ Namespace Views.Accounting
             Me.lblMtdRevenue.TabIndex = 8
             Me.lblMtdRevenue.Tag = "PrimaryMetricValue"
             '
+            'deltaIndicator
+            '
+            Me.deltaIndicator.Location = New System.Drawing.Point(230, 140)
+            Me.deltaIndicator.Name = "deltaIndicator"
+            Me.deltaIndicator.Size = New System.Drawing.Size(80, 20)
+            Me.deltaIndicator.TabIndex = 24
+            '
+            'sparkline
+            '
+            Me.sparkline.Location = New System.Drawing.Point(320, 135)
+            Me.sparkline.Name = "sparkline"
+            Me.sparkline.Size = New System.Drawing.Size(100, 30)
+            Me.sparkline.TabIndex = 25
+            '
             'lblYtdRevenue
             '
             Me.lblYtdRevenue.AutoSize = True
@@ -298,6 +314,8 @@ Namespace Views.Accounting
             Me.Controls.Add(Me.lblLastRefreshed)
             Me.Controls.Add(Me.btnRefresh)
             Me.Controls.Add(Me.lblTitle)
+            Me.Controls.Add(Me.deltaIndicator)
+            Me.Controls.Add(Me.sparkline)
             Me.Name = "FinancialOverviewView"
             Me.Size = New System.Drawing.Size(950, 480)
             Me.pnlWhatThisMeans.ResumeLayout(False)
@@ -331,6 +349,8 @@ Namespace Views.Accounting
         Friend WithEvents pnlVatTile As System.Windows.Forms.Panel
         Friend WithEvents lblVatPayable As System.Windows.Forms.Label
         Friend WithEvents lblVatDueDate As System.Windows.Forms.Label
+        Friend WithEvents deltaIndicator As MerchSys.App.Controls.DeltaIndicator
+        Friend WithEvents sparkline As MerchSys.App.Controls.Sparkline
 
     End Class
 

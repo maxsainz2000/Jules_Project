@@ -18,6 +18,9 @@ Namespace Views
         Property ErrorMessage As String
         Property LastRefreshedText As String
 
+        Property RevenueDeltaPercent As Decimal?
+        Property RevenueSparkPoints As List(Of Decimal)
+
         Property VatPayableDisplay As String
         Property VatDueDateDisplay As String
         Property VatSeverity As KpiSeverity

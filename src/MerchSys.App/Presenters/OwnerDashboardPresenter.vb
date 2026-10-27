@@ -119,6 +119,9 @@ Namespace Presenters
                 Dim todayStart = DateTime.UtcNow.Date
                 Dim weekStart = todayStart.AddDays(-6)
 
+                Dim yesterdayStart = todayStart.AddDays(-1)
+                Dim prevWeekStart = weekStart.AddDays(-7)
+
                 Dim todayRevenue = Await _posDb.SalesTransactions.
                     Where(Function(t) Not t.IsVoid AndAlso t.TransactionDate >= todayStart).
                     SumAsync(Function(t) t.TotalAmount)
@@ -128,15 +131,27 @@ Namespace Presenters
                 Dim transactionsToday = Await _posDb.SalesTransactions.
                     CountAsync(Function(t) Not t.IsVoid AndAlso t.TransactionDate >= todayStart)
 
+                Dim yesterdayRevenue = Await _posDb.SalesTransactions.
+                    Where(Function(t) Not t.IsVoid AndAlso t.TransactionDate >= yesterdayStart AndAlso t.TransactionDate < todayStart).
+                    SumAsync(Function(t) t.TotalAmount)
+                Dim prevWeekRevenue = Await _posDb.SalesTransactions.
+                    Where(Function(t) Not t.IsVoid AndAlso t.TransactionDate >= prevWeekStart AndAlso t.TransactionDate < weekStart).
+                    SumAsync(Function(t) t.TotalAmount)
+
                 _view.Kpi3Value = $"{FormatMoney(todayRevenue)} today · {FormatMoney(weekRevenue)} this week"
                 _view.Kpi3Interpretation =
                     If(transactionsToday = 0,
                        "No sales recorded today.",
                        $"{transactionsToday} sale(s) recorded today.")
+
+                _view.TodayRevenueDelta = If(yesterdayRevenue > 0, ((todayRevenue - yesterdayRevenue) / yesterdayRevenue) * 100D, CType(Nothing, Decimal?))
+                _view.WeekRevenueDelta = If(prevWeekRevenue > 0, ((weekRevenue - prevWeekRevenue) / prevWeekRevenue) * 100D, CType(Nothing, Decimal?))
             Catch ex As Exception
                 _logger.LogWarning(ex, "Sales KPIs unavailable.")
                 _view.Kpi3Value = "Unavailable"
                 _view.Kpi3Interpretation = "Sales figures could not be loaded right now."
+                _view.TodayRevenueDelta = Nothing
+                _view.WeekRevenueDelta = Nothing
             End Try
         End Function
 

@@ -128,6 +128,12 @@ Imports MerchSys.App.Models
             <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
             Public Property Kpi4Interpretation As String Implements IOwnerDashboardView.Kpi4Interpretation
 
+            <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
+            Public Property TodayRevenueDelta As Decimal? Implements IOwnerDashboardView.TodayRevenueDelta
+
+            <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
+            Public Property WeekRevenueDelta As Decimal? Implements IOwnerDashboardView.WeekRevenueDelta
+
             Public Sub RaiseLoad()
                 RaiseEvent Load(Me, EventArgs.Empty)
             End Sub

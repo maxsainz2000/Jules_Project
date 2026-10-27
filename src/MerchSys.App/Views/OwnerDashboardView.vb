@@ -106,5 +106,25 @@ Namespace Views
             pnlLoading.Visible = loading
             pnlLoading.BringToFront()
         End Sub
+
+        <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
+        Public Property TodayRevenueDelta As Decimal? Implements IOwnerDashboardView.TodayRevenueDelta
+            Get
+                Return deltaIndicatorToday.Percent
+            End Get
+            Set(value As Decimal?)
+                deltaIndicatorToday.Percent = value
+            End Set
+        End Property
+
+        <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
+        Public Property WeekRevenueDelta As Decimal? Implements IOwnerDashboardView.WeekRevenueDelta
+            Get
+                Return deltaIndicatorWeek.Percent
+            End Get
+            Set(value As Decimal?)
+                deltaIndicatorWeek.Percent = value
+            End Set
+        End Property
     End Class
 End Namespace

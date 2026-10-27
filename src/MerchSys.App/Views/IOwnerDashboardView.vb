@@ -14,6 +14,9 @@ Namespace Views
         Property Kpi4Value As String
         Property Kpi4Interpretation As String
 
+        Property TodayRevenueDelta As Decimal?
+        Property WeekRevenueDelta As Decimal?
+
         Sub SetLoading(loading As Boolean)
     End Interface
 End Namespace
