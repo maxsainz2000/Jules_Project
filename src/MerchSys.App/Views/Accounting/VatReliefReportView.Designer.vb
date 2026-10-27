@@ -160,6 +160,7 @@ Namespace Views.Accounting
             Me.pnlNetVatBanner.Dock = System.Windows.Forms.DockStyle.Top
             Me.pnlNetVatBanner.Location = New System.Drawing.Point(0, 60)
             Me.pnlNetVatBanner.Name = "pnlNetVatBanner"
+            Me.pnlNetVatBanner.Tag = "PrimaryMetricCard"
             Me.pnlNetVatBanner.Size = New System.Drawing.Size(900, 60)
             Me.pnlNetVatBanner.TabIndex = 1
             '
@@ -169,6 +170,7 @@ Namespace Views.Accounting
             Me.lblNetVatPayable.Font = New System.Drawing.Font("Segoe UI", 18.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
             Me.lblNetVatPayable.Location = New System.Drawing.Point(180, 15)
             Me.lblNetVatPayable.Name = "lblNetVatPayable"
+            Me.lblNetVatPayable.Tag = "PrimaryMetricValue"
             Me.lblNetVatPayable.Size = New System.Drawing.Size(76, 32)
             Me.lblNetVatPayable.TabIndex = 1
             Me.lblNetVatPayable.Text = "₱0.00"
@@ -211,6 +213,7 @@ Namespace Views.Accounting
             Me.pnlSalesCard.Location = New System.Drawing.Point(10, 10)
             Me.pnlSalesCard.Margin = New System.Windows.Forms.Padding(10)
             Me.pnlSalesCard.Name = "pnlSalesCard"
+            Me.pnlSalesCard.Tag = "SecondaryMetricCard"
             Me.pnlSalesCard.Size = New System.Drawing.Size(430, 180)
             Me.pnlSalesCard.TabIndex = 0
             '
@@ -284,6 +287,7 @@ Namespace Views.Accounting
             Me.pnlPurchasesCard.Location = New System.Drawing.Point(460, 10)
             Me.pnlPurchasesCard.Margin = New System.Windows.Forms.Padding(10)
             Me.pnlPurchasesCard.Name = "pnlPurchasesCard"
+            Me.pnlPurchasesCard.Tag = "SecondaryMetricCard"
             Me.pnlPurchasesCard.Size = New System.Drawing.Size(430, 180)
             Me.pnlPurchasesCard.TabIndex = 1
             '

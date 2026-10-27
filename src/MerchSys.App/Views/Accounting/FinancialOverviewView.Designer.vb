@@ -148,6 +148,7 @@ Namespace Views.Accounting
             Me.lblTodayRevenue.AutoSize = True
             Me.lblTodayRevenue.Location = New System.Drawing.Point(17, 140)
             Me.lblTodayRevenue.Name = "lblTodayRevenue"
+            Me.lblTodayRevenue.Tag = "SecondaryMetricValue"
             Me.lblTodayRevenue.Size = New System.Drawing.Size(0, 15)
             Me.lblTodayRevenue.TabIndex = 7
             '
@@ -156,6 +157,7 @@ Namespace Views.Accounting
             Me.lblMtdRevenue.AutoSize = True
             Me.lblMtdRevenue.Location = New System.Drawing.Point(130, 140)
             Me.lblMtdRevenue.Name = "lblMtdRevenue"
+            Me.lblMtdRevenue.Tag = "PrimaryMetricValue"
             Me.lblMtdRevenue.Size = New System.Drawing.Size(0, 15)
             Me.lblMtdRevenue.TabIndex = 8
             '
@@ -164,6 +166,7 @@ Namespace Views.Accounting
             Me.lblYtdRevenue.AutoSize = True
             Me.lblYtdRevenue.Location = New System.Drawing.Point(250, 140)
             Me.lblYtdRevenue.Name = "lblYtdRevenue"
+            Me.lblYtdRevenue.Tag = "MetricCaption"
             Me.lblYtdRevenue.Size = New System.Drawing.Size(0, 15)
             Me.lblYtdRevenue.TabIndex = 9
             '
@@ -172,6 +175,7 @@ Namespace Views.Accounting
             Me.lblGrossMarginToday.AutoSize = True
             Me.lblGrossMarginToday.Location = New System.Drawing.Point(370, 140)
             Me.lblGrossMarginToday.Name = "lblGrossMarginToday"
+            Me.lblGrossMarginToday.Tag = "SecondaryMetricValue"
             Me.lblGrossMarginToday.Size = New System.Drawing.Size(0, 15)
             Me.lblGrossMarginToday.TabIndex = 10
             '
@@ -180,6 +184,7 @@ Namespace Views.Accounting
             Me.lblTotalAR.AutoSize = True
             Me.lblTotalAR.Location = New System.Drawing.Point(490, 140)
             Me.lblTotalAR.Name = "lblTotalAR"
+            Me.lblTotalAR.Tag = "SecondaryMetricValue"
             Me.lblTotalAR.Size = New System.Drawing.Size(0, 15)
             Me.lblTotalAR.TabIndex = 11
             '
@@ -188,6 +193,7 @@ Namespace Views.Accounting
             Me.lblTotalAP.AutoSize = True
             Me.lblTotalAP.Location = New System.Drawing.Point(610, 140)
             Me.lblTotalAP.Name = "lblTotalAP"
+            Me.lblTotalAP.Tag = "SecondaryMetricValue"
             Me.lblTotalAP.Size = New System.Drawing.Size(0, 15)
             Me.lblTotalAP.TabIndex = 12
             '
@@ -196,6 +202,7 @@ Namespace Views.Accounting
             Me.lblInventoryValue.AutoSize = True
             Me.lblInventoryValue.Location = New System.Drawing.Point(730, 140)
             Me.lblInventoryValue.Name = "lblInventoryValue"
+            Me.lblInventoryValue.Tag = "MetricCaption"
             Me.lblInventoryValue.Size = New System.Drawing.Size(0, 15)
             Me.lblInventoryValue.TabIndex = 13
             '
@@ -241,6 +248,7 @@ Namespace Views.Accounting
             Me.pnlVatTile.Controls.Add(Me.lblVatDueDate)
             Me.pnlVatTile.Location = New System.Drawing.Point(600, 180)
             Me.pnlVatTile.Name = "pnlVatTile"
+            Me.pnlVatTile.Tag = "TertiaryMetricCard"
             Me.pnlVatTile.Size = New System.Drawing.Size(200, 50)
             Me.pnlVatTile.TabIndex = 17
             Me.pnlVatTile.Cursor = System.Windows.Forms.Cursors.Hand

@@ -206,6 +206,7 @@ Namespace Views.Accounting
             Me.pnlNetSales.Controls.Add(Me.lblNetSalesValue)
             Me.pnlNetSales.Location = New System.Drawing.Point(3, 3)
             Me.pnlNetSales.Name = "pnlNetSales"
+            Me.pnlNetSales.Tag = "PrimaryMetricCard"
             Me.pnlNetSales.Size = New System.Drawing.Size(180, 80)
             Me.pnlNetSales.TabIndex = 0
             '
@@ -215,6 +216,7 @@ Namespace Views.Accounting
             Me.lblNetSalesTitle.ForeColor = System.Drawing.Color.Gray
             Me.lblNetSalesTitle.Location = New System.Drawing.Point(10, 10)
             Me.lblNetSalesTitle.Name = "lblNetSalesTitle"
+            Me.lblNetSalesTitle.Tag = "MetricCaption"
             Me.lblNetSalesTitle.Size = New System.Drawing.Size(54, 15)
             Me.lblNetSalesTitle.TabIndex = 0
             Me.lblNetSalesTitle.Text = "Net Sales"
@@ -225,6 +227,7 @@ Namespace Views.Accounting
             Me.lblNetSalesValue.Font = New System.Drawing.Font("Segoe UI", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
             Me.lblNetSalesValue.Location = New System.Drawing.Point(10, 35)
             Me.lblNetSalesValue.Name = "lblNetSalesValue"
+            Me.lblNetSalesValue.Tag = "PrimaryMetricValue"
             Me.lblNetSalesValue.Size = New System.Drawing.Size(50, 21)
             Me.lblNetSalesValue.TabIndex = 1
             Me.lblNetSalesValue.Text = "₱0.00"
@@ -237,6 +240,7 @@ Namespace Views.Accounting
             Me.pnlTransactions.Controls.Add(Me.lblTransactionsValue)
             Me.pnlTransactions.Location = New System.Drawing.Point(189, 3)
             Me.pnlTransactions.Name = "pnlTransactions"
+            Me.pnlTransactions.Tag = "SecondaryMetricCard"
             Me.pnlTransactions.Size = New System.Drawing.Size(180, 80)
             Me.pnlTransactions.TabIndex = 1
             '
@@ -246,6 +250,7 @@ Namespace Views.Accounting
             Me.lblTransactionsTitle.ForeColor = System.Drawing.Color.Gray
             Me.lblTransactionsTitle.Location = New System.Drawing.Point(10, 10)
             Me.lblTransactionsTitle.Name = "lblTransactionsTitle"
+            Me.lblTransactionsTitle.Tag = "MetricCaption"
             Me.lblTransactionsTitle.Size = New System.Drawing.Size(72, 15)
             Me.lblTransactionsTitle.TabIndex = 0
             Me.lblTransactionsTitle.Text = "Transactions"
@@ -256,6 +261,7 @@ Namespace Views.Accounting
             Me.lblTransactionsValue.Font = New System.Drawing.Font("Segoe UI", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
             Me.lblTransactionsValue.Location = New System.Drawing.Point(10, 35)
             Me.lblTransactionsValue.Name = "lblTransactionsValue"
+            Me.lblTransactionsValue.Tag = "SecondaryMetricValue"
             Me.lblTransactionsValue.Size = New System.Drawing.Size(19, 21)
             Me.lblTransactionsValue.TabIndex = 1
             Me.lblTransactionsValue.Text = "0"
@@ -268,6 +274,7 @@ Namespace Views.Accounting
             Me.pnlAvgTransaction.Controls.Add(Me.lblAvgTransactionValue)
             Me.pnlAvgTransaction.Location = New System.Drawing.Point(375, 3)
             Me.pnlAvgTransaction.Name = "pnlAvgTransaction"
+            Me.pnlAvgTransaction.Tag = "SecondaryMetricCard"
             Me.pnlAvgTransaction.Size = New System.Drawing.Size(180, 80)
             Me.pnlAvgTransaction.TabIndex = 2
             '
@@ -277,6 +284,7 @@ Namespace Views.Accounting
             Me.lblAvgTransactionTitle.ForeColor = System.Drawing.Color.Gray
             Me.lblAvgTransactionTitle.Location = New System.Drawing.Point(10, 10)
             Me.lblAvgTransactionTitle.Name = "lblAvgTransactionTitle"
+            Me.lblAvgTransactionTitle.Tag = "MetricCaption"
             Me.lblAvgTransactionTitle.Size = New System.Drawing.Size(91, 15)
             Me.lblAvgTransactionTitle.TabIndex = 0
             Me.lblAvgTransactionTitle.Text = "Avg Transaction"
@@ -287,6 +295,7 @@ Namespace Views.Accounting
             Me.lblAvgTransactionValue.Font = New System.Drawing.Font("Segoe UI", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
             Me.lblAvgTransactionValue.Location = New System.Drawing.Point(10, 35)
             Me.lblAvgTransactionValue.Name = "lblAvgTransactionValue"
+            Me.lblAvgTransactionValue.Tag = "SecondaryMetricValue"
             Me.lblAvgTransactionValue.Size = New System.Drawing.Size(50, 21)
             Me.lblAvgTransactionValue.TabIndex = 1
             Me.lblAvgTransactionValue.Text = "₱0.00"
@@ -299,6 +308,7 @@ Namespace Views.Accounting
             Me.pnlReturns.Controls.Add(Me.lblReturnsValue)
             Me.pnlReturns.Location = New System.Drawing.Point(561, 3)
             Me.pnlReturns.Name = "pnlReturns"
+            Me.pnlReturns.Tag = "SecondaryMetricCard"
             Me.pnlReturns.Size = New System.Drawing.Size(180, 80)
             Me.pnlReturns.TabIndex = 3
             '
@@ -308,6 +318,7 @@ Namespace Views.Accounting
             Me.lblReturnsTitle.ForeColor = System.Drawing.Color.Gray
             Me.lblReturnsTitle.Location = New System.Drawing.Point(10, 10)
             Me.lblReturnsTitle.Name = "lblReturnsTitle"
+            Me.lblReturnsTitle.Tag = "MetricCaption"
             Me.lblReturnsTitle.Size = New System.Drawing.Size(47, 15)
             Me.lblReturnsTitle.TabIndex = 0
             Me.lblReturnsTitle.Text = "Returns"
@@ -318,6 +329,7 @@ Namespace Views.Accounting
             Me.lblReturnsValue.Font = New System.Drawing.Font("Segoe UI", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
             Me.lblReturnsValue.Location = New System.Drawing.Point(10, 35)
             Me.lblReturnsValue.Name = "lblReturnsValue"
+            Me.lblReturnsValue.Tag = "SecondaryMetricValue"
             Me.lblReturnsValue.Size = New System.Drawing.Size(50, 21)
             Me.lblReturnsValue.TabIndex = 1
             Me.lblReturnsValue.Text = "₱0.00"

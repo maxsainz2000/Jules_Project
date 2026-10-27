@@ -42,6 +42,7 @@ Namespace Views
             Me.pnlSummary.Dock = DockStyle.Top
             Me.pnlSummary.Location = New System.Drawing.Point(0, 0)
             Me.pnlSummary.Name = "pnlSummary"
+            Me.pnlSummary.Tag = "PrimaryMetricCard"
             Me.pnlSummary.Size = New System.Drawing.Size(800, 60)
 
             'lblTotalItems
@@ -49,6 +50,7 @@ Namespace Views
             Me.lblTotalItems.Font = New System.Drawing.Font("Segoe UI", 12.0!, System.Drawing.FontStyle.Bold)
             Me.lblTotalItems.Location = New System.Drawing.Point(20, 20)
             Me.lblTotalItems.Name = "lblTotalItems"
+            Me.lblTotalItems.Tag = "SecondaryMetricValue"
             Me.lblTotalItems.Size = New System.Drawing.Size(155, 21)
             Me.lblTotalItems.Text = "Total Items Lost: 0"
 
@@ -57,6 +59,7 @@ Namespace Views
             Me.lblTotalValue.Font = New System.Drawing.Font("Segoe UI", 12.0!, System.Drawing.FontStyle.Bold)
             Me.lblTotalValue.Location = New System.Drawing.Point(220, 20)
             Me.lblTotalValue.Name = "lblTotalValue"
+            Me.lblTotalValue.Tag = "PrimaryMetricValue"
             Me.lblTotalValue.Size = New System.Drawing.Size(175, 21)
             Me.lblTotalValue.Text = "Total Value Lost: $0.00"
 

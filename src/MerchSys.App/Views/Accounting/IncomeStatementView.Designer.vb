@@ -246,6 +246,7 @@ Partial Class IncomeStatementView
         Me.lblNetSales.Font = New System.Drawing.Font("Segoe UI", 12.0!)
         Me.lblNetSales.Location = New System.Drawing.Point(20, 20)
         Me.lblNetSales.Name = "lblNetSales"
+        Me.lblNetSales.Tag = "SecondaryMetricValue"
         Me.lblNetSales.Size = New System.Drawing.Size(126, 21)
         Me.lblNetSales.TabIndex = 0
         Me.lblNetSales.Text = "Net Sales: ₱0.00"
@@ -256,6 +257,7 @@ Partial Class IncomeStatementView
         Me.lblCostOfGoodsSold.Font = New System.Drawing.Font("Segoe UI", 12.0!)
         Me.lblCostOfGoodsSold.Location = New System.Drawing.Point(20, 50)
         Me.lblCostOfGoodsSold.Name = "lblCostOfGoodsSold"
+        Me.lblCostOfGoodsSold.Tag = "SecondaryMetricValue"
         Me.lblCostOfGoodsSold.Size = New System.Drawing.Size(111, 21)
         Me.lblCostOfGoodsSold.TabIndex = 1
         Me.lblCostOfGoodsSold.Text = "COGS: -₱0.00"
@@ -266,6 +268,7 @@ Partial Class IncomeStatementView
         Me.lblGrossProfit.Font = New System.Drawing.Font("Segoe UI", 12.0!, System.Drawing.FontStyle.Bold)
         Me.lblGrossProfit.Location = New System.Drawing.Point(20, 80)
         Me.lblGrossProfit.Name = "lblGrossProfit"
+        Me.lblGrossProfit.Tag = "SecondaryMetricValue"
         Me.lblGrossProfit.Size = New System.Drawing.Size(149, 21)
         Me.lblGrossProfit.TabIndex = 2
         Me.lblGrossProfit.Text = "Gross Profit: ₱0.00"
@@ -276,6 +279,7 @@ Partial Class IncomeStatementView
         Me.lblGrossMarginPercent.Font = New System.Drawing.Font("Segoe UI", 10.0!)
         Me.lblGrossMarginPercent.Location = New System.Drawing.Point(20, 110)
         Me.lblGrossMarginPercent.Name = "lblGrossMarginPercent"
+        Me.lblGrossMarginPercent.Tag = "SecondaryMetricValue"
         Me.lblGrossMarginPercent.Size = New System.Drawing.Size(124, 19)
         Me.lblGrossMarginPercent.TabIndex = 3
         Me.lblGrossMarginPercent.Text = "Gross Margin: 0.0%"
@@ -286,6 +290,7 @@ Partial Class IncomeStatementView
         Me.lblOperatingExpenses.Font = New System.Drawing.Font("Segoe UI", 12.0!)
         Me.lblOperatingExpenses.Location = New System.Drawing.Point(20, 150)
         Me.lblOperatingExpenses.Name = "lblOperatingExpenses"
+        Me.lblOperatingExpenses.Tag = "SecondaryMetricValue"
         Me.lblOperatingExpenses.Size = New System.Drawing.Size(207, 21)
         Me.lblOperatingExpenses.TabIndex = 4
         Me.lblOperatingExpenses.Text = "Operating Expenses: -₱0.00"
@@ -296,6 +301,7 @@ Partial Class IncomeStatementView
         Me.lblNetIncome.Font = New System.Drawing.Font("Segoe UI", 14.0!, System.Drawing.FontStyle.Bold)
         Me.lblNetIncome.Location = New System.Drawing.Point(20, 190)
         Me.lblNetIncome.Name = "lblNetIncome"
+        Me.lblNetIncome.Tag = "PrimaryMetricValue"
         Me.lblNetIncome.Size = New System.Drawing.Size(170, 25)
         Me.lblNetIncome.TabIndex = 5
         Me.lblNetIncome.Text = "Net Income: ₱0.00"
@@ -306,6 +312,7 @@ Partial Class IncomeStatementView
         Me.lblNetMarginPercent.Font = New System.Drawing.Font("Segoe UI", 10.0!)
         Me.lblNetMarginPercent.Location = New System.Drawing.Point(20, 220)
         Me.lblNetMarginPercent.Name = "lblNetMarginPercent"
+        Me.lblNetMarginPercent.Tag = "SecondaryMetricValue"
         Me.lblNetMarginPercent.Size = New System.Drawing.Size(115, 19)
         Me.lblNetMarginPercent.TabIndex = 6
         Me.lblNetMarginPercent.Text = "Net Margin: 0.0%"

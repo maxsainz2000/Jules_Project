@@ -52,6 +52,7 @@ Namespace Views
             Me.lblNearExpiry.AutoSize = True
             Me.lblNearExpiry.Location = New System.Drawing.Point(15, 15)
             Me.lblNearExpiry.Name = "lblNearExpiry"
+            Me.lblNearExpiry.Tag = "SecondaryMetricValue"
             Me.lblNearExpiry.Size = New System.Drawing.Size(125, 15)
             Me.lblNearExpiry.TabIndex = 0
             Me.lblNearExpiry.Text = "Near Expiry Count: 0"
@@ -61,6 +62,7 @@ Namespace Views
             Me.lblExpired.AutoSize = True
             Me.lblExpired.Location = New System.Drawing.Point(200, 15)
             Me.lblExpired.Name = "lblExpired"
+            Me.lblExpired.Tag = "SecondaryMetricValue"
             Me.lblExpired.Size = New System.Drawing.Size(100, 15)
             Me.lblExpired.TabIndex = 1
             Me.lblExpired.Text = "Expired Count: 0"
@@ -70,6 +72,7 @@ Namespace Views
             Me.lblTotalValueAtRisk.AutoSize = True
             Me.lblTotalValueAtRisk.Location = New System.Drawing.Point(385, 15)
             Me.lblTotalValueAtRisk.Name = "lblTotalValueAtRisk"
+            Me.lblTotalValueAtRisk.Tag = "PrimaryMetricValue"
             Me.lblTotalValueAtRisk.Size = New System.Drawing.Size(130, 15)
             Me.lblTotalValueAtRisk.TabIndex = 2
             Me.lblTotalValueAtRisk.Text = "Total Value At Risk: $0"

@@ -103,6 +103,7 @@ Namespace Views
             Me.pnlKpi1.Dock = System.Windows.Forms.DockStyle.Fill
             Me.pnlKpi1.Location = New System.Drawing.Point(3, 3)
             Me.pnlKpi1.Name = "pnlKpi1"
+            Me.pnlKpi1.Tag = "PrimaryMetricCard"
             Me.pnlKpi1.Size = New System.Drawing.Size(294, 194)
             Me.pnlKpi1.TabIndex = 0
             '
@@ -112,6 +113,7 @@ Namespace Views
             Me.lblKpi1Title.Font = New System.Drawing.Font("Segoe UI", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
             Me.lblKpi1Title.Location = New System.Drawing.Point(10, 10)
             Me.lblKpi1Title.Name = "lblKpi1Title"
+            Me.lblKpi1Title.Tag = "SectionHeader"
             Me.lblKpi1Title.Size = New System.Drawing.Size(120, 21)
             Me.lblKpi1Title.TabIndex = 0
             Me.lblKpi1Title.Text = "Gross Revenue"
@@ -122,6 +124,7 @@ Namespace Views
             Me.lblKpi1Value.Font = New System.Drawing.Font("Segoe UI", 16.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
             Me.lblKpi1Value.Location = New System.Drawing.Point(10, 40)
             Me.lblKpi1Value.Name = "lblKpi1Value"
+            Me.lblKpi1Value.Tag = "PrimaryMetricValue"
             Me.lblKpi1Value.Size = New System.Drawing.Size(55, 30)
             Me.lblKpi1Value.TabIndex = 1
             Me.lblKpi1Value.Text = "$0.00"
@@ -131,6 +134,7 @@ Namespace Views
             Me.lblKpi1Interpretation.AutoSize = True
             Me.lblKpi1Interpretation.Location = New System.Drawing.Point(10, 80)
             Me.lblKpi1Interpretation.Name = "lblKpi1Interpretation"
+            Me.lblKpi1Interpretation.Tag = "MetricCaption"
             Me.lblKpi1Interpretation.Size = New System.Drawing.Size(117, 15)
             Me.lblKpi1Interpretation.TabIndex = 2
             Me.lblKpi1Interpretation.Text = "What This Means: ..."
@@ -144,6 +148,7 @@ Namespace Views
             Me.pnlKpi2.Dock = System.Windows.Forms.DockStyle.Fill
             Me.pnlKpi2.Location = New System.Drawing.Point(303, 3)
             Me.pnlKpi2.Name = "pnlKpi2"
+            Me.pnlKpi2.Tag = "SecondaryMetricCard"
             Me.pnlKpi2.Size = New System.Drawing.Size(294, 194)
             Me.pnlKpi2.TabIndex = 1
             '
@@ -163,6 +168,7 @@ Namespace Views
             Me.lblKpi2Value.Font = New System.Drawing.Font("Segoe UI", 16.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
             Me.lblKpi2Value.Location = New System.Drawing.Point(10, 40)
             Me.lblKpi2Value.Name = "lblKpi2Value"
+            Me.lblKpi2Value.Tag = "SecondaryMetricValue"
             Me.lblKpi2Value.Size = New System.Drawing.Size(55, 30)
             Me.lblKpi2Value.TabIndex = 1
             Me.lblKpi2Value.Text = "$0.00"
@@ -172,6 +178,7 @@ Namespace Views
             Me.lblKpi2Interpretation.AutoSize = True
             Me.lblKpi2Interpretation.Location = New System.Drawing.Point(10, 80)
             Me.lblKpi2Interpretation.Name = "lblKpi2Interpretation"
+            Me.lblKpi2Interpretation.Tag = "MetricCaption"
             Me.lblKpi2Interpretation.Size = New System.Drawing.Size(117, 15)
             Me.lblKpi2Interpretation.TabIndex = 2
             Me.lblKpi2Interpretation.Text = "What This Means: ..."
@@ -185,6 +192,7 @@ Namespace Views
             Me.pnlKpi3.Dock = System.Windows.Forms.DockStyle.Fill
             Me.pnlKpi3.Location = New System.Drawing.Point(3, 203)
             Me.pnlKpi3.Name = "pnlKpi3"
+            Me.pnlKpi3.Tag = "SecondaryMetricCard"
             Me.pnlKpi3.Size = New System.Drawing.Size(294, 194)
             Me.pnlKpi3.TabIndex = 2
             '
@@ -204,6 +212,7 @@ Namespace Views
             Me.lblKpi3Value.Font = New System.Drawing.Font("Segoe UI", 16.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
             Me.lblKpi3Value.Location = New System.Drawing.Point(10, 40)
             Me.lblKpi3Value.Name = "lblKpi3Value"
+            Me.lblKpi3Value.Tag = "SecondaryMetricValue"
             Me.lblKpi3Value.Size = New System.Drawing.Size(55, 30)
             Me.lblKpi3Value.TabIndex = 1
             Me.lblKpi3Value.Text = "$0.00"
@@ -213,6 +222,7 @@ Namespace Views
             Me.lblKpi3Interpretation.AutoSize = True
             Me.lblKpi3Interpretation.Location = New System.Drawing.Point(10, 80)
             Me.lblKpi3Interpretation.Name = "lblKpi3Interpretation"
+            Me.lblKpi3Interpretation.Tag = "MetricCaption"
             Me.lblKpi3Interpretation.Size = New System.Drawing.Size(117, 15)
             Me.lblKpi3Interpretation.TabIndex = 2
             Me.lblKpi3Interpretation.Text = "What This Means: ..."
@@ -226,6 +236,7 @@ Namespace Views
             Me.pnlKpi4.Dock = System.Windows.Forms.DockStyle.Fill
             Me.pnlKpi4.Location = New System.Drawing.Point(303, 203)
             Me.pnlKpi4.Name = "pnlKpi4"
+            Me.pnlKpi4.Tag = "SecondaryMetricCard"
             Me.pnlKpi4.Size = New System.Drawing.Size(294, 194)
             Me.pnlKpi4.TabIndex = 3
             '
@@ -245,6 +256,7 @@ Namespace Views
             Me.lblKpi4Value.Font = New System.Drawing.Font("Segoe UI", 16.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
             Me.lblKpi4Value.Location = New System.Drawing.Point(10, 40)
             Me.lblKpi4Value.Name = "lblKpi4Value"
+            Me.lblKpi4Value.Tag = "SecondaryMetricValue"
             Me.lblKpi4Value.Size = New System.Drawing.Size(55, 30)
             Me.lblKpi4Value.TabIndex = 1
             Me.lblKpi4Value.Text = "$0.00"
@@ -254,6 +266,7 @@ Namespace Views
             Me.lblKpi4Interpretation.AutoSize = True
             Me.lblKpi4Interpretation.Location = New System.Drawing.Point(10, 80)
             Me.lblKpi4Interpretation.Name = "lblKpi4Interpretation"
+            Me.lblKpi4Interpretation.Tag = "MetricCaption"
             Me.lblKpi4Interpretation.Size = New System.Drawing.Size(117, 15)
             Me.lblKpi4Interpretation.TabIndex = 2
             Me.lblKpi4Interpretation.Text = "What This Means: ..."

@@ -75,6 +75,7 @@ Namespace Views.Purchasing
             Me.lblTotalOutstanding.TabIndex = 1
             Me.lblTotalOutstanding.Text = "Outstanding: ₱0.00"
             Me.lblTotalOutstanding.TextAlign = System.Drawing.ContentAlignment.MiddleRight
+            Me.lblTotalOutstanding.Tag = "PrimaryMetricValue"
             '
             'pnlToolbar
             '
