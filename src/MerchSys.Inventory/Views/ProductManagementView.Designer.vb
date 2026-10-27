@@ -85,6 +85,7 @@ Namespace Views
             Me.toolStripProducts.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.btnAddProduct, Me.btnEditProduct, Me.btnDeleteProduct, Me.btnPriceHistory})
             Me.toolStripProducts.Location = New System.Drawing.Point(3, 3)
             Me.toolStripProducts.Name = "toolStripProducts"
+            Me.toolStripProducts.Tag = "FilterBar"
             Me.toolStripProducts.Size = New System.Drawing.Size(786, 25)
             Me.toolStripProducts.TabIndex = 0
             Me.toolStripProducts.Text = "toolStrip1"
@@ -93,6 +94,7 @@ Namespace Views
             '
             Me.btnAddProduct.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
             Me.btnAddProduct.Name = "btnAddProduct"
+            Me.btnAddProduct.Tag = "FilterBarItem"
             Me.btnAddProduct.Size = New System.Drawing.Size(33, 22)
             Me.btnAddProduct.Text = "Add"
             '
@@ -100,6 +102,7 @@ Namespace Views
             '
             Me.btnEditProduct.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
             Me.btnEditProduct.Name = "btnEditProduct"
+            Me.btnEditProduct.Tag = "FilterBarItem"
             Me.btnEditProduct.Size = New System.Drawing.Size(31, 22)
             Me.btnEditProduct.Text = "Edit"
             '
@@ -107,6 +110,7 @@ Namespace Views
             '
             Me.btnDeleteProduct.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
             Me.btnDeleteProduct.Name = "btnDeleteProduct"
+            Me.btnDeleteProduct.Tag = "FilterBarItem"
             Me.btnDeleteProduct.Size = New System.Drawing.Size(44, 22)
             Me.btnDeleteProduct.Text = "Delete"
             '
@@ -114,6 +118,7 @@ Namespace Views
             '
             Me.btnPriceHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
             Me.btnPriceHistory.Name = "btnPriceHistory"
+            Me.btnPriceHistory.Tag = "FilterBarItem"
             Me.btnPriceHistory.Size = New System.Drawing.Size(78, 22)
             Me.btnPriceHistory.Text = "Price History"
             '
@@ -147,6 +152,7 @@ Namespace Views
             Me.toolStripCategories.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.btnAddCategory, Me.btnEditCategory, Me.btnDeleteCategory})
             Me.toolStripCategories.Location = New System.Drawing.Point(3, 3)
             Me.toolStripCategories.Name = "toolStripCategories"
+            Me.toolStripCategories.Tag = "FilterBar"
             Me.toolStripCategories.Size = New System.Drawing.Size(786, 25)
             Me.toolStripCategories.TabIndex = 0
             Me.toolStripCategories.Text = "toolStrip2"
@@ -155,6 +161,7 @@ Namespace Views
             '
             Me.btnAddCategory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
             Me.btnAddCategory.Name = "btnAddCategory"
+            Me.btnAddCategory.Tag = "FilterBarItem"
             Me.btnAddCategory.Size = New System.Drawing.Size(33, 22)
             Me.btnAddCategory.Text = "Add"
             '
@@ -162,6 +169,7 @@ Namespace Views
             '
             Me.btnEditCategory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
             Me.btnEditCategory.Name = "btnEditCategory"
+            Me.btnEditCategory.Tag = "FilterBarItem"
             Me.btnEditCategory.Size = New System.Drawing.Size(31, 22)
             Me.btnEditCategory.Text = "Edit"
             '
@@ -169,6 +177,7 @@ Namespace Views
             '
             Me.btnDeleteCategory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
             Me.btnDeleteCategory.Name = "btnDeleteCategory"
+            Me.btnDeleteCategory.Tag = "FilterBarItem"
             Me.btnDeleteCategory.Size = New System.Drawing.Size(44, 22)
             Me.btnDeleteCategory.Text = "Delete"
             '

@@ -29,7 +29,7 @@ Namespace Views.Accounting
         Private Sub InitializeComponent()
             Me.pnlHeader = New System.Windows.Forms.Panel()
             Me.lblTitle = New System.Windows.Forms.Label()
-            Me.pnlFilter = New System.Windows.Forms.Panel()
+            Me.pnlFilter = New System.Windows.Forms.FlowLayoutPanel()
             Me.lblTo = New System.Windows.Forms.Label()
             Me.dtpTo = New System.Windows.Forms.DateTimePicker()
             Me.lblFrom = New System.Windows.Forms.Label()
@@ -85,6 +85,9 @@ Namespace Views.Accounting
             Me.pnlFilter.Dock = System.Windows.Forms.DockStyle.Top
             Me.pnlFilter.Location = New System.Drawing.Point(0, 60)
             Me.pnlFilter.Name = "pnlFilter"
+            Me.pnlFilter.Tag = "FilterBar"
+            Me.pnlFilter.WrapContents = True
+            Me.pnlFilter.AutoSize = True
             Me.pnlFilter.Size = New System.Drawing.Size(900, 50)
             Me.pnlFilter.TabIndex = 1
             '
@@ -95,6 +98,7 @@ Namespace Views.Accounting
             Me.lblTo.Name = "lblTo"
             Me.lblTo.Size = New System.Drawing.Size(22, 15)
             Me.lblTo.TabIndex = 4
+            Me.lblTo.Tag = "FilterBarItem"
             Me.lblTo.Text = "To:"
             '
             'dtpTo
@@ -104,6 +108,7 @@ Namespace Views.Accounting
             Me.dtpTo.Name = "dtpTo"
             Me.dtpTo.Size = New System.Drawing.Size(120, 23)
             Me.dtpTo.TabIndex = 3
+            Me.dtpTo.Tag = "FilterBarItem"
             '
             'lblFrom
             '
@@ -112,6 +117,7 @@ Namespace Views.Accounting
             Me.lblFrom.Name = "lblFrom"
             Me.lblFrom.Size = New System.Drawing.Size(38, 15)
             Me.lblFrom.TabIndex = 2
+            Me.lblFrom.Tag = "FilterBarItem"
             Me.lblFrom.Text = "From:"
             '
             'dtpFrom
@@ -121,12 +127,13 @@ Namespace Views.Accounting
             Me.dtpFrom.Name = "dtpFrom"
             Me.dtpFrom.Size = New System.Drawing.Size(120, 23)
             Me.dtpFrom.TabIndex = 1
+            Me.dtpFrom.Tag = "FilterBarItem"
             '
             'btnRefresh
             '
             Me.btnRefresh.Cursor = System.Windows.Forms.Cursors.Hand
             Me.btnRefresh.Location = New System.Drawing.Point(400, 12)
-            Me.btnRefresh.Tag = "Accent"
+            Me.btnRefresh.Tag = "FilterBarItem"
             Me.btnRefresh.Name = "btnRefresh"
             Me.btnRefresh.Size = New System.Drawing.Size(90, 26)
             Me.btnRefresh.TabIndex = 0
@@ -137,7 +144,7 @@ Namespace Views.Accounting
             '
             Me.btnExportCsv.Cursor = System.Windows.Forms.Cursors.Hand
             Me.btnExportCsv.Location = New System.Drawing.Point(500, 12)
-            Me.btnExportCsv.Tag = "Accent"
+            Me.btnExportCsv.Tag = "FilterBarItem"
             Me.btnExportCsv.Name = "btnExportCsv"
             Me.btnExportCsv.Size = New System.Drawing.Size(90, 26)
             Me.btnExportCsv.TabIndex = 5
@@ -148,7 +155,7 @@ Namespace Views.Accounting
             '
             Me.btnExportPdf.Cursor = System.Windows.Forms.Cursors.Hand
             Me.btnExportPdf.Location = New System.Drawing.Point(600, 12)
-            Me.btnExportPdf.Tag = "Accent"
+            Me.btnExportPdf.Tag = "FilterBarItem"
             Me.btnExportPdf.Name = "btnExportPdf"
             Me.btnExportPdf.Size = New System.Drawing.Size(90, 26)
             Me.btnExportPdf.TabIndex = 6
@@ -264,7 +271,7 @@ Namespace Views.Accounting
 
         Friend WithEvents pnlHeader As Panel
         Friend WithEvents lblTitle As Label
-        Friend WithEvents pnlFilter As Panel
+        Friend WithEvents pnlFilter As FlowLayoutPanel
         Friend WithEvents pnlContent As Panel
         Friend WithEvents lblTo As Label
         Friend WithEvents dtpTo As DateTimePicker

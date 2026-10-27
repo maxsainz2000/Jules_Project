@@ -23,6 +23,7 @@ Namespace Views
         Friend WithEvents btnEdit As System.Windows.Forms.Button
         Friend WithEvents btnSubmit As System.Windows.Forms.Button
         Friend WithEvents btnDelete As System.Windows.Forms.Button
+        Friend WithEvents pnlFilter As System.Windows.Forms.FlowLayoutPanel
 
         <System.Diagnostics.DebuggerStepThrough()>
         Private Sub InitializeComponent()
@@ -34,12 +35,13 @@ Namespace Views
             Me.btnEdit = New System.Windows.Forms.Button()
             Me.btnSubmit = New System.Windows.Forms.Button()
             Me.btnDelete = New System.Windows.Forms.Button()
+            Me.pnlFilter = New System.Windows.Forms.FlowLayoutPanel()
             CType(Me.dgvPurchaseOrders, System.ComponentModel.ISupportInitialize).BeginInit()
             Me.SuspendLayout()
             '
             'dgvPurchaseOrders
             '
-            Me.dgvPurchaseOrders.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) Or System.Windows.Forms.AnchorStyles.Left) Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+            Me.dgvPurchaseOrders.Dock = System.Windows.Forms.DockStyle.Fill
             Me.dgvPurchaseOrders.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
             Me.dgvPurchaseOrders.Location = New System.Drawing.Point(12, 41)
             Me.dgvPurchaseOrders.Name = "dgvPurchaseOrders"
@@ -50,12 +52,24 @@ Namespace Views
             Me.dgvPurchaseOrders.ReadOnly = True
             Me.dgvPurchaseOrders.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect
             '
+            'pnlFilter
+            '
+            Me.pnlFilter.Dock = System.Windows.Forms.DockStyle.Top
+            Me.pnlFilter.Location = New System.Drawing.Point(0, 0)
+            Me.pnlFilter.Name = "pnlFilter"
+            Me.pnlFilter.Size = New System.Drawing.Size(800, 40)
+            Me.pnlFilter.TabIndex = 8
+            Me.pnlFilter.Tag = "FilterBar"
+            Me.pnlFilter.WrapContents = True
+            Me.pnlFilter.AutoSize = True
+            '
             'txtSearch
             '
             Me.txtSearch.Location = New System.Drawing.Point(12, 12)
             Me.txtSearch.Name = "txtSearch"
             Me.txtSearch.Size = New System.Drawing.Size(150, 20)
             Me.txtSearch.TabIndex = 1
+            Me.txtSearch.Tag = "FilterBarItem"
             Me.txtSearch.PlaceholderText = "Search by Order #..."
             '
             'cmbStatus
@@ -66,6 +80,7 @@ Namespace Views
             Me.cmbStatus.Name = "cmbStatus"
             Me.cmbStatus.Size = New System.Drawing.Size(121, 21)
             Me.cmbStatus.TabIndex = 2
+            Me.cmbStatus.Tag = "FilterBarItem"
             '
             'btnSearch
             '
@@ -73,6 +88,7 @@ Namespace Views
             Me.btnSearch.Name = "btnSearch"
             Me.btnSearch.Size = New System.Drawing.Size(75, 23)
             Me.btnSearch.TabIndex = 3
+            Me.btnSearch.Tag = "FilterBarItem"
             Me.btnSearch.Text = "Search"
             Me.btnSearch.UseVisualStyleBackColor = True
             '
@@ -83,6 +99,7 @@ Namespace Views
             Me.btnNew.Name = "btnNew"
             Me.btnNew.Size = New System.Drawing.Size(75, 23)
             Me.btnNew.TabIndex = 4
+            Me.btnNew.Tag = "FilterBarItem"
             Me.btnNew.Text = "New PO"
             Me.btnNew.UseVisualStyleBackColor = True
             '
@@ -93,6 +110,7 @@ Namespace Views
             Me.btnEdit.Name = "btnEdit"
             Me.btnEdit.Size = New System.Drawing.Size(75, 23)
             Me.btnEdit.TabIndex = 5
+            Me.btnEdit.Tag = "FilterBarItem"
             Me.btnEdit.Text = "Edit"
             Me.btnEdit.UseVisualStyleBackColor = True
             '
@@ -103,6 +121,7 @@ Namespace Views
             Me.btnSubmit.Name = "btnSubmit"
             Me.btnSubmit.Size = New System.Drawing.Size(75, 23)
             Me.btnSubmit.TabIndex = 6
+            Me.btnSubmit.Tag = "FilterBarItem"
             Me.btnSubmit.Text = "Submit"
             Me.btnSubmit.UseVisualStyleBackColor = True
             '
@@ -113,6 +132,7 @@ Namespace Views
             Me.btnDelete.Name = "btnDelete"
             Me.btnDelete.Size = New System.Drawing.Size(75, 23)
             Me.btnDelete.TabIndex = 7
+            Me.btnDelete.Tag = "FilterBarItem"
             Me.btnDelete.Text = "Delete"
             Me.btnDelete.UseVisualStyleBackColor = True
             '
@@ -120,13 +140,14 @@ Namespace Views
             '
             Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-            Me.Controls.Add(Me.btnDelete)
-            Me.Controls.Add(Me.btnSubmit)
-            Me.Controls.Add(Me.btnEdit)
-            Me.Controls.Add(Me.btnNew)
-            Me.Controls.Add(Me.btnSearch)
-            Me.Controls.Add(Me.cmbStatus)
-            Me.Controls.Add(Me.txtSearch)
+            Me.pnlFilter.Controls.Add(Me.txtSearch)
+            Me.pnlFilter.Controls.Add(Me.cmbStatus)
+            Me.pnlFilter.Controls.Add(Me.btnSearch)
+            Me.pnlFilter.Controls.Add(Me.btnNew)
+            Me.pnlFilter.Controls.Add(Me.btnEdit)
+            Me.pnlFilter.Controls.Add(Me.btnSubmit)
+            Me.pnlFilter.Controls.Add(Me.btnDelete)
+            Me.Controls.Add(Me.pnlFilter)
             Me.Controls.Add(Me.dgvPurchaseOrders)
             Me.Name = "PurchaseOrderListView"
             Me.Size = New System.Drawing.Size(800, 450)

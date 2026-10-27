@@ -122,10 +122,10 @@ Namespace Views
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
         Public Property ThresholdDays As Integer Implements IExpiryMonitorView.ThresholdDays
             Get
-                Return CInt(numThreshold.Value)
+                Return CInt(nudThreshold.Value)
             End Get
             Set(value As Integer)
-                numThreshold.Value = value
+                nudThreshold.Value = value
             End Set
         End Property
 
@@ -141,11 +141,11 @@ Namespace Views
             dgvExpired.DataSource = batches
         End Sub
 
-        Private Sub btnRefresh_Click(sender As Object, e As EventArgs) Handles btnRefresh.Click
+        Private Sub btnFilter_Click(sender As Object, e As EventArgs) Handles btnFilter.Click
             RaiseEvent RefreshRequested(Me, EventArgs.Empty)
         End Sub
 
-        Private Sub numThreshold_ValueChanged(sender As Object, e As EventArgs) Handles numThreshold.ValueChanged
+        Private Sub nudThreshold_ValueChanged(sender As Object, e As EventArgs) Handles nudThreshold.ValueChanged
             RaiseEvent ThresholdChanged(Me, EventArgs.Empty)
         End Sub
 

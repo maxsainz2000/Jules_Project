@@ -20,10 +20,16 @@ Namespace Views.Accounting
         Public Event ExportCsvRequested As EventHandler(Of String) Implements ITamperAuditReportView.ExportCsvRequested
         Public Event ExportPdfRequested As EventHandler(Of String) Implements ITamperAuditReportView.ExportPdfRequested
 
+        Public Sub New()
+            InitializeComponent()
+        End Sub
+
         Public Sub New(presenter As TamperAuditReportPresenter)
             InitializeComponent()
             _presenter = presenter
-            _presenter.View = Me
+            If _presenter IsNot Nothing Then
+                _presenter.View = Me
+            End If
 
             ' Wire up event handlers after InitializeComponent
             AddHandler dtpFrom.ValueChanged, AddressOf OnFilterChanged

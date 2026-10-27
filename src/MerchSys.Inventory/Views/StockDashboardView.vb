@@ -20,6 +20,7 @@ Namespace Views
         Private _txtFilter As TextBox
         Private _cboCategoryFilter As ComboBox
         Private _cboStatusFilter As ComboBox
+        Private _pnlFilterBar As FlowLayoutPanel
 
         Private WithEvents _dgvProducts As DataGridView
         Private _dgvBatches As DataGridView
@@ -38,10 +39,11 @@ Namespace Views
             _lblExpiredBatchCount = New Label() With {.Tag = "SecondaryMetricValue"}
             _lblCriticalRiskCount = New Label() With {.Tag = "PrimaryMetricValue"}
             _lblTotalProducts = New Label() With {.Tag = "SecondaryMetricValue"}
+            _pnlFilterBar = New FlowLayoutPanel() With {.Tag = "FilterBar", .WrapContents = True, .AutoSize = True}
 
-            _txtFilter = New TextBox()
-            _cboCategoryFilter = New ComboBox()
-            _cboStatusFilter = New ComboBox()
+            _txtFilter = New TextBox() With {.Tag = "FilterBarItem"}
+            _cboCategoryFilter = New ComboBox() With {.Tag = "FilterBarItem"}
+            _cboStatusFilter = New ComboBox() With {.Tag = "FilterBarItem"}
 
             _dgvProducts = New DataGridView()
             _dgvBatches = New DataGridView()
@@ -109,9 +111,10 @@ Namespace Views
             Controls.Add(_lblExpiredBatchCount)
             Controls.Add(_lblCriticalRiskCount)
             Controls.Add(_lblTotalProducts)
-            Controls.Add(_txtFilter)
-            Controls.Add(_cboCategoryFilter)
-            Controls.Add(_cboStatusFilter)
+            _pnlFilterBar.Controls.Add(_txtFilter)
+            _pnlFilterBar.Controls.Add(_cboCategoryFilter)
+            _pnlFilterBar.Controls.Add(_cboStatusFilter)
+            Controls.Add(_pnlFilterBar)
             Controls.Add(_dgvProducts)
             Controls.Add(_dgvBatches)
 
@@ -137,9 +140,7 @@ Namespace Views
 
             yPos += 30
 
-            _txtFilter.Location = New Point(10, yPos)
-            _cboCategoryFilter.Location = New Point(220, yPos)
-            _cboStatusFilter.Location = New Point(350, yPos)
+            _pnlFilterBar.Location = New Point(10, yPos)
 
             yPos += 30
 

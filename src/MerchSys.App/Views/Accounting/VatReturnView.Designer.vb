@@ -151,6 +151,7 @@ Namespace Views.Accounting
             Me.dgvHistory.Width = 300
             
             ' VatReturnView
+            Me.AutoScroll = True
             Me.Controls.Add(Me.dgvLines)
             Me.Controls.Add(Me.dgvHistory)
             Me.Controls.Add(Me.pnlSummary)

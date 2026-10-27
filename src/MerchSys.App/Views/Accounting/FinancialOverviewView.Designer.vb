@@ -279,6 +279,7 @@ Namespace Views.Accounting
             '
             Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+            Me.AutoScroll = True
             Me.Controls.Add(Me.pnlVatTile)
             Me.Controls.Add(Me.lblLowStockAlertCount)
             Me.Controls.Add(Me.lblOverdueAPCount)

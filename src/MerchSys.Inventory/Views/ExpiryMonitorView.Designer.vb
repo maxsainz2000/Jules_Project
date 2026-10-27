@@ -31,15 +31,16 @@ Namespace Views
             Me.lblNearExpiry = New System.Windows.Forms.Label()
             Me.lblExpired = New System.Windows.Forms.Label()
             Me.lblTotalValueAtRisk = New System.Windows.Forms.Label()
-            Me.numThreshold = New System.Windows.Forms.NumericUpDown()
+            Me.nudThreshold = New System.Windows.Forms.NumericUpDown()
             Me.tabControl = New System.Windows.Forms.TabControl()
             Me.tabNearExpiry = New System.Windows.Forms.TabPage()
             Me.dgvNearExpiry = New System.Windows.Forms.DataGridView()
             Me.tabExpired = New System.Windows.Forms.TabPage()
             Me.dgvExpired = New System.Windows.Forms.DataGridView()
-            Me.btnRefresh = New System.Windows.Forms.Button()
+            Me.btnFilter = New System.Windows.Forms.Button()
+            Me.pnlFilter = New System.Windows.Forms.FlowLayoutPanel()
             Me.lblThreshold = New System.Windows.Forms.Label()
-            CType(Me.numThreshold, System.ComponentModel.ISupportInitialize).BeginInit()
+            CType(Me.nudThreshold, System.ComponentModel.ISupportInitialize).BeginInit()
             Me.tabControl.SuspendLayout()
             Me.tabNearExpiry.SuspendLayout()
             CType(Me.dgvNearExpiry, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -84,23 +85,26 @@ Namespace Views
             Me.lblThreshold.Name = "lblThreshold"
             Me.lblThreshold.Size = New System.Drawing.Size(95, 15)
             Me.lblThreshold.TabIndex = 6
+            Me.lblThreshold.Tag = "FilterBarItem"
             Me.lblThreshold.Text = "Threshold Days:"
             '
-            'numThreshold
+            'nudThreshold
             '
-            Me.numThreshold.Location = New System.Drawing.Point(650, 13)
-            Me.numThreshold.Name = "numThreshold"
-            Me.numThreshold.Size = New System.Drawing.Size(60, 23)
-            Me.numThreshold.TabIndex = 3
+            Me.nudThreshold.Location = New System.Drawing.Point(650, 13)
+            Me.nudThreshold.Name = "nudThreshold"
+            Me.nudThreshold.Size = New System.Drawing.Size(60, 23)
+            Me.nudThreshold.TabIndex = 3
+            Me.nudThreshold.Tag = "FilterBarItem"
             '
-            'btnRefresh
+            'btnFilter
             '
-            Me.btnRefresh.Location = New System.Drawing.Point(730, 13)
-            Me.btnRefresh.Name = "btnRefresh"
-            Me.btnRefresh.Size = New System.Drawing.Size(75, 23)
-            Me.btnRefresh.TabIndex = 7
-            Me.btnRefresh.Text = "Refresh"
-            Me.btnRefresh.UseVisualStyleBackColor = True
+            Me.btnFilter.Location = New System.Drawing.Point(730, 13)
+            Me.btnFilter.Name = "btnFilter"
+            Me.btnFilter.Size = New System.Drawing.Size(75, 23)
+            Me.btnFilter.TabIndex = 7
+            Me.btnFilter.Tag = "FilterBarItem"
+            Me.btnFilter.Text = "Refresh"
+            Me.btnFilter.UseVisualStyleBackColor = True
             '
             'tabControl
             '
@@ -111,6 +115,16 @@ Namespace Views
             Me.tabControl.SelectedIndex = 0
             Me.tabControl.Size = New System.Drawing.Size(790, 430)
             Me.tabControl.TabIndex = 4
+            '
+            'pnlFilter
+            '
+            Me.pnlFilter.Location = New System.Drawing.Point(550, 10)
+            Me.pnlFilter.Name = "pnlFilter"
+            Me.pnlFilter.Size = New System.Drawing.Size(260, 40)
+            Me.pnlFilter.TabIndex = 8
+            Me.pnlFilter.Tag = "FilterBar"
+            Me.pnlFilter.WrapContents = True
+            Me.pnlFilter.AutoSize = True
             '
             'tabNearExpiry
             '
@@ -158,16 +172,17 @@ Namespace Views
             '
             Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-            Me.Controls.Add(Me.btnRefresh)
-            Me.Controls.Add(Me.lblThreshold)
+            Me.pnlFilter.Controls.Add(Me.lblThreshold)
+            Me.pnlFilter.Controls.Add(Me.nudThreshold)
+            Me.pnlFilter.Controls.Add(Me.btnFilter)
+            Me.Controls.Add(Me.pnlFilter)
             Me.Controls.Add(Me.tabControl)
-            Me.Controls.Add(Me.numThreshold)
             Me.Controls.Add(Me.lblTotalValueAtRisk)
             Me.Controls.Add(Me.lblExpired)
             Me.Controls.Add(Me.lblNearExpiry)
             Me.Name = "ExpiryMonitorView"
             Me.Size = New System.Drawing.Size(820, 500)
-            CType(Me.numThreshold, System.ComponentModel.ISupportInitialize).EndInit()
+            CType(Me.nudThreshold, System.ComponentModel.ISupportInitialize).EndInit()
             Me.tabControl.ResumeLayout(False)
             Me.tabNearExpiry.ResumeLayout(False)
             CType(Me.dgvNearExpiry, System.ComponentModel.ISupportInitialize).EndInit()
@@ -181,14 +196,15 @@ Namespace Views
         Friend WithEvents lblNearExpiry As Label
         Friend WithEvents lblExpired As Label
         Friend WithEvents lblTotalValueAtRisk As Label
-        Friend WithEvents numThreshold As NumericUpDown
+        Friend WithEvents nudThreshold As NumericUpDown
         Friend WithEvents tabControl As TabControl
         Friend WithEvents tabNearExpiry As TabPage
         Friend WithEvents dgvNearExpiry As DataGridView
         Friend WithEvents tabExpired As TabPage
         Friend WithEvents dgvExpired As DataGridView
         Friend WithEvents lblThreshold As Label
-        Friend WithEvents btnRefresh As Button
+        Friend WithEvents btnFilter As Button
+        Friend WithEvents pnlFilter As FlowLayoutPanel
     End Class
 
 End Namespace

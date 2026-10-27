@@ -20,7 +20,7 @@ Namespace Views
             Me.lblTotalItems = New Label()
             Me.lblTotalValue = New Label()
             Me.btnRecord = New Button()
-            Me.pnlFilter = New Panel()
+            Me.pnlFilter = New FlowLayoutPanel()
             Me.chkDateFilter = New CheckBox()
             Me.dtpStart = New DateTimePicker()
             Me.lblTo = New Label()
@@ -81,12 +81,16 @@ Namespace Views
             Me.pnlFilter.Dock = DockStyle.Top
             Me.pnlFilter.Location = New System.Drawing.Point(0, 60)
             Me.pnlFilter.Name = "pnlFilter"
+            CType(Me.pnlFilter, FlowLayoutPanel).WrapContents = True
+            Me.pnlFilter.Tag = "FilterBar"
+            Me.pnlFilter.AutoSize = True
             Me.pnlFilter.Size = New System.Drawing.Size(800, 50)
 
             'chkDateFilter
             Me.chkDateFilter.AutoSize = True
             Me.chkDateFilter.Location = New System.Drawing.Point(20, 15)
             Me.chkDateFilter.Name = "chkDateFilter"
+            Me.chkDateFilter.Tag = "FilterBarItem"
             Me.chkDateFilter.Size = New System.Drawing.Size(82, 19)
             Me.chkDateFilter.Text = "Filter Date:"
 
@@ -94,12 +98,14 @@ Namespace Views
             Me.dtpStart.Format = DateTimePickerFormat.Short
             Me.dtpStart.Location = New System.Drawing.Point(110, 13)
             Me.dtpStart.Name = "dtpStart"
+            Me.dtpStart.Tag = "FilterBarItem"
             Me.dtpStart.Size = New System.Drawing.Size(100, 23)
 
             'lblTo
             Me.lblTo.AutoSize = True
             Me.lblTo.Location = New System.Drawing.Point(220, 17)
             Me.lblTo.Name = "lblTo"
+            Me.lblTo.Tag = "FilterBarItem"
             Me.lblTo.Size = New System.Drawing.Size(18, 15)
             Me.lblTo.Text = "to"
 
@@ -107,12 +113,14 @@ Namespace Views
             Me.dtpEnd.Format = DateTimePickerFormat.Short
             Me.dtpEnd.Location = New System.Drawing.Point(250, 13)
             Me.dtpEnd.Name = "dtpEnd"
+            Me.dtpEnd.Tag = "FilterBarItem"
             Me.dtpEnd.Size = New System.Drawing.Size(100, 23)
 
             'lblReason
             Me.lblReason.AutoSize = True
             Me.lblReason.Location = New System.Drawing.Point(370, 17)
             Me.lblReason.Name = "lblReason"
+            Me.lblReason.Tag = "FilterBarItem"
             Me.lblReason.Size = New System.Drawing.Size(48, 15)
             Me.lblReason.Text = "Reason:"
 
@@ -120,11 +128,13 @@ Namespace Views
             Me.cmbReason.DropDownStyle = ComboBoxStyle.DropDownList
             Me.cmbReason.Location = New System.Drawing.Point(425, 13)
             Me.cmbReason.Name = "cmbReason"
+            Me.cmbReason.Tag = "FilterBarItem"
             Me.cmbReason.Size = New System.Drawing.Size(120, 23)
 
             'btnFilter
             Me.btnFilter.Location = New System.Drawing.Point(560, 12)
             Me.btnFilter.Name = "btnFilter"
+            Me.btnFilter.Tag = "FilterBarItem"
             Me.btnFilter.Size = New System.Drawing.Size(75, 25)
             Me.btnFilter.Text = "Apply"
 
@@ -159,7 +169,7 @@ Namespace Views
         Friend WithEvents lblTotalItems As Label
         Friend WithEvents lblTotalValue As Label
         Friend WithEvents btnRecord As Button
-        Friend WithEvents pnlFilter As Panel
+        Friend WithEvents pnlFilter As FlowLayoutPanel
         Friend WithEvents chkDateFilter As CheckBox
         Friend WithEvents dtpStart As DateTimePicker
         Friend WithEvents lblTo As Label
