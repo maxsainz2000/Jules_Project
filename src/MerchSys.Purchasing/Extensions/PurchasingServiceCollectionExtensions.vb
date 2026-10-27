@@ -21,6 +21,7 @@ Namespace Extensions
             services.AddScoped(Of GoodsReceiptVatCalculator)()
             
             ' Views
+            services.AddTransient(Of IPurchasingDashboardView, PurchasingDashboardView)()
             services.AddTransient(Of IPurchaseOrderListView, PurchaseOrderListView)()
             services.AddTransient(Of IPurchaseOrderEditorView, PurchaseOrderEditorDialog)()
             services.AddTransient(Of IGoodsReceivingView, GoodsReceivingView)()
@@ -32,6 +33,7 @@ Namespace Extensions
             services.AddTransient(Of IReorderConfigEditorDialog, ReorderConfigEditorDialog)()
             
             ' Presenters
+            services.AddTransient(Of PurchasingDashboardPresenter)()
             services.AddTransient(Of PurchaseOrderListPresenter)()
             services.AddTransient(Of PurchaseOrderEditorPresenter)()
             services.AddTransient(Of GoodsReceivingPresenter)()

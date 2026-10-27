@@ -112,6 +112,7 @@ Namespace Presenters
             overviewGroup.Items.Add(Item("Owner Dashboard", "Overview", AddressOf ViewFactory(Of IOwnerDashboardView)))
 
             Dim purchasingGroup As New NavigationGroup With {.GroupName = "Purchasing"}
+            purchasingGroup.Items.Add(Item("Purchasing Dashboard", "Purchasing", AddressOf ViewFactory(Of MerchSys.Purchasing.Views.IPurchasingDashboardView)))
             purchasingGroup.Items.Add(Item("Purchase Orders", "Purchasing", AddressOf ViewFactory(Of MerchSys.Purchasing.Views.IPurchaseOrderListView)))
             purchasingGroup.Items.Add(Item("Accounts Payable", "Purchasing", AddressOf ViewFactory(Of MerchSys.Purchasing.Views.IAPLedgerView)))
             If isManager Then
