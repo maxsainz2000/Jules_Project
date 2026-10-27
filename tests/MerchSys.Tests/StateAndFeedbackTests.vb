@@ -6,6 +6,7 @@ Imports Microsoft.Extensions.DependencyInjection
 Imports Moq
 Imports Xunit
 Imports System.Threading.Tasks
+Imports MerchSys.SharedKernel.Interfaces
 
 Public Class StateAndFeedbackTests
 

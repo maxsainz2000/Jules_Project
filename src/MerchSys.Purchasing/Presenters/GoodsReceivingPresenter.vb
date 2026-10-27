@@ -6,6 +6,8 @@ Imports MerchSys.Purchasing.Dtos
 Imports MerchSys.Purchasing.Services
 Imports MerchSys.Purchasing.Views
 Imports MerchSys.SharedKernel.Enums
+Imports MerchSys.SharedKernel.Interfaces
+Imports MerchSys.SharedKernel.Persistence
 
 Namespace Presenters
 
@@ -84,6 +86,7 @@ Namespace Presenters
         Private ReadOnly _purchaseOrderService As IPurchaseOrderService
         Private ReadOnly _goodsReceivingService As IGoodsReceivingService
         Private ReadOnly _vendorService As IVendorService
+        Private ReadOnly _conflictPresenter As IConflictPresenter
         Private _currentLines As List(Of GRLineItem) = New List(Of GRLineItem)()
 
         Public ReadOnly Property VatTreatmentValues As List(Of VatTreatment)
@@ -92,10 +95,15 @@ Namespace Presenters
             End Get
         End Property
 
-        Public Sub New(purchaseOrderService As IPurchaseOrderService, goodsReceivingService As IGoodsReceivingService, vendorService As IVendorService)
+        Public Sub New(purchaseOrderService As IPurchaseOrderService, goodsReceivingService As IGoodsReceivingService, vendorService As IVendorService, Optional conflictPresenter As IConflictPresenter = Nothing)
             _purchaseOrderService = purchaseOrderService
             _goodsReceivingService = goodsReceivingService
             _vendorService = vendorService
+            _conflictPresenter = conflictPresenter
+        End Sub
+
+        Public Sub New(purchaseOrderService As IPurchaseOrderService, goodsReceivingService As IGoodsReceivingService, vendorService As IVendorService)
+            Me.New(purchaseOrderService, goodsReceivingService, vendorService, Nothing)
         End Sub
 
         Public Property View As IGoodsReceivingView
@@ -208,11 +216,13 @@ Namespace Presenters
                     }).ToList()
                 }
 
-                Await _goodsReceivingService.ReceiveGoodsAsync(dto)
-                _view.ShowMessage("Goods received successfully.", "Success")
-
-                ' Reset state
-                Await LoadSubmittedPOsAsync()
+                Dim success = Await ConcurrencyHelper.ExecuteWithConflictPromptAsync(
+                    Function() _goodsReceivingService.ReceiveGoodsAsync(dto),
+                    AddressOf LoadSubmittedPOsAsync, _conflictPresenter)
+                If success Then
+                    _view.ShowMessage("Goods received successfully.", "Success")
+                    Await LoadSubmittedPOsAsync()
+                End If
 
             Catch ex As Exception
                 _view.ShowError($"Error receiving goods: {ex.Message}")

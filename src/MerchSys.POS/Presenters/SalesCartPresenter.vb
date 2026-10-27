@@ -6,6 +6,8 @@ Imports MediatR
 Imports MerchSys.POS.Services
 Imports MerchSys.POS.Views
 Imports MerchSys.SharedKernel.Queries
+Imports MerchSys.SharedKernel.Interfaces
+Imports MerchSys.SharedKernel.Persistence
 
 Namespace Presenters
 
@@ -15,18 +17,24 @@ Namespace Presenters
         Private ReadOnly _paymentService As IPaymentService
         Private ReadOnly _creditService As ICreditService
         Private ReadOnly _receiptService As IReceiptService
+        Private ReadOnly _conflictPresenter As IConflictPresenter
 
         Private _view As ISalesCartView
         Private _searchResults As List(Of ProductCatalogItem) = New List(Of ProductCatalogItem)()
         Private ReadOnly _cartId As String = Guid.NewGuid().ToString()
         Private ReadOnly _syncContext As TaskScheduler = TaskScheduler.FromCurrentSynchronizationContext()
 
-        Public Sub New(mediator As IMediator, cartService As ICartService, paymentService As IPaymentService, creditService As ICreditService, receiptService As IReceiptService)
+        Public Sub New(mediator As IMediator, cartService As ICartService, paymentService As IPaymentService, creditService As ICreditService, receiptService As IReceiptService, Optional conflictPresenter As IConflictPresenter = Nothing)
             _mediator = mediator
             _cartService = cartService
             _paymentService = paymentService
             _creditService = creditService
             _receiptService = receiptService
+            _conflictPresenter = conflictPresenter
+        End Sub
+
+        Public Sub New(mediator As IMediator, cartService As ICartService, paymentService As IPaymentService, creditService As ICreditService, receiptService As IReceiptService)
+            Me.New(mediator, cartService, paymentService, creditService, receiptService, Nothing)
         End Sub
 
         Public Property View As ISalesCartView
@@ -115,20 +123,22 @@ Namespace Presenters
         End Sub
 
         Private Sub ProceedWithFinalizeTransaction()
-            _cartService.FinalizeTransactionAsync(_cartId, _view.PaymentMethod, _view.SelectedCustomer).ContinueWith(
+            Dim finalizerTask = ConcurrencyHelper.ExecuteWithConflictPromptAsync(
+                Function()
+                    Return _cartService.FinalizeTransactionAsync(_cartId, _view.PaymentMethod, _view.SelectedCustomer).ContinueWith(
+                        Function(t)
+                            Dim transaction = t.Result
+                            Return _paymentService.ProcessPaymentAsync(transaction.Id, _view.CashTendered, _view.PaymentMethod, "")
+                        End Function, TaskContinuationOptions.OnlyOnRanToCompletion).Unwrap()
+                End Function,
+                Function() Task.FromResult(True), _conflictPresenter)
+
+            finalizerTask.ContinueWith(
                 Sub(t)
-                    If t.IsFaulted Then
-                        Throw t.Exception
+                    If t.Result Then
+                        _cartService.ClearCart(_cartId)
+                        RefreshCartView()
                     End If
-                    Dim transaction = t.Result
-                    _paymentService.ProcessPaymentAsync(transaction.Id, _view.CashTendered, _view.PaymentMethod, "").ContinueWith(
-                        Sub(pt)
-                            If pt.IsFaulted Then
-                                Throw pt.Exception
-                            End If
-                            _cartService.ClearCart(_cartId)
-                            RefreshCartView()
-                        End Sub, _syncContext)
                 End Sub, _syncContext)
         End Sub
 

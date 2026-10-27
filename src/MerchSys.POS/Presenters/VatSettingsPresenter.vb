@@ -2,6 +2,7 @@ Imports System.Threading.Tasks
 Imports MerchSys.POS.Services
 Imports MerchSys.POS.Views
 Imports MerchSys.SharedKernel.Interfaces
+Imports MerchSys.SharedKernel.Persistence
 
 Namespace Presenters
     Public Class VatSettingsPresenter
@@ -9,6 +10,7 @@ Namespace Presenters
         Private ReadOnly _writer As IVatConfigurationWriter
         Private ReadOnly _configLoader As VatConfigurationLoader
         Private ReadOnly _notificationService As INotificationService
+        Private ReadOnly _conflictPresenter As IConflictPresenter
 
         Public Property View As IVatSettingsView
             Get
@@ -32,10 +34,15 @@ Namespace Presenters
             End Set
         End Property
 
-        Public Sub New(writer As IVatConfigurationWriter, configLoader As VatConfigurationLoader, notificationService As INotificationService)
+        Public Sub New(writer As IVatConfigurationWriter, configLoader As VatConfigurationLoader, notificationService As INotificationService, Optional conflictPresenter As IConflictPresenter = Nothing)
             _writer = writer
             _configLoader = configLoader
             _notificationService = notificationService
+            _conflictPresenter = conflictPresenter
+        End Sub
+
+        Public Sub New(writer As IVatConfigurationWriter, configLoader As VatConfigurationLoader, notificationService As INotificationService)
+            Me.New(writer, configLoader, notificationService, Nothing)
         End Sub
 
         Public Async Function LoadConfigurationAsync() As Task
@@ -69,14 +76,17 @@ Namespace Presenters
                     .Tin = _view.Tin
                 }
 
-                Dim result = Await _writer.UpdateConfigurationAsync(request)
-
-                If result.Success Then
-                    _notificationService.ShowSuccess("VAT configuration saved successfully.")
-                Else
-                    _view.ErrorMessage = result.ErrorMessage
-                    _notificationService.ShowError(result.ErrorMessage)
-                End If
+                Dim success = Await ConcurrencyHelper.ExecuteWithConflictPromptAsync(
+                    Async Function()
+                        Dim result = Await _writer.UpdateConfigurationAsync(request)
+                        If result.Success Then
+                            _notificationService.ShowSuccess("VAT configuration saved successfully.")
+                        Else
+                            _view.ErrorMessage = result.ErrorMessage
+                            _notificationService.ShowError(result.ErrorMessage)
+                        End If
+                    End Function,
+                    AddressOf LoadConfigurationAsync, _conflictPresenter)
             Catch ex As Exception
                 Dim errMsg As String = ex.Message
                 _view.ErrorMessage = "Failed to save VAT settings."

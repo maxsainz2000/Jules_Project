@@ -1,6 +1,8 @@
+Imports System.Threading.Tasks
 Imports MerchSys.App.Services.Theming
 Imports MerchSys.App.Views.Dialogs
 Imports System.Windows.Forms
+Imports MerchSys.SharedKernel.Interfaces
 
 Namespace Presenters
     Public Class DefaultConflictPresenter
@@ -22,6 +24,11 @@ Namespace Presenters
                     Return ConflictResolution.Cancel
                 End If
             End Using
+        End Function
+
+        Public Function PromptAsync() As Task(Of Boolean) Implements IConflictPresenter.PromptAsync
+            Dim result = PromptConflict("the data")
+            Return Task.FromResult(result = ConflictResolution.Refresh)
         End Function
     End Class
 End Namespace
