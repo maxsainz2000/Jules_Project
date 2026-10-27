@@ -208,6 +208,7 @@ Namespace Views.Accounting
             Me.pnlNetSales.Name = "pnlNetSales"
             Me.pnlNetSales.Size = New System.Drawing.Size(180, 80)
             Me.pnlNetSales.TabIndex = 0
+            Me.pnlNetSales.Tag = "PrimaryMetricCard"
             '
             'lblNetSalesTitle
             '
@@ -218,6 +219,7 @@ Namespace Views.Accounting
             Me.lblNetSalesTitle.Size = New System.Drawing.Size(54, 15)
             Me.lblNetSalesTitle.TabIndex = 0
             Me.lblNetSalesTitle.Text = "Net Sales"
+            Me.lblNetSalesTitle.Tag = "MetricCaption"
             '
             'lblNetSalesValue
             '
@@ -228,6 +230,7 @@ Namespace Views.Accounting
             Me.lblNetSalesValue.Size = New System.Drawing.Size(50, 21)
             Me.lblNetSalesValue.TabIndex = 1
             Me.lblNetSalesValue.Text = "₱0.00"
+            Me.lblNetSalesValue.Tag = "PrimaryMetricValue"
             '
             'pnlTransactions
             '
@@ -239,6 +242,7 @@ Namespace Views.Accounting
             Me.pnlTransactions.Name = "pnlTransactions"
             Me.pnlTransactions.Size = New System.Drawing.Size(180, 80)
             Me.pnlTransactions.TabIndex = 1
+            Me.pnlTransactions.Tag = "SecondaryMetricCard"
             '
             'lblTransactionsTitle
             '
@@ -249,6 +253,7 @@ Namespace Views.Accounting
             Me.lblTransactionsTitle.Size = New System.Drawing.Size(72, 15)
             Me.lblTransactionsTitle.TabIndex = 0
             Me.lblTransactionsTitle.Text = "Transactions"
+            Me.lblTransactionsTitle.Tag = "MetricCaption"
             '
             'lblTransactionsValue
             '
@@ -259,6 +264,7 @@ Namespace Views.Accounting
             Me.lblTransactionsValue.Size = New System.Drawing.Size(19, 21)
             Me.lblTransactionsValue.TabIndex = 1
             Me.lblTransactionsValue.Text = "0"
+            Me.lblTransactionsValue.Tag = "SecondaryMetricValue"
             '
             'pnlAvgTransaction
             '
@@ -270,6 +276,7 @@ Namespace Views.Accounting
             Me.pnlAvgTransaction.Name = "pnlAvgTransaction"
             Me.pnlAvgTransaction.Size = New System.Drawing.Size(180, 80)
             Me.pnlAvgTransaction.TabIndex = 2
+            Me.pnlAvgTransaction.Tag = "SecondaryMetricCard"
             '
             'lblAvgTransactionTitle
             '
@@ -280,6 +287,7 @@ Namespace Views.Accounting
             Me.lblAvgTransactionTitle.Size = New System.Drawing.Size(91, 15)
             Me.lblAvgTransactionTitle.TabIndex = 0
             Me.lblAvgTransactionTitle.Text = "Avg Transaction"
+            Me.lblAvgTransactionTitle.Tag = "MetricCaption"
             '
             'lblAvgTransactionValue
             '
@@ -290,6 +298,7 @@ Namespace Views.Accounting
             Me.lblAvgTransactionValue.Size = New System.Drawing.Size(50, 21)
             Me.lblAvgTransactionValue.TabIndex = 1
             Me.lblAvgTransactionValue.Text = "₱0.00"
+            Me.lblAvgTransactionValue.Tag = "SecondaryMetricValue"
             '
             'pnlReturns
             '
@@ -301,6 +310,7 @@ Namespace Views.Accounting
             Me.pnlReturns.Name = "pnlReturns"
             Me.pnlReturns.Size = New System.Drawing.Size(180, 80)
             Me.pnlReturns.TabIndex = 3
+            Me.pnlReturns.Tag = "SecondaryMetricCard"
             '
             'lblReturnsTitle
             '
@@ -311,6 +321,7 @@ Namespace Views.Accounting
             Me.lblReturnsTitle.Size = New System.Drawing.Size(47, 15)
             Me.lblReturnsTitle.TabIndex = 0
             Me.lblReturnsTitle.Text = "Returns"
+            Me.lblReturnsTitle.Tag = "MetricCaption"
             '
             'lblReturnsValue
             '
@@ -321,6 +332,7 @@ Namespace Views.Accounting
             Me.lblReturnsValue.Size = New System.Drawing.Size(50, 21)
             Me.lblReturnsValue.TabIndex = 1
             Me.lblReturnsValue.Text = "₱0.00"
+            Me.lblReturnsValue.Tag = "SecondaryMetricValue"
             '
             'tabControl1
             '

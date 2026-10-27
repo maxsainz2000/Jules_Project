@@ -122,13 +122,19 @@ Namespace Views.Accounting
             Me.pnlSummary.Controls.Add(Me.lblError)
             Me.pnlSummary.Dock = System.Windows.Forms.DockStyle.Top
             Me.pnlSummary.Height = 80
+            Me.pnlSummary.Tag = "PrimaryMetricCard"
             
             ' Labels setup (simplified layout)
             Me.lblTotalSales.Location = New System.Drawing.Point(10, 10)
+            Me.lblTotalSales.Tag = "SecondaryMetricValue"
             Me.lblTotalPurchases.Location = New System.Drawing.Point(150, 10)
+            Me.lblTotalPurchases.Tag = "SecondaryMetricValue"
             Me.lblOutputVat.Location = New System.Drawing.Point(290, 10)
+            Me.lblOutputVat.Tag = "SecondaryMetricValue"
             Me.lblInputVat.Location = New System.Drawing.Point(430, 10)
+            Me.lblInputVat.Tag = "SecondaryMetricValue"
             Me.lblNetVatPayable.Location = New System.Drawing.Point(570, 10)
+            Me.lblNetVatPayable.Tag = "PrimaryMetricValue"
             Me.lblFilingStatus.Location = New System.Drawing.Point(10, 40)
             Me.lblError.Location = New System.Drawing.Point(150, 40)
             Me.lblError.ForeColor = System.Drawing.Color.Red

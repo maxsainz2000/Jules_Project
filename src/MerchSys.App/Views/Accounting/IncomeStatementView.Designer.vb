@@ -249,6 +249,7 @@ Partial Class IncomeStatementView
         Me.lblNetSales.Size = New System.Drawing.Size(126, 21)
         Me.lblNetSales.TabIndex = 0
         Me.lblNetSales.Text = "Net Sales: ₱0.00"
+        Me.lblNetSales.Tag = "SecondaryMetricValue"
         '
         'lblCostOfGoodsSold
         '
@@ -259,6 +260,7 @@ Partial Class IncomeStatementView
         Me.lblCostOfGoodsSold.Size = New System.Drawing.Size(111, 21)
         Me.lblCostOfGoodsSold.TabIndex = 1
         Me.lblCostOfGoodsSold.Text = "COGS: -₱0.00"
+        Me.lblCostOfGoodsSold.Tag = "SecondaryMetricValue"
         '
         'lblGrossProfit
         '
@@ -269,6 +271,7 @@ Partial Class IncomeStatementView
         Me.lblGrossProfit.Size = New System.Drawing.Size(149, 21)
         Me.lblGrossProfit.TabIndex = 2
         Me.lblGrossProfit.Text = "Gross Profit: ₱0.00"
+        Me.lblGrossProfit.Tag = "SecondaryMetricValue"
         '
         'lblGrossMarginPercent
         '
@@ -279,6 +282,7 @@ Partial Class IncomeStatementView
         Me.lblGrossMarginPercent.Size = New System.Drawing.Size(124, 19)
         Me.lblGrossMarginPercent.TabIndex = 3
         Me.lblGrossMarginPercent.Text = "Gross Margin: 0.0%"
+        Me.lblGrossMarginPercent.Tag = "SecondaryMetricValue"
         '
         'lblOperatingExpenses
         '
@@ -289,6 +293,7 @@ Partial Class IncomeStatementView
         Me.lblOperatingExpenses.Size = New System.Drawing.Size(207, 21)
         Me.lblOperatingExpenses.TabIndex = 4
         Me.lblOperatingExpenses.Text = "Operating Expenses: -₱0.00"
+        Me.lblOperatingExpenses.Tag = "SecondaryMetricValue"
         '
         'lblNetIncome
         '
@@ -299,6 +304,7 @@ Partial Class IncomeStatementView
         Me.lblNetIncome.Size = New System.Drawing.Size(170, 25)
         Me.lblNetIncome.TabIndex = 5
         Me.lblNetIncome.Text = "Net Income: ₱0.00"
+        Me.lblNetIncome.Tag = "PrimaryMetricValue"
         '
         'lblNetMarginPercent
         '
@@ -309,6 +315,7 @@ Partial Class IncomeStatementView
         Me.lblNetMarginPercent.Size = New System.Drawing.Size(115, 19)
         Me.lblNetMarginPercent.TabIndex = 6
         Me.lblNetMarginPercent.Text = "Net Margin: 0.0%"
+        Me.lblNetMarginPercent.Tag = "SecondaryMetricValue"
         '
         'dgvOperatingExpenses
         '

@@ -12,10 +12,16 @@ Namespace Views.Accounting
         Private _presenter As IncomeStatementPresenter
         Private _isInitializing As Boolean = True
 
+        Public Sub New()
+            InitializeComponent()
+        End Sub
+
         Public Sub New(presenter As IncomeStatementPresenter)
             InitializeComponent()
             _presenter = presenter
-            _presenter.View = Me
+            If _presenter IsNot Nothing Then
+                _presenter.View = Me
+            End If
             lblWhatThisMeansIcon.Image = Services.Theming.IconHelper.GetIcon(Services.Theming.AppIcon.Lightbulb, Drawing.Color.Goldenrod, 24)
             lblWhatThisMeansIcon.ImageAlign = Drawing.ContentAlignment.MiddleCenter
         End Sub

@@ -28,6 +28,9 @@ Namespace Views.Accounting
         'Do not modify it using the code editor.
         <System.Diagnostics.DebuggerStepThrough()>
         Private Sub InitializeComponent()
+            Me.pnlVatTile = New System.Windows.Forms.Panel()
+            Me.lblVatPayable = New System.Windows.Forms.Label()
+            Me.lblVatDueDate = New System.Windows.Forms.Label()
             Me.lblTitle = New System.Windows.Forms.Label()
             Me.btnRefresh = New System.Windows.Forms.Button()
             Me.lblLastRefreshed = New System.Windows.Forms.Label()
@@ -150,6 +153,7 @@ Namespace Views.Accounting
             Me.lblTodayRevenue.Name = "lblTodayRevenue"
             Me.lblTodayRevenue.Size = New System.Drawing.Size(0, 15)
             Me.lblTodayRevenue.TabIndex = 7
+            Me.lblTodayRevenue.Tag = "SecondaryMetricValue"
             '
             'lblMtdRevenue
             '
@@ -158,6 +162,7 @@ Namespace Views.Accounting
             Me.lblMtdRevenue.Name = "lblMtdRevenue"
             Me.lblMtdRevenue.Size = New System.Drawing.Size(0, 15)
             Me.lblMtdRevenue.TabIndex = 8
+            Me.lblMtdRevenue.Tag = "PrimaryMetricValue"
             '
             'lblYtdRevenue
             '
@@ -166,6 +171,7 @@ Namespace Views.Accounting
             Me.lblYtdRevenue.Name = "lblYtdRevenue"
             Me.lblYtdRevenue.Size = New System.Drawing.Size(0, 15)
             Me.lblYtdRevenue.TabIndex = 9
+            Me.lblYtdRevenue.Tag = "MetricCaption"
             '
             'lblGrossMarginToday
             '
@@ -174,6 +180,7 @@ Namespace Views.Accounting
             Me.lblGrossMarginToday.Name = "lblGrossMarginToday"
             Me.lblGrossMarginToday.Size = New System.Drawing.Size(0, 15)
             Me.lblGrossMarginToday.TabIndex = 10
+            Me.lblGrossMarginToday.Tag = "SecondaryMetricValue"
             '
             'lblTotalAR
             '
@@ -182,6 +189,7 @@ Namespace Views.Accounting
             Me.lblTotalAR.Name = "lblTotalAR"
             Me.lblTotalAR.Size = New System.Drawing.Size(0, 15)
             Me.lblTotalAR.TabIndex = 11
+            Me.lblTotalAR.Tag = "SecondaryMetricValue"
             '
             'lblTotalAP
             '
@@ -190,6 +198,7 @@ Namespace Views.Accounting
             Me.lblTotalAP.Name = "lblTotalAP"
             Me.lblTotalAP.Size = New System.Drawing.Size(0, 15)
             Me.lblTotalAP.TabIndex = 12
+            Me.lblTotalAP.Tag = "SecondaryMetricValue"
             '
             'lblInventoryValue
             '
@@ -198,6 +207,7 @@ Namespace Views.Accounting
             Me.lblInventoryValue.Name = "lblInventoryValue"
             Me.lblInventoryValue.Size = New System.Drawing.Size(0, 15)
             Me.lblInventoryValue.TabIndex = 13
+            Me.lblInventoryValue.Tag = "MetricCaption"
             '
             'lblOverdueARCount
             '
@@ -244,6 +254,7 @@ Namespace Views.Accounting
             Me.pnlVatTile.Size = New System.Drawing.Size(200, 50)
             Me.pnlVatTile.TabIndex = 17
             Me.pnlVatTile.Cursor = System.Windows.Forms.Cursors.Hand
+            Me.pnlVatTile.Tag = "TertiaryMetricCard"
             '
             'lblVatPayable
             '

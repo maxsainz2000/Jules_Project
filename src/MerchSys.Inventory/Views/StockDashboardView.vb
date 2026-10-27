@@ -33,11 +33,11 @@ Namespace Views
         End Sub
 
         Private Sub InitializeComponent()
-            _lblTotalStockValue = New Label()
-            _lblLowStockCount = New Label()
-            _lblExpiredBatchCount = New Label()
-            _lblCriticalRiskCount = New Label()
-            _lblTotalProducts = New Label()
+            _lblTotalStockValue = New Label() With {.Tag = "SecondaryMetricValue"}
+            _lblLowStockCount = New Label() With {.Tag = "SecondaryMetricValue"}
+            _lblExpiredBatchCount = New Label() With {.Tag = "SecondaryMetricValue"}
+            _lblCriticalRiskCount = New Label() With {.Tag = "PrimaryMetricValue"}
+            _lblTotalProducts = New Label() With {.Tag = "SecondaryMetricValue"}
 
             _txtFilter = New TextBox()
             _cboCategoryFilter = New ComboBox()

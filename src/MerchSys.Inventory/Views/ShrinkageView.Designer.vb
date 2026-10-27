@@ -43,6 +43,7 @@ Namespace Views
             Me.pnlSummary.Location = New System.Drawing.Point(0, 0)
             Me.pnlSummary.Name = "pnlSummary"
             Me.pnlSummary.Size = New System.Drawing.Size(800, 60)
+            Me.pnlSummary.Tag = "PrimaryMetricCard"
 
             'lblTotalItems
             Me.lblTotalItems.AutoSize = True
@@ -51,6 +52,7 @@ Namespace Views
             Me.lblTotalItems.Name = "lblTotalItems"
             Me.lblTotalItems.Size = New System.Drawing.Size(155, 21)
             Me.lblTotalItems.Text = "Total Items Lost: 0"
+            Me.lblTotalItems.Tag = "SecondaryMetricValue"
 
             'lblTotalValue
             Me.lblTotalValue.AutoSize = True
@@ -59,6 +61,7 @@ Namespace Views
             Me.lblTotalValue.Name = "lblTotalValue"
             Me.lblTotalValue.Size = New System.Drawing.Size(175, 21)
             Me.lblTotalValue.Text = "Total Value Lost: $0.00"
+            Me.lblTotalValue.Tag = "PrimaryMetricValue"
 
             'btnRecord
             Me.btnRecord.Anchor = AnchorStyles.Top Or AnchorStyles.Right

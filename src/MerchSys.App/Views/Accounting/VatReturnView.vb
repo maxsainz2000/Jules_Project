@@ -13,10 +13,16 @@ Namespace Views.Accounting
 
         Private ReadOnly _presenter As VatReturnPresenter
 
+        Public Sub New()
+            InitializeComponent()
+        End Sub
+
         Public Sub New(presenter As VatReturnPresenter)
             InitializeComponent()
             _presenter = presenter
-            _presenter.View = Me
+            If _presenter IsNot Nothing Then
+                _presenter.View = Me
+            End If
 
             AddHandler Me.Load, Sub(s, e) RaiseEvent ViewLoaded(Me, EventArgs.Empty)
         End Sub

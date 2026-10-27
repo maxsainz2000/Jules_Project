@@ -105,6 +105,7 @@ Namespace Views
             Me.pnlKpi1.Name = "pnlKpi1"
             Me.pnlKpi1.Size = New System.Drawing.Size(294, 194)
             Me.pnlKpi1.TabIndex = 0
+            Me.pnlKpi1.Tag = "PrimaryMetricCard"
             '
             'lblKpi1Title
             '
@@ -115,6 +116,7 @@ Namespace Views
             Me.lblKpi1Title.Size = New System.Drawing.Size(120, 21)
             Me.lblKpi1Title.TabIndex = 0
             Me.lblKpi1Title.Text = "Gross Revenue"
+            Me.lblKpi1Title.Tag = "SectionHeader"
             '
             'lblKpi1Value
             '
@@ -125,6 +127,7 @@ Namespace Views
             Me.lblKpi1Value.Size = New System.Drawing.Size(55, 30)
             Me.lblKpi1Value.TabIndex = 1
             Me.lblKpi1Value.Text = "$0.00"
+            Me.lblKpi1Value.Tag = "PrimaryMetricValue"
             '
             'lblKpi1Interpretation
             '
@@ -134,6 +137,7 @@ Namespace Views
             Me.lblKpi1Interpretation.Size = New System.Drawing.Size(117, 15)
             Me.lblKpi1Interpretation.TabIndex = 2
             Me.lblKpi1Interpretation.Text = "What This Means: ..."
+            Me.lblKpi1Interpretation.Tag = "MetricCaption"
             '
             'pnlKpi2
             '
@@ -146,6 +150,7 @@ Namespace Views
             Me.pnlKpi2.Name = "pnlKpi2"
             Me.pnlKpi2.Size = New System.Drawing.Size(294, 194)
             Me.pnlKpi2.TabIndex = 1
+            Me.pnlKpi2.Tag = "SecondaryMetricCard"
             '
             'lblKpi2Title
             '
@@ -166,6 +171,7 @@ Namespace Views
             Me.lblKpi2Value.Size = New System.Drawing.Size(55, 30)
             Me.lblKpi2Value.TabIndex = 1
             Me.lblKpi2Value.Text = "$0.00"
+            Me.lblKpi2Value.Tag = "SecondaryMetricValue"
             '
             'lblKpi2Interpretation
             '
@@ -175,6 +181,7 @@ Namespace Views
             Me.lblKpi2Interpretation.Size = New System.Drawing.Size(117, 15)
             Me.lblKpi2Interpretation.TabIndex = 2
             Me.lblKpi2Interpretation.Text = "What This Means: ..."
+            Me.lblKpi2Interpretation.Tag = "MetricCaption"
             '
             'pnlKpi3
             '
@@ -187,6 +194,7 @@ Namespace Views
             Me.pnlKpi3.Name = "pnlKpi3"
             Me.pnlKpi3.Size = New System.Drawing.Size(294, 194)
             Me.pnlKpi3.TabIndex = 2
+            Me.pnlKpi3.Tag = "SecondaryMetricCard"
             '
             'lblKpi3Title
             '
@@ -207,6 +215,7 @@ Namespace Views
             Me.lblKpi3Value.Size = New System.Drawing.Size(55, 30)
             Me.lblKpi3Value.TabIndex = 1
             Me.lblKpi3Value.Text = "$0.00"
+            Me.lblKpi3Value.Tag = "SecondaryMetricValue"
             '
             'lblKpi3Interpretation
             '
@@ -216,6 +225,7 @@ Namespace Views
             Me.lblKpi3Interpretation.Size = New System.Drawing.Size(117, 15)
             Me.lblKpi3Interpretation.TabIndex = 2
             Me.lblKpi3Interpretation.Text = "What This Means: ..."
+            Me.lblKpi3Interpretation.Tag = "MetricCaption"
             '
             'pnlKpi4
             '
@@ -228,6 +238,7 @@ Namespace Views
             Me.pnlKpi4.Name = "pnlKpi4"
             Me.pnlKpi4.Size = New System.Drawing.Size(294, 194)
             Me.pnlKpi4.TabIndex = 3
+            Me.pnlKpi4.Tag = "SecondaryMetricCard"
             '
             'lblKpi4Title
             '
@@ -248,6 +259,7 @@ Namespace Views
             Me.lblKpi4Value.Size = New System.Drawing.Size(55, 30)
             Me.lblKpi4Value.TabIndex = 1
             Me.lblKpi4Value.Text = "$0.00"
+            Me.lblKpi4Value.Tag = "SecondaryMetricValue"
             '
             'lblKpi4Interpretation
             '
@@ -257,6 +269,7 @@ Namespace Views
             Me.lblKpi4Interpretation.Size = New System.Drawing.Size(117, 15)
             Me.lblKpi4Interpretation.TabIndex = 2
             Me.lblKpi4Interpretation.Text = "What This Means: ..."
+            Me.lblKpi4Interpretation.Tag = "MetricCaption"
             '
             'OwnerDashboardView
             '

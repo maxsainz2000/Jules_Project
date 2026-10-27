@@ -14,11 +14,17 @@ Namespace Views.Accounting
         Private ReadOnly _presenter As VatReliefReportPresenter
         Private _isInitializing As Boolean = True
 
+        Public Sub New()
+            InitializeComponent()
+        End Sub
+
         Public Sub New(presenter As VatReliefReportPresenter)
             InitializeComponent()
 
             _presenter = presenter
-            _presenter.View = Me
+            If _presenter IsNot Nothing Then
+                _presenter.View = Me
+            End If
 
             ConfigureGrid()
         End Sub

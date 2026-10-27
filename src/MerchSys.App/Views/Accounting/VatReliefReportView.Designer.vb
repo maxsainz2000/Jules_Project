@@ -162,6 +162,7 @@ Namespace Views.Accounting
             Me.pnlNetVatBanner.Name = "pnlNetVatBanner"
             Me.pnlNetVatBanner.Size = New System.Drawing.Size(900, 60)
             Me.pnlNetVatBanner.TabIndex = 1
+            Me.pnlNetVatBanner.Tag = "PrimaryMetricCard"
             '
             'lblNetVatPayable
             '
@@ -172,6 +173,7 @@ Namespace Views.Accounting
             Me.lblNetVatPayable.Size = New System.Drawing.Size(76, 32)
             Me.lblNetVatPayable.TabIndex = 1
             Me.lblNetVatPayable.Text = "₱0.00"
+            Me.lblNetVatPayable.Tag = "PrimaryMetricValue"
             '
             'lblNetVatTitle
             '
@@ -213,6 +215,7 @@ Namespace Views.Accounting
             Me.pnlSalesCard.Name = "pnlSalesCard"
             Me.pnlSalesCard.Size = New System.Drawing.Size(430, 180)
             Me.pnlSalesCard.TabIndex = 0
+            Me.pnlSalesCard.Tag = "SecondaryMetricCard"
             '
             'lblOutputVat
             '
@@ -286,6 +289,7 @@ Namespace Views.Accounting
             Me.pnlPurchasesCard.Name = "pnlPurchasesCard"
             Me.pnlPurchasesCard.Size = New System.Drawing.Size(430, 180)
             Me.pnlPurchasesCard.TabIndex = 1
+            Me.pnlPurchasesCard.Tag = "SecondaryMetricCard"
             '
             'lblInputVat
             '

@@ -18,10 +18,16 @@ Namespace Views.Accounting
         Public Event RefreshRequested As EventHandler Implements ISalesSummaryView.RefreshRequested
         Public Event ViewLoaded As EventHandler Implements ISalesSummaryView.ViewLoaded
 
+        Public Sub New()
+            InitializeComponent()
+        End Sub
+
         Public Sub New(presenter As SalesSummaryPresenter)
             InitializeComponent()
             _presenter = presenter
-            _presenter.View = Me
+            If _presenter IsNot Nothing Then
+                _presenter.View = Me
+            End If
 
             lblWarning.Image = Services.Theming.IconHelper.GetIcon(Services.Theming.AppIcon.Warning, Drawing.Color.Red, 16)
             lblWarning.ImageAlign = Drawing.ContentAlignment.MiddleLeft
