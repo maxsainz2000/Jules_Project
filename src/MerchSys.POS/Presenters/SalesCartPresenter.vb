@@ -1,3 +1,5 @@
+Imports MerchSys.SharedKernel.Interfaces
+Imports MerchSys.SharedKernel.Persistence
 Imports System
 Imports System.Collections.Generic
 Imports System.Threading.Tasks
@@ -17,9 +19,19 @@ Namespace Presenters
         Private ReadOnly _receiptService As IReceiptService
 
         Private _view As ISalesCartView
+        Private ReadOnly _conflictPresenter As IConflictPresenter
         Private _searchResults As List(Of ProductCatalogItem) = New List(Of ProductCatalogItem)()
         Private ReadOnly _cartId As String = Guid.NewGuid().ToString()
         Private ReadOnly _syncContext As TaskScheduler = TaskScheduler.FromCurrentSynchronizationContext()
+
+        Public Sub New(mediator As IMediator, cartService As ICartService, paymentService As IPaymentService, creditService As ICreditService, receiptService As IReceiptService, Optional conflictPresenter As IConflictPresenter = Nothing)
+            _mediator = mediator
+            _cartService = cartService
+            _paymentService = paymentService
+            _creditService = creditService
+            _receiptService = receiptService
+            _conflictPresenter = conflictPresenter
+        End Sub
 
         Public Sub New(mediator As IMediator, cartService As ICartService, paymentService As IPaymentService, creditService As ICreditService, receiptService As IReceiptService)
             _mediator = mediator
@@ -114,22 +126,22 @@ Namespace Presenters
             End If
         End Sub
 
-        Private Sub ProceedWithFinalizeTransaction()
-            _cartService.FinalizeTransactionAsync(_cartId, _view.PaymentMethod, _view.SelectedCustomer).ContinueWith(
-                Sub(t)
-                    If t.IsFaulted Then
-                        Throw t.Exception
-                    End If
-                    Dim transaction = t.Result
-                    _paymentService.ProcessPaymentAsync(transaction.Id, _view.CashTendered, _view.PaymentMethod, "").ContinueWith(
-                        Sub(pt)
-                            If pt.IsFaulted Then
-                                Throw pt.Exception
-                            End If
-                            _cartService.ClearCart(_cartId)
-                            RefreshCartView()
-                        End Sub, _syncContext)
-                End Sub, _syncContext)
+        Private Async Sub ProceedWithFinalizeTransaction()
+            Dim work As Func(Of Task) = Async Function()
+                Dim transaction = Await _cartService.FinalizeTransactionAsync(_cartId, _view.PaymentMethod, _view.SelectedCustomer)
+                Await _paymentService.ProcessPaymentAsync(transaction.Id, _view.CashTendered, _view.PaymentMethod, "")
+                _cartService.ClearCart(_cartId)
+            End Function
+
+            Dim refresh As Func(Of Task) = Function()
+                RefreshCartView()
+                Return Task.CompletedTask
+            End Function
+
+            Dim success = Await ConcurrencyHelper.ExecuteWithConflictPromptAsync(work, refresh, _conflictPresenter)
+            If success Then
+                RefreshCartView()
+            End If
         End Sub
 
         Private Sub OnPreviewReceipt(sender As Object, e As Integer)

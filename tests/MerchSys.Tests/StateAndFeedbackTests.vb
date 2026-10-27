@@ -1,5 +1,6 @@
 Imports MerchSys.App.Controls
 Imports MerchSys.App.Presenters
+Imports MerchSys.SharedKernel.Interfaces
 Imports MerchSys.App.Services.Theming
 Imports MerchSys.App.Views.Dialogs
 Imports Microsoft.Extensions.DependencyInjection

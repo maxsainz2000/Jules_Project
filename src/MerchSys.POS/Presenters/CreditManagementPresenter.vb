@@ -1,3 +1,5 @@
+Imports MerchSys.SharedKernel.Interfaces
+Imports MerchSys.SharedKernel.Persistence
 Imports System.Threading.Tasks
 Imports System.Collections.Generic
 Imports System.Linq
@@ -12,8 +14,17 @@ Namespace Presenters
         Private ReadOnly _creditService As ICreditService
         Private ReadOnly _dbContext As POSDbContext
         Private _view As ICreditManagementView
+        Private ReadOnly _conflictPresenter As IConflictPresenter
         Private _allAccounts As List(Of CreditAccount)
         Private _overdueAccountIds As HashSet(Of Integer)
+
+        Public Sub New(creditService As ICreditService, dbContext As POSDbContext, Optional conflictPresenter As IConflictPresenter = Nothing)
+            _creditService = creditService
+            _dbContext = dbContext
+            _allAccounts = New List(Of CreditAccount)()
+            _overdueAccountIds = New HashSet(Of Integer)()
+            _conflictPresenter = conflictPresenter
+        End Sub
 
         Public Sub New(creditService As ICreditService, dbContext As POSDbContext)
             _creditService = creditService
@@ -206,7 +217,7 @@ Namespace Presenters
                 End Sub, TaskScheduler.FromCurrentSynchronizationContext())
         End Sub
 
-        Private Sub OnRecordPayment(sender As Object, e As RecordPaymentEventArgs)
+        Private Async Sub OnRecordPayment(sender As Object, e As RecordPaymentEventArgs)
             If _view Is Nothing OrElse e Is Nothing Then Return
 
             If e.Amount <= 0 Then
@@ -225,22 +236,27 @@ Namespace Presenters
                 Return
             End If
 
-            _creditService.RecordPaymentAsync(e.AccountId, e.Amount, e.PaymentMethod).ContinueWith(
-                Sub(t)
-                    If t.IsFaulted Then
-                        Dim ex = t.Exception.GetBaseException()
-                        _view.ErrorMessage = "Failed to record payment: " & ex.Message
-                    Else
-                        _view.Message = "Payment recorded successfully."
-                        LoadDataAsync()
+            Try
+                Dim work As Func(Of Task) = Function()
+                    Return _creditService.RecordPaymentAsync(e.AccountId, e.Amount, e.PaymentMethod)
+                End Function
+                Dim refresh As Func(Of Task) = Function()
+                    LoadDataAsync()
+                    Return Task.CompletedTask
+                End Function
 
-                        ' Reload selected account history
-                        Dim accountSelectedEventArgs As New AccountSelectedEventArgs With {
-                            .AccountId = e.AccountId
-                        }
-                        OnAccountSelected(Me, accountSelectedEventArgs)
-                    End If
-                End Sub, TaskScheduler.FromCurrentSynchronizationContext())
+                Dim success = Await ConcurrencyHelper.ExecuteWithConflictPromptAsync(work, refresh, _conflictPresenter)
+                If success Then
+                    _view.Message = "Payment recorded successfully."
+                    LoadDataAsync()
+                    Dim accountSelectedEventArgs As New AccountSelectedEventArgs With {
+                        .AccountId = e.AccountId
+                    }
+                    OnAccountSelected(Me, accountSelectedEventArgs)
+                End If
+            Catch ex As Exception
+                _view.ErrorMessage = "Failed to record payment: " & ex.Message
+            End Try
         End Sub
     End Class
 

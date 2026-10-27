@@ -1,3 +1,4 @@
+Imports MerchSys.SharedKernel.Persistence
 Imports System.Threading.Tasks
 Imports MerchSys.POS.Services
 Imports MerchSys.POS.Views
@@ -6,6 +7,7 @@ Imports MerchSys.SharedKernel.Interfaces
 Namespace Presenters
     Public Class VatSettingsPresenter
         Private _view As IVatSettingsView
+        Private ReadOnly _conflictPresenter As IConflictPresenter
         Private ReadOnly _writer As IVatConfigurationWriter
         Private ReadOnly _configLoader As VatConfigurationLoader
         Private ReadOnly _notificationService As INotificationService
@@ -31,6 +33,13 @@ Namespace Presenters
                 End If
             End Set
         End Property
+
+        Public Sub New(writer As IVatConfigurationWriter, configLoader As VatConfigurationLoader, notificationService As INotificationService, Optional conflictPresenter As IConflictPresenter = Nothing)
+            _writer = writer
+            _configLoader = configLoader
+            _notificationService = notificationService
+            _conflictPresenter = conflictPresenter
+        End Sub
 
         Public Sub New(writer As IVatConfigurationWriter, configLoader As VatConfigurationLoader, notificationService As INotificationService)
             _writer = writer
@@ -69,13 +78,19 @@ Namespace Presenters
                     .Tin = _view.Tin
                 }
 
-                Dim result = Await _writer.UpdateConfigurationAsync(request)
+                Dim result As VatConfigurationUpdateResult = Nothing
+                Dim success = Await ConcurrencyHelper.ExecuteWithConflictPromptAsync(
+                    Async Function()
+                        result = Await _writer.UpdateConfigurationAsync(request)
+                    End Function, AddressOf LoadConfigurationAsync, _conflictPresenter)
 
-                If result.Success Then
-                    _notificationService.ShowSuccess("VAT configuration saved successfully.")
-                Else
-                    _view.ErrorMessage = result.ErrorMessage
-                    _notificationService.ShowError(result.ErrorMessage)
+                If success AndAlso result IsNot Nothing Then
+                    If result.Success Then
+                        _notificationService.ShowSuccess("VAT configuration saved successfully.")
+                    Else
+                        _view.ErrorMessage = result.ErrorMessage
+                        _notificationService.ShowError(result.ErrorMessage)
+                    End If
                 End If
             Catch ex As Exception
                 Dim errMsg As String = ex.Message

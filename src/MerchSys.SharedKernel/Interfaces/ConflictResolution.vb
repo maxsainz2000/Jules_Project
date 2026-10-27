@@ -1,4 +1,4 @@
-Namespace Presenters
+Namespace Interfaces
     Public Enum ConflictResolution
         Refresh = 0
         Cancel = 1

@@ -1,3 +1,5 @@
+Imports MerchSys.SharedKernel.Interfaces
+Imports MerchSys.SharedKernel.Persistence
 Imports System
 Imports System.Collections.Generic
 Imports System.Linq
@@ -81,6 +83,7 @@ Namespace Presenters
     Public Class GoodsReceivingPresenter
 
         Private _view As IGoodsReceivingView
+        Private ReadOnly _conflictPresenter As IConflictPresenter
         Private ReadOnly _purchaseOrderService As IPurchaseOrderService
         Private ReadOnly _goodsReceivingService As IGoodsReceivingService
         Private ReadOnly _vendorService As IVendorService
@@ -91,6 +94,13 @@ Namespace Presenters
                 Return [Enum].GetValues(GetType(VatTreatment)).Cast(Of VatTreatment)().ToList()
             End Get
         End Property
+
+        Public Sub New(purchaseOrderService As IPurchaseOrderService, goodsReceivingService As IGoodsReceivingService, vendorService As IVendorService, Optional conflictPresenter As IConflictPresenter = Nothing)
+            _purchaseOrderService = purchaseOrderService
+            _goodsReceivingService = goodsReceivingService
+            _vendorService = vendorService
+            _conflictPresenter = conflictPresenter
+        End Sub
 
         Public Sub New(purchaseOrderService As IPurchaseOrderService, goodsReceivingService As IGoodsReceivingService, vendorService As IVendorService)
             _purchaseOrderService = purchaseOrderService
@@ -208,11 +218,11 @@ Namespace Presenters
                     }).ToList()
                 }
 
-                Await _goodsReceivingService.ReceiveGoodsAsync(dto)
-                _view.ShowMessage("Goods received successfully.", "Success")
-
-                ' Reset state
-                Await LoadSubmittedPOsAsync()
+                Dim success = Await ConcurrencyHelper.ExecuteWithConflictPromptAsync(Function() _goodsReceivingService.ReceiveGoodsAsync(dto), AddressOf LoadSubmittedPOsAsync, _conflictPresenter)
+                If success Then
+                    _view.ShowMessage("Goods received successfully.", "Success")
+                    Await LoadSubmittedPOsAsync()
+                End If
 
             Catch ex As Exception
                 _view.ShowError($"Error receiving goods: {ex.Message}")

@@ -1,5 +1,7 @@
+Imports System.Threading.Tasks
 Imports MerchSys.App.Services.Theming
 Imports MerchSys.App.Views.Dialogs
+Imports MerchSys.SharedKernel.Interfaces
 Imports System.Windows.Forms
 
 Namespace Presenters
@@ -11,6 +13,14 @@ Namespace Presenters
         Public Sub New(themeService As IThemeService)
             _themeService = themeService
         End Sub
+
+        Public Function PromptAsync() As Task(Of Boolean) Implements IConflictPresenter.PromptAsync
+            Using dialog As New ConcurrencyConflictPrompt("Record")
+                _themeService.ApplyTheme(dialog)
+                Dim result = dialog.ShowDialog()
+                Return Task.FromResult(result = DialogResult.Retry OrElse result = DialogResult.OK)
+            End Using
+        End Function
 
         Public Function PromptConflict(entityName As String) As ConflictResolution Implements IConflictPresenter.PromptConflict
             Using dialog As New ConcurrencyConflictPrompt(entityName)
