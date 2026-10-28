@@ -28,6 +28,7 @@ Namespace Views.Accounting
         'Do not modify it using the code editor.
         <System.Diagnostics.DebuggerStepThrough()>
         Private Sub InitializeComponent()
+            Me.pnlErrorState = New MerchSys.App.Controls.ErrorStatePanel()
             Me.deltaIndicator = New MerchSys.App.Controls.DeltaIndicator()
             Me.sparkline = New MerchSys.App.Controls.Sparkline()
             Me.pnlVatTile = New System.Windows.Forms.Panel()
@@ -310,6 +311,15 @@ Namespace Views.Accounting
             Me.Controls.Add(Me.dgvMonthlyTrends)
             Me.Controls.Add(Me.dgvTopProducts)
             Me.Controls.Add(Me.pnlWhatThisMeans)
+            '
+            ' pnlErrorState
+            '
+            Me.pnlErrorState.Dock = System.Windows.Forms.DockStyle.Fill
+            Me.pnlErrorState.Location = New System.Drawing.Point(0, 0)
+            Me.pnlErrorState.Name = "pnlErrorState"
+            Me.pnlErrorState.TabIndex = 26
+            Me.pnlErrorState.Visible = False
+            Me.Controls.Add(Me.pnlErrorState)
             Me.Controls.Add(Me.lblLoading)
             Me.Controls.Add(Me.lblLastRefreshed)
             Me.Controls.Add(Me.btnRefresh)
@@ -351,6 +361,7 @@ Namespace Views.Accounting
         Friend WithEvents lblVatDueDate As System.Windows.Forms.Label
         Friend WithEvents deltaIndicator As MerchSys.App.Controls.DeltaIndicator
         Friend WithEvents sparkline As MerchSys.App.Controls.Sparkline
+        Friend WithEvents pnlErrorState As MerchSys.App.Controls.ErrorStatePanel
 
     End Class
 

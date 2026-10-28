@@ -84,4 +84,46 @@ Public Class StateAndFeedbackTests
         Assert.IsType(Of DefaultConflictPresenter)(presenter)
     End Sub
 
+
+    <Fact>
+    Public Sub ErrorStatePanel_SetProperties_FiresRetryEvent()
+        Using panel As New ErrorStatePanel()
+            panel.Title = "Error"
+            panel.Message = "Failed"
+            panel.RetryText = "Retry"
+
+            Assert.Equal("Error", panel.Title)
+            Assert.Equal("Failed", panel.Message)
+            Assert.Equal("Retry", panel.RetryText)
+
+            Dim fired = False
+            AddHandler panel.RetryClicked, Sub(s, e) fired = True
+
+            Dim btnProp = panel.GetType().GetProperty("btnRetry", System.Reflection.BindingFlags.NonPublic Or System.Reflection.BindingFlags.Instance)
+            Dim btn = DirectCast(btnProp.GetValue(panel), System.Windows.Forms.Button)
+            btn.PerformClick()
+
+            Assert.True(fired)
+        End Using
+    End Sub
+
+    <Fact>
+    Public Sub ErrorStatePanel_ApplyTheme_UpdatesColors()
+        Using panel As New ErrorStatePanel()
+            Dim tokens As New ThemeTokens()
+            tokens.Danger = System.Drawing.Color.Red
+            tokens.SecondaryText = System.Drawing.Color.Gray
+            panel.ApplyTheme(tokens)
+
+            Dim lblTitleProp = panel.GetType().GetProperty("lblTitle", System.Reflection.BindingFlags.NonPublic Or System.Reflection.BindingFlags.Instance)
+            Dim lblTitle = DirectCast(lblTitleProp.GetValue(panel), System.Windows.Forms.Label)
+
+            Dim lblMsgProp = panel.GetType().GetProperty("lblMessage", System.Reflection.BindingFlags.NonPublic Or System.Reflection.BindingFlags.Instance)
+            Dim lblMsg = DirectCast(lblMsgProp.GetValue(panel), System.Windows.Forms.Label)
+
+            Assert.Equal(System.Drawing.Color.Red, lblTitle.ForeColor)
+            Assert.Equal(System.Drawing.Color.Gray, lblMsg.ForeColor)
+        End Using
+    End Sub
+
 End Class

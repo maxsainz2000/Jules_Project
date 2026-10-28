@@ -24,6 +24,7 @@ Partial Class IncomeStatementView
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+            Me.pnlErrorState = New MerchSys.App.Controls.ErrorStatePanel()
         Me.lblTitle = New System.Windows.Forms.Label()
         Me.pnlHeader = New System.Windows.Forms.Panel()
         Me.rbAnnual = New System.Windows.Forms.RadioButton()
@@ -434,7 +435,17 @@ Partial Class IncomeStatementView
         CType(Me.dgvOperatingExpenses, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabPageProductMargins.ResumeLayout(False)
         CType(Me.dgvProductMargins, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.ResumeLayout(False)
+
+            '
+            ' pnlErrorState
+            '
+            Me.pnlErrorState.Dock = System.Windows.Forms.DockStyle.Fill
+            Me.pnlErrorState.Location = New System.Drawing.Point(0, 0)
+            Me.pnlErrorState.Name = "pnlErrorState"
+            Me.pnlErrorState.TabIndex = 26
+            Me.pnlErrorState.Visible = False
+            Me.Controls.Add(Me.pnlErrorState)
+            Me.ResumeLayout(False)
         Me.PerformLayout()
 
     End Sub
@@ -473,6 +484,7 @@ Partial Class IncomeStatementView
     Friend WithEvents colCogs As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents colGrossProfit As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents colMarginPercent As System.Windows.Forms.DataGridViewTextBoxColumn
+        Friend WithEvents pnlErrorState As MerchSys.App.Controls.ErrorStatePanel
 
 End Class
 

@@ -16,6 +16,7 @@ Namespace Views.Accounting
 
         Public Sub New()
             InitializeComponent()
+        AddHandler pnlErrorState.RetryClicked, Sub(s, ev) RaiseEvent RefreshRequested(Me, EventArgs.Empty)
         End Sub
 
         Public Sub New(presenter As VatReliefReportPresenter)
@@ -27,6 +28,7 @@ Namespace Views.Accounting
             End If
 
             ConfigureGrid()
+        AddHandler pnlErrorState.RetryClicked, Sub(s, ev) RaiseEvent RefreshRequested(Me, EventArgs.Empty)
         End Sub
 
         Private Sub ConfigureGrid()
@@ -142,17 +144,28 @@ Namespace Views.Accounting
                 Return Not Me.Enabled
             End Get
             Set(value As Boolean)
-                Me.Enabled = Not value
+                SafeInvoke(Sub()
+                               Me.Enabled = Not value
+                               If value Then pnlErrorState.Visible = False
+                           End Sub)
             End Set
         End Property
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
-        Public Property ErrorMessage As String Implements IVatReliefReportView.ErrorMessage
+                Public Property ErrorMessage As String Implements IVatReliefReportView.ErrorMessage
             Get
-                Return String.Empty
+                Return "" ' View only
             End Get
             Set(value As String)
-                ' Handled by presenter notification service
+                SafeInvoke(Sub()
+                               If String.IsNullOrWhiteSpace(value) Then
+                                   pnlErrorState.Visible = False
+                               Else
+                                   pnlErrorState.Message = value
+                                   pnlErrorState.Visible = True
+                                   pnlErrorState.BringToFront()
+                               End If
+                           End Sub)
             End Set
         End Property
 
@@ -226,8 +239,18 @@ Namespace Views.Accounting
         Private Class MonthItem
             Public Property Value As Integer
             Public Property DisplayName As String
+
         End Class
 
-    End Class
 
+
+        Private Sub SafeInvoke(action As Action)
+            If Me.InvokeRequired Then
+                Me.Invoke(action)
+            Else
+                action()
+            End If
+        End Sub
+
+    End Class
 End Namespace

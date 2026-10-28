@@ -16,6 +16,7 @@ Namespace Views.Accounting
         End Sub
 
         Private Sub InitializeComponent()
+            Me.pnlErrorState = New MerchSys.App.Controls.ErrorStatePanel()
             Me.lblTitle = New System.Windows.Forms.Label()
             Me.rbDaily = New System.Windows.Forms.RadioButton()
             Me.rbWeekly = New System.Windows.Forms.RadioButton()
@@ -478,6 +479,16 @@ Namespace Views.Accounting
             CType(Me.dgvDailyBreakdown, System.ComponentModel.ISupportInitialize).EndInit()
             Me.tabPage3.ResumeLayout(False)
             CType(Me.dgvPaymentTrends, System.ComponentModel.ISupportInitialize).EndInit()
+
+            '
+            ' pnlErrorState
+            '
+            Me.pnlErrorState.Dock = System.Windows.Forms.DockStyle.Fill
+            Me.pnlErrorState.Location = New System.Drawing.Point(0, 0)
+            Me.pnlErrorState.Name = "pnlErrorState"
+            Me.pnlErrorState.TabIndex = 26
+            Me.pnlErrorState.Visible = False
+            Me.Controls.Add(Me.pnlErrorState)
             Me.ResumeLayout(False)
             Me.PerformLayout()
 
@@ -517,6 +528,7 @@ Namespace Views.Accounting
         Friend WithEvents dgvDailyBreakdown As DataGridView
         Friend WithEvents tabPage3 As TabPage
         Friend WithEvents dgvPaymentTrends As DataGridView
+        Friend WithEvents pnlErrorState As MerchSys.App.Controls.ErrorStatePanel
 
     End Class
 

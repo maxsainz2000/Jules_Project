@@ -110,6 +110,21 @@ Imports MerchSys.App.Models
 
             Public Sub SetLoading(loading As Boolean) Implements IOwnerDashboardView.SetLoading
             End Sub
+            Public Shadows Custom Event RefreshRequested As EventHandler Implements IOwnerDashboardView.RefreshRequested
+                AddHandler(value As EventHandler)
+                End AddHandler
+                RemoveHandler(value As EventHandler)
+                End RemoveHandler
+                RaiseEvent(sender As Object, e As EventArgs)
+                End RaiseEvent
+            End Event
+
+            <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
+            Public Property ErrorMessage As String Implements IOwnerDashboardView.ErrorMessage
+
+            <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
+            Public Property IsLoading As Boolean Implements IOwnerDashboardView.IsLoading
+
 
             <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
             Public Property Kpi1Value As String Implements IOwnerDashboardView.Kpi1Value

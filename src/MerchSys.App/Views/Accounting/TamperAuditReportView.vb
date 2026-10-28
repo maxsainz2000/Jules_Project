@@ -22,6 +22,7 @@ Namespace Views.Accounting
 
         Public Sub New()
             InitializeComponent()
+        AddHandler pnlErrorState.RetryClicked, Sub(s, ev) RaiseEvent RefreshRequested(Me, EventArgs.Empty)
         End Sub
 
         Public Sub New(presenter As TamperAuditReportPresenter)
@@ -38,6 +39,7 @@ Namespace Views.Accounting
             AddHandler dgvIncidents.CellFormatting, AddressOf dgvIncidents_CellFormatting
             AddHandler btnExportCsv.Click, AddressOf btnExportCsv_Click
             AddHandler btnExportPdf.Click, AddressOf btnExportPdf_Click
+            AddHandler pnlErrorState.RetryClicked, Sub(s, ev) RaiseEvent RefreshRequested(Me, EventArgs.Empty)
         End Sub
 
         Private Sub TamperAuditReportView_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -112,22 +114,33 @@ Namespace Views.Accounting
         End Property
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
-        Public Property IsLoading As Boolean Implements ITamperAuditReportView.IsLoading
+                Public Property IsLoading As Boolean Implements ITamperAuditReportView.IsLoading
             Get
                 Return Not btnRefresh.Enabled
             End Get
             Set(value As Boolean)
-                btnRefresh.Enabled = Not value
+                SafeInvoke(Sub()
+                               btnRefresh.Enabled = Not value
+                               If value Then pnlErrorState.Visible = False
+                           End Sub)
             End Set
         End Property
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
-        Public Property ErrorMessage As String Implements ITamperAuditReportView.ErrorMessage
+                Public Property ErrorMessage As String Implements ITamperAuditReportView.ErrorMessage
             Get
-                Return "" ' Implementation depends on notification service, not directly shown on view
+                Return "" ' View only
             End Get
             Set(value As String)
-                ' No-op, presenter uses notification service for errors
+                SafeInvoke(Sub()
+                               If String.IsNullOrWhiteSpace(value) Then
+                                   pnlErrorState.Visible = False
+                               Else
+                                   pnlErrorState.Message = value
+                                   pnlErrorState.Visible = True
+                                   pnlErrorState.BringToFront()
+                               End If
+                           End Sub)
             End Set
         End Property
 
@@ -159,6 +172,15 @@ Namespace Views.Accounting
                 End If
             End If
         End Sub
+
+        Private Sub SafeInvoke(action As Action)
+            If Me.InvokeRequired Then
+                Me.Invoke(action)
+            Else
+                action()
+            End If
+        End Sub
+
     End Class
 
 End Namespace

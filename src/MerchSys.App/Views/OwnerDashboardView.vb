@@ -20,6 +20,7 @@ Namespace Views
 
         Public Sub New()
             InitializeComponent()
+        AddHandler pnlErrorState.RetryClicked, Sub(s, ev) RaiseEvent RefreshRequested(Me, EventArgs.Empty)
         End Sub
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
@@ -126,5 +127,47 @@ Namespace Views
                 deltaIndicatorWeek.Percent = value
             End Set
         End Property
+
+        Public Event RefreshRequested As EventHandler Implements IOwnerDashboardView.RefreshRequested
+
+        <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
+        Public Property ErrorMessage As String Implements IOwnerDashboardView.ErrorMessage
+            Get
+                Return "" ' View only
+            End Get
+            Set(value As String)
+                SafeInvoke(Sub()
+                               If String.IsNullOrWhiteSpace(value) Then
+                                   pnlErrorState.Visible = False
+                               Else
+                                   pnlErrorState.Message = value
+                                   pnlErrorState.Visible = True
+                                   pnlErrorState.BringToFront()
+                               End If
+                           End Sub)
+            End Set
+        End Property
+
+        <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
+        Public Property IsLoading As Boolean Implements IOwnerDashboardView.IsLoading
+            Get
+                Return Not Me.Enabled
+            End Get
+            Set(value As Boolean)
+                SafeInvoke(Sub()
+                               Me.Enabled = Not value
+                               If value Then pnlErrorState.Visible = False
+                           End Sub)
+            End Set
+        End Property
+
+        Private Sub SafeInvoke(action As Action)
+            If Me.InvokeRequired Then
+                Me.Invoke(action)
+            Else
+                action()
+            End If
+        End Sub
+
     End Class
 End Namespace
