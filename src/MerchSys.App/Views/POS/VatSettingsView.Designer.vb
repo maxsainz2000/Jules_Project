@@ -31,7 +31,6 @@ Namespace Views.POS
         Me.nudNonVatRate = New System.Windows.Forms.NumericUpDown()
         Me.btnSave = New System.Windows.Forms.Button()
         Me.btnReload = New System.Windows.Forms.Button()
-        Me.lblError = New System.Windows.Forms.Label()
         Me.lblTin = New System.Windows.Forms.Label()
         Me.lblVatRate = New System.Windows.Forms.Label()
         Me.lblNonVatRate = New System.Windows.Forms.Label()
@@ -153,20 +152,22 @@ Namespace Views.POS
         '
         'lblError
         '
-        Me.lblError.AutoSize = True
-        Me.lblError.ForeColor = System.Drawing.Color.Red
-        Me.lblError.Location = New System.Drawing.Point(30, 270)
-        Me.lblError.Name = "lblError"
-        Me.lblError.Size = New System.Drawing.Size(0, 15)
-        Me.lblError.TabIndex = 13
-        Me.lblError.Visible = False
         '
         'VatSettingsView
         Me.AutoScroll = True
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.Controls.Add(Me.lblError)
+        '
+        'pnlErrorState
+        '
+        Me.pnlErrorState.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlErrorState.Location = New System.Drawing.Point(0, 0)
+        Me.pnlErrorState.Name = "pnlErrorState"
+        Me.pnlErrorState.TabIndex = 26
+        Me.pnlErrorState.Visible = False
+
+        Me.Controls.Add(Me.pnlErrorState)
         Me.Controls.Add(Me.btnReload)
         Me.Controls.Add(Me.btnSave)
         Me.Controls.Add(Me.txtBusinessAddress)
@@ -202,6 +203,6 @@ Namespace Views.POS
     Friend WithEvents txtBusinessAddress As System.Windows.Forms.TextBox
     Friend WithEvents btnSave As System.Windows.Forms.Button
     Friend WithEvents btnReload As System.Windows.Forms.Button
-    Friend WithEvents lblError As System.Windows.Forms.Label
+    Friend WithEvents pnlErrorState As MerchSys.App.Controls.ErrorStatePanel
 End Class
 End Namespace

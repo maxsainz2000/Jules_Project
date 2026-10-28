@@ -20,6 +20,7 @@ Namespace Views
 
         Public Sub New()
             InitializeComponent()
+            AddHandler pnlErrorState.RetryClicked, Sub(s, e) RaiseEvent DashboardLoad(Me, EventArgs.Empty)
         End Sub
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
@@ -105,6 +106,7 @@ Namespace Views
         Public Sub SetLoading(loading As Boolean) Implements IOwnerDashboardView.SetLoading
             pnlLoading.Visible = loading
             pnlLoading.BringToFront()
+            If loading Then pnlErrorState.Visible = False
         End Sub
 
         <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
@@ -124,6 +126,22 @@ Namespace Views
             End Get
             Set(value As Decimal?)
                 deltaIndicatorWeek.Percent = value
+            End Set
+        End Property
+
+        <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
+        Public Property ErrorMessage As String Implements IOwnerDashboardView.ErrorMessage
+            Get
+                Return pnlErrorState.Message
+            End Get
+            Set(value As String)
+                If String.IsNullOrWhiteSpace(value) Then
+                    pnlErrorState.Visible = False
+                Else
+                    pnlErrorState.Message = value
+                    pnlErrorState.Visible = True
+                    pnlErrorState.BringToFront()
+                End If
             End Set
         End Property
     End Class

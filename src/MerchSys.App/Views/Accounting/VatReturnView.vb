@@ -177,11 +177,20 @@ Namespace Views.Accounting
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
         Public Property ErrorMessage As String Implements IVatReturnView.ErrorMessage
             Get
-                Return lblError.Text
+                Return pnlErrorState.Message
             End Get
             Set(value As String)
-                lblError.Text = value
-                lblError.Visible = Not String.IsNullOrEmpty(value)
+                If Me.InvokeRequired Then
+                    Me.Invoke(Sub() ErrorMessage = value)
+                Else
+                    If String.IsNullOrWhiteSpace(value) Then
+                        pnlErrorState.Visible = False
+                    Else
+                        pnlErrorState.Message = value
+                        pnlErrorState.Visible = True
+                        pnlErrorState.BringToFront()
+                    End If
+                End If
             End Set
         End Property
 

@@ -84,4 +84,57 @@ Public Class StateAndFeedbackTests
         Assert.IsType(Of DefaultConflictPresenter)(presenter)
     End Sub
 
+
+    <Fact>
+    Public Async Function ErrorStatePanel_SetProperties_FiresRetryEvent() As Task
+        Using panel As New ErrorStatePanel()
+            ' Initial state
+            Assert.Equal("Unable to load data", panel.Title)
+
+            ' Set properties
+            panel.Title = "Custom Error"
+            panel.Message = "Custom Message"
+            panel.RetryText = "Try Again"
+
+            Assert.Equal("Custom Error", panel.Title)
+            Assert.Equal("Custom Message", panel.Message)
+            Assert.Equal("Try Again", panel.RetryText)
+
+            ' Verify event firing by simulating button click
+            Dim eventFired As Boolean = False
+            AddHandler panel.RetryClicked, Sub(sender, e) eventFired = True
+
+            ' Reflection to get the button and invoke click
+            Dim btnProp = panel.GetType().GetProperty("btnRetry", System.Reflection.BindingFlags.NonPublic Or System.Reflection.BindingFlags.Instance)
+            Dim btn = DirectCast(btnProp.GetValue(panel), System.Windows.Forms.Button)
+            btn.PerformClick()
+
+            Assert.True(eventFired)
+            Await Task.Yield()
+        End Using
+    End Function
+
+    <Fact>
+    Public Sub ErrorStatePanel_ApplyTheme_UpdatesColors()
+        Using panel As New ErrorStatePanel()
+            Dim tokens As New ThemeTokens() With {
+                .SurfaceBackground = System.Drawing.Color.Red,
+                .Danger = System.Drawing.Color.Blue,
+                .SecondaryText = System.Drawing.Color.Green
+            }
+
+            panel.ApplyTheme(tokens)
+
+            Assert.Equal(System.Drawing.Color.Red, panel.BackColor)
+
+            Dim lblTitleProp = panel.GetType().GetProperty("lblTitle", System.Reflection.BindingFlags.NonPublic Or System.Reflection.BindingFlags.Instance)
+            Dim lblTitle = DirectCast(lblTitleProp.GetValue(panel), System.Windows.Forms.Label)
+            Assert.Equal(System.Drawing.Color.Blue, lblTitle.ForeColor)
+
+            Dim lblMsgProp = panel.GetType().GetProperty("lblMessage", System.Reflection.BindingFlags.NonPublic Or System.Reflection.BindingFlags.Instance)
+            Dim lblMsg = DirectCast(lblMsgProp.GetValue(panel), System.Windows.Forms.Label)
+            Assert.Equal(System.Drawing.Color.Green, lblMsg.ForeColor)
+        End Using
+    End Sub
+
 End Class

@@ -25,6 +25,7 @@ Namespace Views.Accounting
         'Do not modify it using the code editor.
         <System.Diagnostics.DebuggerStepThrough()> _
         Private Sub InitializeComponent()
+            Me.pnlErrorState = New MerchSys.App.Controls.ErrorStatePanel()
             Me.pnlHeader = New System.Windows.Forms.Panel()
             Me.btnRefresh = New System.Windows.Forms.Button()
             Me.btnExportPdf = New System.Windows.Forms.Button()
@@ -401,6 +402,16 @@ Namespace Views.Accounting
             '
             Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+            '
+            'pnlErrorState
+            '
+            Me.pnlErrorState.Dock = System.Windows.Forms.DockStyle.Fill
+            Me.pnlErrorState.Location = New System.Drawing.Point(0, 0)
+            Me.pnlErrorState.Name = "pnlErrorState"
+            Me.pnlErrorState.TabIndex = 26
+            Me.pnlErrorState.Visible = False
+
+            Me.Controls.Add(Me.pnlErrorState)
             Me.Controls.Add(Me.dgvTrailingMonths)
             Me.Controls.Add(Me.pnlWhatThisMeans)
             Me.Controls.Add(Me.pnlSummaries)
@@ -454,5 +465,6 @@ Namespace Views.Accounting
         Friend WithEvents pnlWhatThisMeans As Panel
         Friend WithEvents lblWhatThisMeansTitle As Label
         Friend WithEvents lblWhatThisMeansText As Label
+        Friend WithEvents pnlErrorState As MerchSys.App.Controls.ErrorStatePanel
     End Class
 End Namespace

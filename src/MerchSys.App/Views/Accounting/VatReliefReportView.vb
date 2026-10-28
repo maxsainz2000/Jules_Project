@@ -143,16 +143,23 @@ Namespace Views.Accounting
             End Get
             Set(value As Boolean)
                 Me.Enabled = Not value
+                If value Then pnlErrorState.Visible = False
             End Set
         End Property
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
         Public Property ErrorMessage As String Implements IVatReliefReportView.ErrorMessage
             Get
-                Return String.Empty
+                Return pnlErrorState.Message
             End Get
             Set(value As String)
-                ' Handled by presenter notification service
+                If String.IsNullOrWhiteSpace(value) Then
+                    pnlErrorState.Visible = False
+                Else
+                    pnlErrorState.Message = value
+                    pnlErrorState.Visible = True
+                    pnlErrorState.BringToFront()
+                End If
             End Set
         End Property
 

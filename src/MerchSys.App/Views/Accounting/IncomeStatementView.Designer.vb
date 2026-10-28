@@ -418,6 +418,16 @@ Partial Class IncomeStatementView
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.White
+        '
+        'pnlErrorState
+        '
+        Me.pnlErrorState.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlErrorState.Location = New System.Drawing.Point(0, 0)
+        Me.pnlErrorState.Name = "pnlErrorState"
+        Me.pnlErrorState.TabIndex = 26
+        Me.pnlErrorState.Visible = False
+
+        Me.Controls.Add(Me.pnlErrorState)
         Me.Controls.Add(Me.tabControl1)
         Me.Controls.Add(Me.pnlWhatThisMeans)
         Me.Controls.Add(Me.pnlHeader)
@@ -474,6 +484,7 @@ Partial Class IncomeStatementView
     Friend WithEvents colGrossProfit As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents colMarginPercent As System.Windows.Forms.DataGridViewTextBoxColumn
 
-End Class
+    Friend WithEvents pnlErrorState As MerchSys.App.Controls.ErrorStatePanel
+    End Class
 
 End Namespace

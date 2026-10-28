@@ -28,6 +28,7 @@ Namespace Views.Accounting
         'Do not modify it using the code editor.
         <System.Diagnostics.DebuggerStepThrough()>
         Private Sub InitializeComponent()
+            Me.pnlErrorState = New MerchSys.App.Controls.ErrorStatePanel()
             Me.deltaIndicator = New MerchSys.App.Controls.DeltaIndicator()
             Me.sparkline = New MerchSys.App.Controls.Sparkline()
             Me.pnlVatTile = New System.Windows.Forms.Panel()
@@ -296,6 +297,16 @@ Namespace Views.Accounting
             Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
             Me.AutoScroll = True
+            '
+            'pnlErrorState
+            '
+            Me.pnlErrorState.Dock = System.Windows.Forms.DockStyle.Fill
+            Me.pnlErrorState.Location = New System.Drawing.Point(0, 0)
+            Me.pnlErrorState.Name = "pnlErrorState"
+            Me.pnlErrorState.TabIndex = 26
+            Me.pnlErrorState.Visible = False
+
+            Me.Controls.Add(Me.pnlErrorState)
             Me.Controls.Add(Me.pnlVatTile)
             Me.Controls.Add(Me.lblLowStockAlertCount)
             Me.Controls.Add(Me.lblOverdueAPCount)
@@ -352,6 +363,7 @@ Namespace Views.Accounting
         Friend WithEvents deltaIndicator As MerchSys.App.Controls.DeltaIndicator
         Friend WithEvents sparkline As MerchSys.App.Controls.Sparkline
 
+        Friend WithEvents pnlErrorState As MerchSys.App.Controls.ErrorStatePanel
     End Class
 
 End Namespace

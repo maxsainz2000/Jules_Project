@@ -190,5 +190,6 @@ Namespace Views.Accounting
         Friend WithEvents lblError As System.Windows.Forms.Label
         Friend WithEvents dgvLines As System.Windows.Forms.DataGridView
         Friend WithEvents dgvHistory As System.Windows.Forms.DataGridView
+        Friend WithEvents pnlErrorState As MerchSys.App.Controls.ErrorStatePanel
     End Class
 End Namespace

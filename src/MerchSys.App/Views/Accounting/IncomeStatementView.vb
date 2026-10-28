@@ -14,10 +14,12 @@ Namespace Views.Accounting
 
         Public Sub New()
             InitializeComponent()
+            AddHandler pnlErrorState.RetryClicked, Sub(s, e) RaiseEvent RefreshRequested(Me, EventArgs.Empty)
         End Sub
 
         Public Sub New(presenter As IncomeStatementPresenter)
             InitializeComponent()
+            AddHandler pnlErrorState.RetryClicked, Sub(s, e) RaiseEvent RefreshRequested(Me, EventArgs.Empty)
             _presenter = presenter
             If _presenter IsNot Nothing Then
                 _presenter.View = Me
@@ -207,10 +209,18 @@ Namespace Views.Accounting
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
         Public Property ErrorMessage As String Implements IIncomeStatementView.ErrorMessage
             Get
-                Return String.Empty
+                Return pnlErrorState.Message
             End Get
             Set(value As String)
-                ' Handled by presenter notification service
+                SafeInvoke(Sub()
+                    If String.IsNullOrWhiteSpace(value) Then
+                        pnlErrorState.Visible = False
+                    Else
+                        pnlErrorState.Message = value
+                        pnlErrorState.Visible = True
+                        pnlErrorState.BringToFront()
+                    End If
+                End Sub)
             End Set
         End Property
 

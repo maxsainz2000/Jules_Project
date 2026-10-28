@@ -204,16 +204,23 @@ Namespace Views.Accounting
             Set(value As Boolean)
                 lblLoading.Visible = value
                 btnRefresh.Enabled = Not value
+                If value Then pnlErrorState.Visible = False
             End Set
         End Property
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
         Public Property ErrorMessage As String Implements IFinancialOverviewView.ErrorMessage
             Get
-                Return "" ' View only
+                Return pnlErrorState.Message
             End Get
             Set(value As String)
-                ' We use INotificationService for popups, this could just be ignored or displayed if we add a label
+                If String.IsNullOrWhiteSpace(value) Then
+                    pnlErrorState.Visible = False
+                Else
+                    pnlErrorState.Message = value
+                    pnlErrorState.Visible = True
+                    pnlErrorState.BringToFront()
+                End If
             End Set
         End Property
 

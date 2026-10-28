@@ -22,10 +22,12 @@ Namespace Views.Accounting
 
         Public Sub New()
             InitializeComponent()
+            AddHandler pnlErrorState.RetryClicked, Sub(s, e) RaiseEvent RefreshRequested(Me, EventArgs.Empty)
         End Sub
 
         Public Sub New(presenter As TamperAuditReportPresenter)
             InitializeComponent()
+            AddHandler pnlErrorState.RetryClicked, Sub(s, e) RaiseEvent RefreshRequested(Me, EventArgs.Empty)
             _presenter = presenter
             If _presenter IsNot Nothing Then
                 _presenter.View = Me
@@ -118,16 +120,23 @@ Namespace Views.Accounting
             End Get
             Set(value As Boolean)
                 btnRefresh.Enabled = Not value
+                If value Then pnlErrorState.Visible = False
             End Set
         End Property
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
         Public Property ErrorMessage As String Implements ITamperAuditReportView.ErrorMessage
             Get
-                Return "" ' Implementation depends on notification service, not directly shown on view
+                Return pnlErrorState.Message
             End Get
             Set(value As String)
-                ' No-op, presenter uses notification service for errors
+                If String.IsNullOrWhiteSpace(value) Then
+                    pnlErrorState.Visible = False
+                Else
+                    pnlErrorState.Message = value
+                    pnlErrorState.Visible = True
+                    pnlErrorState.BringToFront()
+                End If
             End Set
         End Property
 
