@@ -14,6 +14,7 @@ Namespace Views.Accounting
 
         Public Sub New()
             InitializeComponent()
+            AddHandler pnlErrorState.RetryClicked, Sub(sender, e) RaiseEvent RefreshRequested(Me, EventArgs.Empty)
         End Sub
 
         Public Sub New(presenter As IncomeStatementPresenter)
@@ -24,6 +25,7 @@ Namespace Views.Accounting
             End If
             lblWhatThisMeansIcon.Image = Services.Theming.IconHelper.GetIcon(Services.Theming.AppIcon.Lightbulb, Drawing.Color.Goldenrod, 24)
             lblWhatThisMeansIcon.ImageAlign = Drawing.ContentAlignment.MiddleCenter
+            AddHandler pnlErrorState.RetryClicked, Sub(sender, e) RaiseEvent RefreshRequested(Me, EventArgs.Empty)
         End Sub
 
         Private Sub IncomeStatementView_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -200,6 +202,7 @@ Namespace Views.Accounting
                                cboYear.Enabled = Not value
                                cboMonth.Enabled = Not value
                                cboQuarter.Enabled = Not value
+                               If value Then pnlErrorState.Visible = False
                            End Sub)
             End Set
         End Property
@@ -207,10 +210,19 @@ Namespace Views.Accounting
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
         Public Property ErrorMessage As String Implements IIncomeStatementView.ErrorMessage
             Get
-                Return String.Empty
+                Return pnlErrorState.Message
             End Get
             Set(value As String)
-                ' Handled by presenter notification service
+                SafeInvoke(Sub()
+                               If Not String.IsNullOrEmpty(value) Then
+                                   pnlErrorState.Message = value
+                                   pnlErrorState.Visible = True
+                                   pnlErrorState.BringToFront()
+                                   lblLoading.Visible = False
+                               Else
+                                   pnlErrorState.Visible = False
+                               End If
+                           End Sub)
             End Set
         End Property
 

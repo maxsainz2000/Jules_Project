@@ -20,6 +20,7 @@ Namespace Views.Accounting
 
         Public Sub New()
             InitializeComponent()
+            AddHandler pnlErrorState.RetryClicked, Sub(sender, e) RaiseEvent RefreshRequested(Me, EventArgs.Empty)
         End Sub
 
         Public Sub New(presenter As SalesSummaryPresenter)
@@ -33,6 +34,8 @@ Namespace Views.Accounting
             lblWarning.ImageAlign = Drawing.ContentAlignment.MiddleLeft
 
             SetupDataGrids()
+
+            AddHandler pnlErrorState.RetryClicked, Sub(sender, e) RaiseEvent RefreshRequested(Me, EventArgs.Empty)
 
             AddHandler rbDaily.CheckedChanged, AddressOf Selector_Changed
             AddHandler rbWeekly.CheckedChanged, AddressOf Selector_Changed
@@ -249,6 +252,7 @@ Namespace Views.Accounting
                 SafeInvoke(Sub()
                                lblLoading.Visible = value
                                btnRefresh.Enabled = Not value
+                               If value Then pnlErrorState.Visible = False
                            End Sub)
             End Set
         End Property
@@ -256,10 +260,19 @@ Namespace Views.Accounting
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
         Public Property ErrorMessage As String Implements ISalesSummaryView.ErrorMessage
             Get
-                Return String.Empty
+                Return pnlErrorState.Message
             End Get
             Set(value As String)
-                ' Handled by notification service
+                SafeInvoke(Sub()
+                               If Not String.IsNullOrEmpty(value) Then
+                                   pnlErrorState.Message = value
+                                   pnlErrorState.Visible = True
+                                   pnlErrorState.BringToFront()
+                                   lblLoading.Visible = False
+                               Else
+                                   pnlErrorState.Visible = False
+                               End If
+                           End Sub)
             End Set
         End Property
 

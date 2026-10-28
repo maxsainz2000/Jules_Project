@@ -161,11 +161,21 @@ Namespace Views.POS
         Me.lblError.TabIndex = 13
         Me.lblError.Visible = False
         '
+        '
+        'pnlErrorState
+        '
+        Me.pnlErrorState.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlErrorState.Location = New System.Drawing.Point(0, 0)
+        Me.pnlErrorState.Name = "pnlErrorState"
+        Me.pnlErrorState.TabIndex = 26
+        Me.pnlErrorState.Visible = False
+        '
         'VatSettingsView
         Me.AutoScroll = True
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.Controls.Add(Me.pnlErrorState)
         Me.Controls.Add(Me.lblError)
         Me.Controls.Add(Me.btnReload)
         Me.Controls.Add(Me.btnSave)
@@ -203,5 +213,6 @@ Namespace Views.POS
     Friend WithEvents btnSave As System.Windows.Forms.Button
     Friend WithEvents btnReload As System.Windows.Forms.Button
     Friend WithEvents lblError As System.Windows.Forms.Label
+    Friend WithEvents pnlErrorState As MerchSys.App.Controls.ErrorStatePanel
 End Class
 End Namespace

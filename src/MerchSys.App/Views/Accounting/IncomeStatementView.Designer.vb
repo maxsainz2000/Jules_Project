@@ -24,6 +24,7 @@ Partial Class IncomeStatementView
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Me.pnlErrorState = New MerchSys.App.Controls.ErrorStatePanel()
         Me.lblTitle = New System.Windows.Forms.Label()
         Me.pnlHeader = New System.Windows.Forms.Panel()
         Me.rbAnnual = New System.Windows.Forms.RadioButton()
@@ -413,11 +414,20 @@ Partial Class IncomeStatementView
         Me.colMarginPercent.ReadOnly = True
         Me.colMarginPercent.Width = 100
         '
+        'pnlErrorState
+        '
+        Me.pnlErrorState.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlErrorState.Location = New System.Drawing.Point(0, 0)
+        Me.pnlErrorState.Name = "pnlErrorState"
+        Me.pnlErrorState.TabIndex = 26
+        Me.pnlErrorState.Visible = False
+        '
         'IncomeStatementView
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.White
+        Me.Controls.Add(Me.pnlErrorState)
         Me.Controls.Add(Me.tabControl1)
         Me.Controls.Add(Me.pnlWhatThisMeans)
         Me.Controls.Add(Me.pnlHeader)
@@ -473,6 +483,7 @@ Partial Class IncomeStatementView
     Friend WithEvents colCogs As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents colGrossProfit As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents colMarginPercent As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents pnlErrorState As MerchSys.App.Controls.ErrorStatePanel
 
 End Class
 

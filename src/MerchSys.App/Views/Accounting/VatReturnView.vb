@@ -15,6 +15,7 @@ Namespace Views.Accounting
 
         Public Sub New()
             InitializeComponent()
+            AddHandler pnlErrorState.RetryClicked, Sub(sender, e) RaiseEvent ViewLoaded(Me, EventArgs.Empty)
         End Sub
 
         Public Sub New(presenter As VatReturnPresenter)
@@ -23,6 +24,8 @@ Namespace Views.Accounting
             If _presenter IsNot Nothing Then
                 _presenter.View = Me
             End If
+
+            AddHandler pnlErrorState.RetryClicked, Sub(sender, e) RaiseEvent ViewLoaded(Me, EventArgs.Empty)
 
             AddHandler Me.Load, Sub(s, e) RaiseEvent ViewLoaded(Me, EventArgs.Empty)
         End Sub
@@ -171,17 +174,24 @@ Namespace Views.Accounting
             End Get
             Set(value As Boolean)
                 Me.Enabled = Not value
+                If value Then pnlErrorState.Visible = False
             End Set
         End Property
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
         Public Property ErrorMessage As String Implements IVatReturnView.ErrorMessage
             Get
-                Return lblError.Text
+                Return pnlErrorState.Message
             End Get
             Set(value As String)
-                lblError.Text = value
-                lblError.Visible = Not String.IsNullOrEmpty(value)
+                If Not String.IsNullOrEmpty(value) Then
+                    pnlErrorState.Message = value
+                    pnlErrorState.Visible = True
+                    pnlErrorState.BringToFront()
+                    lblError.Visible = False
+                Else
+                    pnlErrorState.Visible = False
+                End If
             End Set
         End Property
 

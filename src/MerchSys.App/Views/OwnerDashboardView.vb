@@ -20,6 +20,7 @@ Namespace Views
 
         Public Sub New()
             InitializeComponent()
+            AddHandler pnlErrorState.RetryClicked, Sub(sender, e) RaiseEvent DashboardLoad(Me, EventArgs.Empty)
         End Sub
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
@@ -105,7 +106,25 @@ Namespace Views
         Public Sub SetLoading(loading As Boolean) Implements IOwnerDashboardView.SetLoading
             pnlLoading.Visible = loading
             pnlLoading.BringToFront()
+            If loading Then pnlErrorState.Visible = False
         End Sub
+
+        <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
+        Public Property ErrorMessage As String Implements IOwnerDashboardView.ErrorMessage
+            Get
+                Return pnlErrorState.Message
+            End Get
+            Set(value As String)
+                If Not String.IsNullOrEmpty(value) Then
+                    pnlErrorState.Message = value
+                    pnlErrorState.Visible = True
+                    pnlErrorState.BringToFront()
+                    pnlLoading.Visible = False
+                Else
+                    pnlErrorState.Visible = False
+                End If
+            End Set
+        End Property
 
         <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
         Public Property TodayRevenueDelta As Decimal? Implements IOwnerDashboardView.TodayRevenueDelta
