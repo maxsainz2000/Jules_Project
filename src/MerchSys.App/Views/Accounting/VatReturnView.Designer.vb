@@ -30,7 +30,7 @@ Namespace Views.Accounting
             Me.lblInputVat = New System.Windows.Forms.Label()
             Me.lblNetVatPayable = New System.Windows.Forms.Label()
             Me.lblFilingStatus = New System.Windows.Forms.Label()
-            Me.lblError = New System.Windows.Forms.Label()
+                        Me.pnlErrorState = New MerchSys.App.Controls.ErrorStatePanel()
             Me.dgvLines = New System.Windows.Forms.DataGridView()
             Me.dgvHistory = New System.Windows.Forms.DataGridView()
             Me.pnlToolbar.SuspendLayout()
@@ -119,8 +119,7 @@ Namespace Views.Accounting
             Me.pnlSummary.Controls.Add(Me.lblInputVat)
             Me.pnlSummary.Controls.Add(Me.lblNetVatPayable)
             Me.pnlSummary.Controls.Add(Me.lblFilingStatus)
-            Me.pnlSummary.Controls.Add(Me.lblError)
-            Me.pnlSummary.Dock = System.Windows.Forms.DockStyle.Top
+                        Me.pnlSummary.Dock = System.Windows.Forms.DockStyle.Top
             Me.pnlSummary.Height = 80
             Me.pnlSummary.Tag = "PrimaryMetricCard"
             
@@ -136,10 +135,13 @@ Namespace Views.Accounting
             Me.lblNetVatPayable.Location = New System.Drawing.Point(570, 10)
             Me.lblNetVatPayable.Tag = "PrimaryMetricValue"
             Me.lblFilingStatus.Location = New System.Drawing.Point(10, 40)
-            Me.lblError.Location = New System.Drawing.Point(150, 40)
-            Me.lblError.ForeColor = System.Drawing.Color.Red
-            Me.lblError.Visible = False
-            Me.lblError.AutoSize = True
+
+            ' pnlErrorState
+            Me.pnlErrorState.Dock = System.Windows.Forms.DockStyle.Fill
+            Me.pnlErrorState.Location = New System.Drawing.Point(0, 0)
+            Me.pnlErrorState.Name = "pnlErrorState"
+            Me.pnlErrorState.TabIndex = 26
+            Me.pnlErrorState.Visible = False
             
             ' dgvLines
             Me.dgvLines.EnableHeadersVisualStyles = False
@@ -152,6 +154,7 @@ Namespace Views.Accounting
             
             ' VatReturnView
             Me.AutoScroll = True
+            Me.Controls.Add(Me.pnlErrorState)
             Me.Controls.Add(Me.dgvLines)
             Me.Controls.Add(Me.dgvHistory)
             Me.Controls.Add(Me.pnlSummary)
@@ -187,7 +190,7 @@ Namespace Views.Accounting
         Friend WithEvents lblInputVat As System.Windows.Forms.Label
         Friend WithEvents lblNetVatPayable As System.Windows.Forms.Label
         Friend WithEvents lblFilingStatus As System.Windows.Forms.Label
-        Friend WithEvents lblError As System.Windows.Forms.Label
+                Friend WithEvents pnlErrorState As MerchSys.App.Controls.ErrorStatePanel
         Friend WithEvents dgvLines As System.Windows.Forms.DataGridView
         Friend WithEvents dgvHistory As System.Windows.Forms.DataGridView
     End Class

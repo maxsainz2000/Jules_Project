@@ -43,6 +43,8 @@ Namespace Views.Accounting
             Me.dgvTopProducts = New System.Windows.Forms.DataGridView()
             Me.dgvMonthlyTrends = New System.Windows.Forms.DataGridView()
             Me.lblTodayRevenue = New System.Windows.Forms.Label()
+            Me.pnlErrorState = New MerchSys.App.Controls.ErrorStatePanel()
+            Me.pnlErrorState = New MerchSys.App.Controls.ErrorStatePanel()
             Me.lblMtdRevenue = New System.Windows.Forms.Label()
             Me.lblYtdRevenue = New System.Windows.Forms.Label()
             Me.lblTotalAR = New System.Windows.Forms.Label()
@@ -251,6 +253,15 @@ Namespace Views.Accounting
             Me.lblLowStockAlertCount.Name = "lblLowStockAlertCount"
             Me.lblLowStockAlertCount.Size = New System.Drawing.Size(0, 15)
             Me.lblLowStockAlertCount.TabIndex = 16
+
+            '
+            'pnlErrorState
+            '
+            Me.pnlErrorState.Dock = System.Windows.Forms.DockStyle.Fill
+            Me.pnlErrorState.Location = New System.Drawing.Point(0, 0)
+            Me.pnlErrorState.Name = "pnlErrorState"
+            Me.pnlErrorState.TabIndex = 26
+            Me.pnlErrorState.Visible = False
             '
             'pnlVatTile
             '
@@ -296,6 +307,7 @@ Namespace Views.Accounting
             Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
             Me.AutoScroll = True
+            Me.Controls.Add(Me.pnlErrorState)
             Me.Controls.Add(Me.pnlVatTile)
             Me.Controls.Add(Me.lblLowStockAlertCount)
             Me.Controls.Add(Me.lblOverdueAPCount)
@@ -318,6 +330,7 @@ Namespace Views.Accounting
             Me.Controls.Add(Me.sparkline)
             Me.Name = "FinancialOverviewView"
             Me.Size = New System.Drawing.Size(950, 480)
+            Me.Controls.Add(Me.pnlErrorState)
             Me.pnlWhatThisMeans.ResumeLayout(False)
             Me.pnlWhatThisMeans.PerformLayout()
             CType(Me.dgvTopProducts, System.ComponentModel.ISupportInitialize).EndInit()
@@ -346,6 +359,7 @@ Namespace Views.Accounting
         Friend WithEvents lblOverdueARCount As System.Windows.Forms.Label
         Friend WithEvents lblOverdueAPCount As System.Windows.Forms.Label
         Friend WithEvents lblLowStockAlertCount As System.Windows.Forms.Label
+        Friend WithEvents pnlErrorState As MerchSys.App.Controls.ErrorStatePanel
         Friend WithEvents pnlVatTile As System.Windows.Forms.Panel
         Friend WithEvents lblVatPayable As System.Windows.Forms.Label
         Friend WithEvents lblVatDueDate As System.Windows.Forms.Label

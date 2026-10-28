@@ -17,6 +17,7 @@ Namespace Views
         Property TodayRevenueDelta As Decimal?
         Property WeekRevenueDelta As Decimal?
 
+        Property ErrorMessage As String
         Sub SetLoading(loading As Boolean)
     End Interface
 End Namespace

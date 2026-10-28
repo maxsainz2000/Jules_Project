@@ -133,6 +133,8 @@ Imports MerchSys.App.Models
 
             <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
             Public Property WeekRevenueDelta As Decimal? Implements IOwnerDashboardView.WeekRevenueDelta
+        <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
+        Public Property ErrorMessage As String Implements IOwnerDashboardView.ErrorMessage
 
             Public Sub RaiseLoad()
                 RaiseEvent Load(Me, EventArgs.Empty)

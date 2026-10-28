@@ -38,6 +38,7 @@ Namespace Views.Accounting
             AddHandler dgvIncidents.CellFormatting, AddressOf dgvIncidents_CellFormatting
             AddHandler btnExportCsv.Click, AddressOf btnExportCsv_Click
             AddHandler btnExportPdf.Click, AddressOf btnExportPdf_Click
+            AddHandler pnlErrorState.RetryClicked, Sub(sender, e) RaiseEvent RefreshRequested(Me, EventArgs.Empty)
         End Sub
 
         Private Sub TamperAuditReportView_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -118,16 +119,22 @@ Namespace Views.Accounting
             End Get
             Set(value As Boolean)
                 btnRefresh.Enabled = Not value
+                If value Then pnlErrorState.Visible = False
             End Set
         End Property
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
         Public Property ErrorMessage As String Implements ITamperAuditReportView.ErrorMessage
             Get
-                Return "" ' Implementation depends on notification service, not directly shown on view
+                Return pnlErrorState.Message
             End Get
             Set(value As String)
-                ' No-op, presenter uses notification service for errors
+                pnlErrorState.Message = value
+                pnlErrorState.Visible = Not String.IsNullOrEmpty(value)
+                If pnlErrorState.Visible Then
+                    pnlErrorState.BringToFront()
+                    lblEmptyState.Visible = False
+                End If
             End Set
         End Property
 

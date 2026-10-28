@@ -20,10 +20,12 @@ Namespace Views.Accounting
 
         Public Sub New()
             InitializeComponent()
+            AddHandler pnlErrorState.RetryClicked, Sub(sender, e) RaiseEvent RefreshRequested(Me, EventArgs.Empty)
         End Sub
 
         Public Sub New(presenter As SalesSummaryPresenter)
             InitializeComponent()
+            AddHandler pnlErrorState.RetryClicked, Sub(sender, e) RaiseEvent RefreshRequested(Me, EventArgs.Empty)
             _presenter = presenter
             If _presenter IsNot Nothing Then
                 _presenter.View = Me
@@ -249,6 +251,7 @@ Namespace Views.Accounting
                 SafeInvoke(Sub()
                                lblLoading.Visible = value
                                btnRefresh.Enabled = Not value
+                               If value Then pnlErrorState.Visible = False
                            End Sub)
             End Set
         End Property
@@ -256,10 +259,14 @@ Namespace Views.Accounting
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
         Public Property ErrorMessage As String Implements ISalesSummaryView.ErrorMessage
             Get
-                Return String.Empty
+                Return pnlErrorState.Message
             End Get
             Set(value As String)
-                ' Handled by notification service
+                SafeInvoke(Sub()
+                               pnlErrorState.Message = value
+                               pnlErrorState.Visible = Not String.IsNullOrEmpty(value)
+                               If pnlErrorState.Visible Then pnlErrorState.BringToFront()
+                           End Sub)
             End Set
         End Property
 

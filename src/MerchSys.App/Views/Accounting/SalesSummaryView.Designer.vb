@@ -16,7 +16,8 @@ Namespace Views.Accounting
         End Sub
 
         Private Sub InitializeComponent()
-            Me.lblTitle = New System.Windows.Forms.Label()
+            Me.pnlErrorState = New MerchSys.App.Controls.ErrorStatePanel()
+        Me.lblTitle = New System.Windows.Forms.Label()
             Me.rbDaily = New System.Windows.Forms.RadioButton()
             Me.rbWeekly = New System.Windows.Forms.RadioButton()
             Me.rbMonthly = New System.Windows.Forms.RadioButton()
@@ -57,6 +58,15 @@ Namespace Views.Accounting
             Me.pnlAvgTransaction.SuspendLayout()
             Me.pnlReturns.SuspendLayout()
             Me.tabControl1.SuspendLayout()
+
+        '
+        'pnlErrorState
+        '
+        Me.pnlErrorState.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlErrorState.Location = New System.Drawing.Point(0, 0)
+        Me.pnlErrorState.Name = "pnlErrorState"
+        Me.pnlErrorState.TabIndex = 26
+        Me.pnlErrorState.Visible = False
             Me.tabPage1.SuspendLayout()
             CType(Me.dgvPaymentBreakdowns, System.ComponentModel.ISupportInitialize).BeginInit()
             Me.tabPage2.SuspendLayout()
@@ -445,7 +455,8 @@ Namespace Views.Accounting
             '
             Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-            Me.Controls.Add(Me.tabControl1)
+            Me.Controls.Add(Me.pnlErrorState)
+        Me.Controls.Add(Me.tabControl1)
             Me.Controls.Add(Me.pnlKpiCards)
             Me.Controls.Add(Me.pnlWhatThisMeans)
             Me.Controls.Add(Me.lblLoading)
@@ -483,7 +494,8 @@ Namespace Views.Accounting
 
         End Sub
 
-        Friend WithEvents lblTitle As Label
+        Friend WithEvents pnlErrorState As MerchSys.App.Controls.ErrorStatePanel
+    Friend WithEvents lblTitle As Label
         Friend WithEvents rbDaily As RadioButton
         Friend WithEvents rbWeekly As RadioButton
         Friend WithEvents rbMonthly As RadioButton

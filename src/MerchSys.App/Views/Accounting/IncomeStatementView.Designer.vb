@@ -40,6 +40,7 @@ Partial Class IncomeStatementView
         Me.lblWhatThisMeans = New System.Windows.Forms.Label()
         Me.tabControl1 = New System.Windows.Forms.TabControl()
         Me.tabPageSummary = New System.Windows.Forms.TabPage()
+        Me.pnlErrorState = New MerchSys.App.Controls.ErrorStatePanel()
         Me.lblNetSales = New System.Windows.Forms.Label()
         Me.lblCostOfGoodsSold = New System.Windows.Forms.Label()
         Me.lblGrossProfit = New System.Windows.Forms.Label()
@@ -418,6 +419,7 @@ Partial Class IncomeStatementView
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.White
+        Me.Controls.Add(Me.pnlErrorState)
         Me.Controls.Add(Me.tabControl1)
         Me.Controls.Add(Me.pnlWhatThisMeans)
         Me.Controls.Add(Me.pnlHeader)
@@ -425,6 +427,15 @@ Partial Class IncomeStatementView
         Me.Name = "IncomeStatementView"
         Me.Size = New System.Drawing.Size(984, 600)
         Me.pnlHeader.ResumeLayout(False)
+
+        '
+        'pnlErrorState
+        '
+        Me.pnlErrorState.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlErrorState.Location = New System.Drawing.Point(0, 0)
+        Me.pnlErrorState.Name = "pnlErrorState"
+        Me.pnlErrorState.TabIndex = 26
+        Me.pnlErrorState.Visible = False
         Me.pnlHeader.PerformLayout()
         Me.pnlWhatThisMeans.ResumeLayout(False)
         Me.pnlWhatThisMeans.PerformLayout()
@@ -439,6 +450,7 @@ Partial Class IncomeStatementView
 
     End Sub
 
+    Friend WithEvents pnlErrorState As MerchSys.App.Controls.ErrorStatePanel
     Friend WithEvents lblTitle As System.Windows.Forms.Label
     Friend WithEvents pnlHeader As System.Windows.Forms.Panel
     Friend WithEvents rbAnnual As System.Windows.Forms.RadioButton

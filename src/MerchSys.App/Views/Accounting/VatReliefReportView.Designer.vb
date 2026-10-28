@@ -51,6 +51,7 @@ Namespace Views.Accounting
             Me.lblVatExemptPurchases = New System.Windows.Forms.Label()
             Me.lblVatablePurchases = New System.Windows.Forms.Label()
             Me.lblPurchasesTitle = New System.Windows.Forms.Label()
+            Me.pnlErrorState = New MerchSys.App.Controls.ErrorStatePanel()
             Me.dgvTrailingMonths = New System.Windows.Forms.DataGridView()
             Me.pnlWhatThisMeans = New System.Windows.Forms.Panel()
             Me.lblWhatThisMeansText = New System.Windows.Forms.Label()
@@ -347,6 +348,15 @@ Namespace Views.Accounting
             Me.lblPurchasesTitle.Size = New System.Drawing.Size(86, 21)
             Me.lblPurchasesTitle.TabIndex = 6
             Me.lblPurchasesTitle.Text = "Purchases"
+
+            '
+            'pnlErrorState
+            '
+            Me.pnlErrorState.Dock = System.Windows.Forms.DockStyle.Fill
+            Me.pnlErrorState.Location = New System.Drawing.Point(0, 0)
+            Me.pnlErrorState.Name = "pnlErrorState"
+            Me.pnlErrorState.TabIndex = 26
+            Me.pnlErrorState.Visible = False
             '
             'dgvTrailingMonths
             '
@@ -401,6 +411,7 @@ Namespace Views.Accounting
             '
             Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+            Me.Controls.Add(Me.pnlErrorState)
             Me.Controls.Add(Me.dgvTrailingMonths)
             Me.Controls.Add(Me.pnlWhatThisMeans)
             Me.Controls.Add(Me.pnlSummaries)
@@ -450,6 +461,7 @@ Namespace Views.Accounting
         Friend WithEvents lblZeroRatedPurchases As Label
         Friend WithEvents lblTotalPurchases As Label
         Friend WithEvents lblInputVat As Label
+        Friend WithEvents pnlErrorState As MerchSys.App.Controls.ErrorStatePanel
         Friend WithEvents dgvTrailingMonths As DataGridView
         Friend WithEvents pnlWhatThisMeans As Panel
         Friend WithEvents lblWhatThisMeansTitle As Label

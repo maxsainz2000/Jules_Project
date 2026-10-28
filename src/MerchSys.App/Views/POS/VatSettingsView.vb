@@ -11,10 +11,12 @@ Namespace Views.POS
 
         Public Sub New()
             InitializeComponent()
+            AddHandler pnlErrorState.RetryClicked, Sub(sender, e) RaiseEvent ReloadRequested(Me, EventArgs.Empty)
         End Sub
 
         Public Sub New(presenter As VatSettingsPresenter)
             InitializeComponent()
+            AddHandler pnlErrorState.RetryClicked, Sub(sender, e) RaiseEvent ReloadRequested(Me, EventArgs.Empty)
             _presenter = presenter
             _presenter.View = Me
         End Sub
@@ -86,11 +88,12 @@ Namespace Views.POS
         <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
         Public Property ErrorMessage As String Implements IVatSettingsView.ErrorMessage
             Get
-                Return lblError.Text
+                Return pnlErrorState.Message
             End Get
             Set(value As String)
-                lblError.Text = value
-                lblError.Visible = Not String.IsNullOrEmpty(value)
+                pnlErrorState.Message = value
+                pnlErrorState.Visible = Not String.IsNullOrEmpty(value)
+                If pnlErrorState.Visible Then pnlErrorState.BringToFront()
             End Set
         End Property
 

@@ -21,6 +21,7 @@ Namespace Views
 
         <System.Diagnostics.DebuggerStepThrough()>
         Private Sub InitializeComponent()
+            Me.pnlErrorState = New MerchSys.App.Controls.ErrorStatePanel()
             Me.deltaIndicatorToday = New MerchSys.App.Controls.DeltaIndicator()
             Me.deltaIndicatorWeek = New MerchSys.App.Controls.DeltaIndicator()
             Me.pnlLoading = New System.Windows.Forms.Panel()
@@ -294,6 +295,7 @@ Namespace Views
             Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
             Me.AutoScroll = True
+            Me.Controls.Add(Me.pnlErrorState)
             Me.Controls.Add(Me.pnlLoading)
             Me.Controls.Add(Me.tableLayoutPanel1)
             Me.Name = "OwnerDashboardView"
@@ -313,6 +315,7 @@ Namespace Views
 
         End Sub
 
+        Friend WithEvents pnlErrorState As MerchSys.App.Controls.ErrorStatePanel
         Friend WithEvents pnlLoading As System.Windows.Forms.Panel
         Friend WithEvents lblLoading As System.Windows.Forms.Label
         Friend WithEvents tableLayoutPanel1 As System.Windows.Forms.TableLayoutPanel

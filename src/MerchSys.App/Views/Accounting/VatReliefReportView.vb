@@ -27,6 +27,7 @@ Namespace Views.Accounting
             End If
 
             ConfigureGrid()
+            AddHandler pnlErrorState.RetryClicked, Sub(sender, e) RaiseEvent RefreshRequested(Me, EventArgs.Empty)
         End Sub
 
         Private Sub ConfigureGrid()
@@ -143,16 +144,19 @@ Namespace Views.Accounting
             End Get
             Set(value As Boolean)
                 Me.Enabled = Not value
+                If value Then pnlErrorState.Visible = False
             End Set
         End Property
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
         Public Property ErrorMessage As String Implements IVatReliefReportView.ErrorMessage
             Get
-                Return String.Empty
+                Return pnlErrorState.Message
             End Get
             Set(value As String)
-                ' Handled by presenter notification service
+                pnlErrorState.Message = value
+                pnlErrorState.Visible = Not String.IsNullOrEmpty(value)
+                If pnlErrorState.Visible Then pnlErrorState.BringToFront()
             End Set
         End Property
 

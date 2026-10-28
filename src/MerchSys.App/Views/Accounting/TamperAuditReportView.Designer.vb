@@ -38,6 +38,7 @@ Namespace Views.Accounting
             Me.btnExportCsv = New System.Windows.Forms.Button()
             Me.btnExportPdf = New System.Windows.Forms.Button()
             Me.pnlContent = New System.Windows.Forms.Panel()
+            Me.pnlErrorState = New MerchSys.App.Controls.ErrorStatePanel()
             Me.lblEmptyState = New System.Windows.Forms.Label()
             Me.dgvIncidents = New System.Windows.Forms.DataGridView()
             Me.colDetectedAt = New System.Windows.Forms.DataGridViewTextBoxColumn()
@@ -161,9 +162,19 @@ Namespace Views.Accounting
             Me.btnExportPdf.TabIndex = 6
             Me.btnExportPdf.Text = "Export PDF"
             Me.btnExportPdf.UseVisualStyleBackColor = True
+
+            '
+            'pnlErrorState
+            '
+            Me.pnlErrorState.Dock = System.Windows.Forms.DockStyle.Fill
+            Me.pnlErrorState.Location = New System.Drawing.Point(0, 0)
+            Me.pnlErrorState.Name = "pnlErrorState"
+            Me.pnlErrorState.TabIndex = 26
+            Me.pnlErrorState.Visible = False
             '
             'pnlContent
             '
+            Me.pnlContent.Controls.Add(Me.pnlErrorState)
             Me.pnlContent.Controls.Add(Me.lblEmptyState)
             Me.pnlContent.Controls.Add(Me.dgvIncidents)
             Me.pnlContent.Dock = System.Windows.Forms.DockStyle.Fill
@@ -281,6 +292,7 @@ Namespace Views.Accounting
         Friend WithEvents btnExportCsv As Button
         Friend WithEvents btnExportPdf As Button
         Friend WithEvents dgvIncidents As DataGridView
+        Friend WithEvents pnlErrorState As MerchSys.App.Controls.ErrorStatePanel
         Friend WithEvents lblEmptyState As Label
         Friend WithEvents colDetectedAt As DataGridViewTextBoxColumn
         Friend WithEvents colReceiptNumber As DataGridViewTextBoxColumn

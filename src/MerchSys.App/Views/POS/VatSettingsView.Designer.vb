@@ -23,6 +23,7 @@ Namespace Views.POS
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Me.pnlErrorState = New MerchSys.App.Controls.ErrorStatePanel()
         Me.chkIsVatRegistered = New System.Windows.Forms.CheckBox()
         Me.txtTin = New System.Windows.Forms.TextBox()
         Me.txtBusinessName = New System.Windows.Forms.TextBox()
@@ -31,8 +32,7 @@ Namespace Views.POS
         Me.nudNonVatRate = New System.Windows.Forms.NumericUpDown()
         Me.btnSave = New System.Windows.Forms.Button()
         Me.btnReload = New System.Windows.Forms.Button()
-        Me.lblError = New System.Windows.Forms.Label()
-        Me.lblTin = New System.Windows.Forms.Label()
+                Me.lblTin = New System.Windows.Forms.Label()
         Me.lblVatRate = New System.Windows.Forms.Label()
         Me.lblNonVatRate = New System.Windows.Forms.Label()
         Me.lblBusinessName = New System.Windows.Forms.Label()
@@ -150,23 +150,14 @@ Namespace Views.POS
         Me.btnReload.TabIndex = 12
         Me.btnReload.Text = "Reload"
         Me.btnReload.UseVisualStyleBackColor = True
-        '
-        'lblError
-        '
-        Me.lblError.AutoSize = True
-        Me.lblError.ForeColor = System.Drawing.Color.Red
-        Me.lblError.Location = New System.Drawing.Point(30, 270)
-        Me.lblError.Name = "lblError"
-        Me.lblError.Size = New System.Drawing.Size(0, 15)
-        Me.lblError.TabIndex = 13
-        Me.lblError.Visible = False
+
         '
         'VatSettingsView
         Me.AutoScroll = True
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.Controls.Add(Me.lblError)
+        Me.Controls.Add(Me.pnlErrorState)
         Me.Controls.Add(Me.btnReload)
         Me.Controls.Add(Me.btnSave)
         Me.Controls.Add(Me.txtBusinessAddress)
@@ -184,11 +175,21 @@ Namespace Views.POS
         Me.Size = New System.Drawing.Size(400, 310)
         CType(Me.nudVatRate, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.nudNonVatRate, System.ComponentModel.ISupportInitialize).EndInit()
+
+        '
+        'pnlErrorState
+        '
+        Me.pnlErrorState.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlErrorState.Location = New System.Drawing.Point(0, 0)
+        Me.pnlErrorState.Name = "pnlErrorState"
+        Me.pnlErrorState.TabIndex = 26
+        Me.pnlErrorState.Visible = False
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
     End Sub
 
+    Friend WithEvents pnlErrorState As MerchSys.App.Controls.ErrorStatePanel
     Friend WithEvents chkIsVatRegistered As System.Windows.Forms.CheckBox
     Friend WithEvents lblTin As System.Windows.Forms.Label
     Friend WithEvents txtTin As System.Windows.Forms.TextBox
@@ -202,6 +203,5 @@ Namespace Views.POS
     Friend WithEvents txtBusinessAddress As System.Windows.Forms.TextBox
     Friend WithEvents btnSave As System.Windows.Forms.Button
     Friend WithEvents btnReload As System.Windows.Forms.Button
-    Friend WithEvents lblError As System.Windows.Forms.Label
-End Class
+    End Class
 End Namespace

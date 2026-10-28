@@ -20,6 +20,7 @@ Namespace Views
 
         Public Sub New()
             InitializeComponent()
+            AddHandler pnlErrorState.RetryClicked, Sub(sender, e) RaiseEvent DashboardLoad(Me, EventArgs.Empty)
         End Sub
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
@@ -102,9 +103,22 @@ Namespace Views
             End Set
         End Property
 
+                <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
+        Public Property ErrorMessage As String Implements IOwnerDashboardView.ErrorMessage
+            Get
+                Return pnlErrorState.Message
+            End Get
+            Set(value As String)
+                pnlErrorState.Message = value
+                pnlErrorState.Visible = Not String.IsNullOrEmpty(value)
+                If pnlErrorState.Visible Then pnlErrorState.BringToFront()
+            End Set
+        End Property
+
         Public Sub SetLoading(loading As Boolean) Implements IOwnerDashboardView.SetLoading
             pnlLoading.Visible = loading
             pnlLoading.BringToFront()
+            If loading Then pnlErrorState.Visible = False
         End Sub
 
         <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
