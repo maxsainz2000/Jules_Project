@@ -27,6 +27,7 @@ Namespace Views.Accounting
         'Do not modify it using the code editor.
         <System.Diagnostics.DebuggerStepThrough()>
         Private Sub InitializeComponent()
+            Me.pnlErrorState = New MerchSys.App.Controls.ErrorStatePanel()
             Me.pnlHeader = New System.Windows.Forms.Panel()
             Me.lblTitle = New System.Windows.Forms.Label()
             Me.pnlFilter = New System.Windows.Forms.FlowLayoutPanel()
@@ -265,6 +266,16 @@ Namespace Views.Accounting
             Me.pnlFilter.PerformLayout()
             Me.pnlContent.ResumeLayout(False)
             CType(Me.dgvIncidents, System.ComponentModel.ISupportInitialize).EndInit()
+
+            '
+            ' pnlErrorState
+            '
+            Me.pnlErrorState.Dock = System.Windows.Forms.DockStyle.Fill
+            Me.pnlErrorState.Location = New System.Drawing.Point(0, 0)
+            Me.pnlErrorState.Name = "pnlErrorState"
+            Me.pnlErrorState.TabIndex = 26
+            Me.pnlErrorState.Visible = False
+            Me.Controls.Add(Me.pnlErrorState)
             Me.ResumeLayout(False)
 
         End Sub
@@ -288,6 +299,7 @@ Namespace Views.Accounting
         Friend WithEvents colActualHash As DataGridViewTextBoxColumn
         Friend WithEvents colTamperKind As DataGridViewTextBoxColumn
         Friend WithEvents colDetails As DataGridViewTextBoxColumn
+        Friend WithEvents pnlErrorState As MerchSys.App.Controls.ErrorStatePanel
     End Class
 
 End Namespace

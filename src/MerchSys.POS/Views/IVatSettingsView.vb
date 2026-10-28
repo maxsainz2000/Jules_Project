@@ -9,6 +9,7 @@ Namespace Views
         Property BusinessAddress As String
         Property Tin As String
         Property ErrorMessage As String
+        Property IsLoading As Boolean
         Property IsSaveEnabled As Boolean
 
         Event SaveRequested As EventHandler

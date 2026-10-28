@@ -10,6 +10,7 @@ Namespace Views.Accounting
         End Sub
 
         Private Sub InitializeComponent()
+            Me.pnlErrorState = New MerchSys.App.Controls.ErrorStatePanel()
             Me.pnlToolbar = New System.Windows.Forms.Panel()
             Me.cmbYear = New System.Windows.Forms.ComboBox()
             Me.cmbPeriod = New System.Windows.Forms.ComboBox()
@@ -164,6 +165,16 @@ Namespace Views.Accounting
             Me.pnlSummary.ResumeLayout(False)
             CType(Me.dgvLines, System.ComponentModel.ISupportInitialize).EndInit()
             CType(Me.dgvHistory, System.ComponentModel.ISupportInitialize).EndInit()
+
+            '
+            ' pnlErrorState
+            '
+            Me.pnlErrorState.Dock = System.Windows.Forms.DockStyle.Fill
+            Me.pnlErrorState.Location = New System.Drawing.Point(0, 0)
+            Me.pnlErrorState.Name = "pnlErrorState"
+            Me.pnlErrorState.TabIndex = 26
+            Me.pnlErrorState.Visible = False
+            Me.Controls.Add(Me.pnlErrorState)
             Me.ResumeLayout(False)
         End Sub
 
@@ -190,5 +201,6 @@ Namespace Views.Accounting
         Friend WithEvents lblError As System.Windows.Forms.Label
         Friend WithEvents dgvLines As System.Windows.Forms.DataGridView
         Friend WithEvents dgvHistory As System.Windows.Forms.DataGridView
+        Friend WithEvents pnlErrorState As MerchSys.App.Controls.ErrorStatePanel
     End Class
 End Namespace

@@ -23,6 +23,7 @@ Namespace Views.POS
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+            Me.pnlErrorState = New MerchSys.App.Controls.ErrorStatePanel()
         Me.chkIsVatRegistered = New System.Windows.Forms.CheckBox()
         Me.txtTin = New System.Windows.Forms.TextBox()
         Me.txtBusinessName = New System.Windows.Forms.TextBox()
@@ -184,7 +185,17 @@ Namespace Views.POS
         Me.Size = New System.Drawing.Size(400, 310)
         CType(Me.nudVatRate, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.nudNonVatRate, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.ResumeLayout(False)
+
+            '
+            ' pnlErrorState
+            '
+            Me.pnlErrorState.Dock = System.Windows.Forms.DockStyle.Fill
+            Me.pnlErrorState.Location = New System.Drawing.Point(0, 0)
+            Me.pnlErrorState.Name = "pnlErrorState"
+            Me.pnlErrorState.TabIndex = 26
+            Me.pnlErrorState.Visible = False
+            Me.Controls.Add(Me.pnlErrorState)
+            Me.ResumeLayout(False)
         Me.PerformLayout()
 
     End Sub
@@ -203,5 +214,6 @@ Namespace Views.POS
     Friend WithEvents btnSave As System.Windows.Forms.Button
     Friend WithEvents btnReload As System.Windows.Forms.Button
     Friend WithEvents lblError As System.Windows.Forms.Label
+        Friend WithEvents pnlErrorState As MerchSys.App.Controls.ErrorStatePanel
 End Class
 End Namespace

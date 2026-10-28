@@ -21,6 +21,7 @@ Namespace Views
 
         <System.Diagnostics.DebuggerStepThrough()>
         Private Sub InitializeComponent()
+            Me.pnlErrorState = New MerchSys.App.Controls.ErrorStatePanel()
             Me.deltaIndicatorToday = New MerchSys.App.Controls.DeltaIndicator()
             Me.deltaIndicatorWeek = New MerchSys.App.Controls.DeltaIndicator()
             Me.pnlLoading = New System.Windows.Forms.Panel()
@@ -309,6 +310,16 @@ Namespace Views
             Me.pnlKpi3.PerformLayout()
             Me.pnlKpi4.ResumeLayout(False)
             Me.pnlKpi4.PerformLayout()
+
+            '
+            ' pnlErrorState
+            '
+            Me.pnlErrorState.Dock = System.Windows.Forms.DockStyle.Fill
+            Me.pnlErrorState.Location = New System.Drawing.Point(0, 0)
+            Me.pnlErrorState.Name = "pnlErrorState"
+            Me.pnlErrorState.TabIndex = 26
+            Me.pnlErrorState.Visible = False
+            Me.Controls.Add(Me.pnlErrorState)
             Me.ResumeLayout(False)
 
         End Sub
@@ -334,5 +345,6 @@ Namespace Views
         Friend WithEvents lblKpi4Interpretation As System.Windows.Forms.Label
         Friend WithEvents deltaIndicatorToday As MerchSys.App.Controls.DeltaIndicator
         Friend WithEvents deltaIndicatorWeek As MerchSys.App.Controls.DeltaIndicator
+        Friend WithEvents pnlErrorState As MerchSys.App.Controls.ErrorStatePanel
     End Class
 End Namespace

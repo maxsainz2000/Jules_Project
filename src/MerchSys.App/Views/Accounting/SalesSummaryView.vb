@@ -20,6 +20,7 @@ Namespace Views.Accounting
 
         Public Sub New()
             InitializeComponent()
+        AddHandler pnlErrorState.RetryClicked, Sub(s, ev) RaiseEvent RefreshRequested(Me, EventArgs.Empty)
         End Sub
 
         Public Sub New(presenter As SalesSummaryPresenter)
@@ -38,6 +39,7 @@ Namespace Views.Accounting
             AddHandler rbWeekly.CheckedChanged, AddressOf Selector_Changed
             AddHandler rbMonthly.CheckedChanged, AddressOf Selector_Changed
             AddHandler dtpDate.ValueChanged, AddressOf Selector_Changed
+            AddHandler pnlErrorState.RetryClicked, Sub(s, ev) RaiseEvent RefreshRequested(Me, EventArgs.Empty)
             AddHandler cboYear.SelectedIndexChanged, AddressOf Selector_Changed
             AddHandler cboMonth.SelectedIndexChanged, AddressOf Selector_Changed
             AddHandler btnRefresh.Click, AddressOf Refresh_Clicked
@@ -248,18 +250,27 @@ Namespace Views.Accounting
             Set(value As Boolean)
                 SafeInvoke(Sub()
                                lblLoading.Visible = value
+                               If value Then pnlErrorState.Visible = False
                                btnRefresh.Enabled = Not value
                            End Sub)
             End Set
         End Property
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
-        Public Property ErrorMessage As String Implements ISalesSummaryView.ErrorMessage
+                Public Property ErrorMessage As String Implements ISalesSummaryView.ErrorMessage
             Get
-                Return String.Empty
+                Return "" ' View only
             End Get
             Set(value As String)
-                ' Handled by notification service
+                SafeInvoke(Sub()
+                               If String.IsNullOrWhiteSpace(value) Then
+                                   pnlErrorState.Visible = False
+                               Else
+                                   pnlErrorState.Message = value
+                                   pnlErrorState.Visible = True
+                                   pnlErrorState.BringToFront()
+                               End If
+                           End Sub)
             End Set
         End Property
 

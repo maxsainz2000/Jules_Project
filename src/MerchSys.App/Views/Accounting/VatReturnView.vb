@@ -15,6 +15,7 @@ Namespace Views.Accounting
 
         Public Sub New()
             InitializeComponent()
+        AddHandler pnlErrorState.RetryClicked, Sub(s, ev) RaiseEvent ViewLoaded(Me, EventArgs.Empty)
         End Sub
 
         Public Sub New(presenter As VatReturnPresenter)
@@ -25,6 +26,7 @@ Namespace Views.Accounting
             End If
 
             AddHandler Me.Load, Sub(s, e) RaiseEvent ViewLoaded(Me, EventArgs.Empty)
+        AddHandler pnlErrorState.RetryClicked, Sub(s, ev) RaiseEvent ViewLoaded(Me, EventArgs.Empty)
         End Sub
 
         ' IVatReturnView implementation
@@ -170,18 +172,28 @@ Namespace Views.Accounting
                 Return Not Me.Enabled
             End Get
             Set(value As Boolean)
-                Me.Enabled = Not value
+                SafeInvoke(Sub()
+                               Me.Enabled = Not value
+                               If value Then pnlErrorState.Visible = False
+                           End Sub)
             End Set
         End Property
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
-        Public Property ErrorMessage As String Implements IVatReturnView.ErrorMessage
+                Public Property ErrorMessage As String Implements IVatReturnView.ErrorMessage
             Get
-                Return lblError.Text
+                Return "" ' View only
             End Get
             Set(value As String)
-                lblError.Text = value
-                lblError.Visible = Not String.IsNullOrEmpty(value)
+                SafeInvoke(Sub()
+                               If String.IsNullOrWhiteSpace(value) Then
+                                   pnlErrorState.Visible = False
+                               Else
+                                   pnlErrorState.Message = value
+                                   pnlErrorState.Visible = True
+                                   pnlErrorState.BringToFront()
+                               End If
+                           End Sub)
             End Set
         End Property
 
@@ -270,5 +282,14 @@ Namespace Views.Accounting
             End If
         End Sub
         
+
+        Private Sub SafeInvoke(action As Action)
+            If Me.InvokeRequired Then
+                Me.Invoke(action)
+            Else
+                action()
+            End If
+        End Sub
+
     End Class
 End Namespace

@@ -14,6 +14,11 @@ Namespace Views
         Property Kpi4Value As String
         Property Kpi4Interpretation As String
 
+        Event RefreshRequested As EventHandler
+
+        Property ErrorMessage As String
+        Property IsLoading As Boolean
+
         Property TodayRevenueDelta As Decimal?
         Property WeekRevenueDelta As Decimal?
 

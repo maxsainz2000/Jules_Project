@@ -18,6 +18,7 @@ Namespace Views.Accounting
             SetupDataGridViews()
             lblWhatThisMeansIcon.Image = Services.Theming.IconHelper.GetIcon(Services.Theming.AppIcon.Lightbulb, Drawing.Color.Goldenrod, 24)
             lblWhatThisMeansIcon.ImageAlign = Drawing.ContentAlignment.MiddleCenter
+        AddHandler pnlErrorState.RetryClicked, Sub(s, ev) RaiseEvent RefreshRequested(Me, EventArgs.Empty)
         End Sub
 
         ' DI constructor
@@ -29,6 +30,7 @@ Namespace Views.Accounting
             SetupDataGridViews()
             lblWhatThisMeansIcon.Image = Services.Theming.IconHelper.GetIcon(Services.Theming.AppIcon.Lightbulb, Drawing.Color.Goldenrod, 24)
             lblWhatThisMeansIcon.ImageAlign = Drawing.ContentAlignment.MiddleCenter
+        AddHandler pnlErrorState.RetryClicked, Sub(s, ev) RaiseEvent RefreshRequested(Me, EventArgs.Empty)
         End Sub
 
         Private Sub SetupDataGridViews()
@@ -197,23 +199,34 @@ Namespace Views.Accounting
         End Property
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
-        Public Property IsLoading As Boolean Implements IFinancialOverviewView.IsLoading
+                Public Property IsLoading As Boolean Implements IFinancialOverviewView.IsLoading
             Get
                 Return lblLoading.Visible
             End Get
             Set(value As Boolean)
-                lblLoading.Visible = value
-                btnRefresh.Enabled = Not value
+                SafeInvoke(Sub()
+                               lblLoading.Visible = value
+                               btnRefresh.Enabled = Not value
+                               If value Then pnlErrorState.Visible = False
+                           End Sub)
             End Set
         End Property
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
-        Public Property ErrorMessage As String Implements IFinancialOverviewView.ErrorMessage
+                Public Property ErrorMessage As String Implements IFinancialOverviewView.ErrorMessage
             Get
                 Return "" ' View only
             End Get
             Set(value As String)
-                ' We use INotificationService for popups, this could just be ignored or displayed if we add a label
+                SafeInvoke(Sub()
+                               If String.IsNullOrWhiteSpace(value) Then
+                                   pnlErrorState.Visible = False
+                               Else
+                                   pnlErrorState.Message = value
+                                   pnlErrorState.Visible = True
+                                   pnlErrorState.BringToFront()
+                               End If
+                           End Sub)
             End Set
         End Property
 
@@ -293,6 +306,15 @@ Namespace Views.Accounting
                 sparkline.Points = value
             End Set
         End Property
+
+        Private Sub SafeInvoke(action As Action)
+            If Me.InvokeRequired Then
+                Me.Invoke(action)
+            Else
+                action()
+            End If
+        End Sub
+
     End Class
 
 End Namespace

@@ -11,12 +11,14 @@ Namespace Views.POS
 
         Public Sub New()
             InitializeComponent()
+        AddHandler pnlErrorState.RetryClicked, Sub(s, ev) RaiseEvent ReloadRequested(Me, EventArgs.Empty)
         End Sub
 
         Public Sub New(presenter As VatSettingsPresenter)
             InitializeComponent()
             _presenter = presenter
             _presenter.View = Me
+        AddHandler pnlErrorState.RetryClicked, Sub(s, ev) RaiseEvent ReloadRequested(Me, EventArgs.Empty)
         End Sub
 
         Public Event SaveRequested As EventHandler Implements IVatSettingsView.SaveRequested
@@ -84,13 +86,20 @@ Namespace Views.POS
         End Property
 
         <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
-        Public Property ErrorMessage As String Implements IVatSettingsView.ErrorMessage
+                Public Property ErrorMessage As String Implements IVatSettingsView.ErrorMessage
             Get
-                Return lblError.Text
+                Return "" ' View only
             End Get
             Set(value As String)
-                lblError.Text = value
-                lblError.Visible = Not String.IsNullOrEmpty(value)
+                SafeInvoke(Sub()
+                               If String.IsNullOrWhiteSpace(value) Then
+                                   pnlErrorState.Visible = False
+                               Else
+                                   pnlErrorState.Message = value
+                                   pnlErrorState.Visible = True
+                                   pnlErrorState.BringToFront()
+                               End If
+                           End Sub)
             End Set
         End Property
 
@@ -115,5 +124,28 @@ Namespace Views.POS
         Private Sub chkIsVatRegistered_CheckedChanged(sender As Object, e As EventArgs) Handles chkIsVatRegistered.CheckedChanged
             RaiseEvent VatRegistrationChanged(Me, EventArgs.Empty)
         End Sub
+
+        <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
+        Public Property IsLoading As Boolean Implements IVatSettingsView.IsLoading
+            Get
+                Return Not Me.Enabled
+            End Get
+            Set(value As Boolean)
+                SafeInvoke(Sub()
+                               Me.Enabled = Not value
+                               If value Then pnlErrorState.Visible = False
+                           End Sub)
+            End Set
+        End Property
+
+
+        Private Sub SafeInvoke(action As Action)
+            If Me.InvokeRequired Then
+                Me.Invoke(action)
+            Else
+                action()
+            End If
+        End Sub
+
     End Class
 End Namespace
