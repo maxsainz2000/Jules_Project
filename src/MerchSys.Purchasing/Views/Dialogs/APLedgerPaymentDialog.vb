@@ -12,6 +12,11 @@ Namespace Views.Dialogs
             AddHandler btnOK.Click, AddressOf btnOK_Click
         End Sub
 
+        Protected Overrides Sub OnLoad(e As EventArgs)
+            MyBase.OnLoad(e)
+            txtPaymentAmount.Select()
+        End Sub
+
         Private Sub btnOK_Click(sender As Object, e As EventArgs)
             If Me.PaymentAmount > 0 AndAlso Me.PaymentAmount <= Me.Balance Then
                 Me.DialogResult = DialogResult.OK

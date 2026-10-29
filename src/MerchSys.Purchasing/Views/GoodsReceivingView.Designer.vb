@@ -78,7 +78,7 @@ Namespace Views
             Me.btnConfirmReceipt.Name = "btnConfirmReceipt"
             Me.btnConfirmReceipt.Size = New System.Drawing.Size(115, 25)
             Me.btnConfirmReceipt.TabIndex = 2
-            Me.btnConfirmReceipt.Text = "Confirm Receipt"
+            Me.btnConfirmReceipt.Text = "&Confirm Receipt"
             Me.btnConfirmReceipt.UseVisualStyleBackColor = True
             '
             'dgvLines

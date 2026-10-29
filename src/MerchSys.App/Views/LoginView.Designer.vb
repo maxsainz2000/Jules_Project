@@ -93,7 +93,7 @@ Namespace Views
             Me.btnLogin.Name = "btnLogin"
             Me.btnLogin.Size = New System.Drawing.Size(284, 40)
             Me.btnLogin.TabIndex = 4
-            Me.btnLogin.Text = "LOG IN"
+            Me.btnLogin.Text = "&LOG IN"
             Me.btnLogin.UseVisualStyleBackColor = False
             '
             'lblError
@@ -125,7 +125,7 @@ Namespace Views
             Me.lblNewPassword.Location = New System.Drawing.Point(0, 5)
             Me.lblNewPassword.Name = "lblNewPassword"
             Me.lblNewPassword.Size = New System.Drawing.Size(87, 15)
-            Me.lblNewPassword.TabIndex = 0
+            Me.lblNewPassword.TabIndex = 7
             Me.lblNewPassword.Text = "New Password:"
             '
             'txtNewPassword
@@ -137,7 +137,7 @@ Namespace Views
             Me.txtNewPassword.Location = New System.Drawing.Point(0, 25)
             Me.txtNewPassword.Name = "txtNewPassword"
             Me.txtNewPassword.Size = New System.Drawing.Size(284, 29)
-            Me.txtNewPassword.TabIndex = 1
+            Me.txtNewPassword.TabIndex = 8
             Me.txtNewPassword.UseSystemPasswordChar = True
             '
             'lblConfirmPassword
@@ -147,7 +147,7 @@ Namespace Views
             Me.lblConfirmPassword.Location = New System.Drawing.Point(0, 65)
             Me.lblConfirmPassword.Name = "lblConfirmPassword"
             Me.lblConfirmPassword.Size = New System.Drawing.Size(107, 15)
-            Me.lblConfirmPassword.TabIndex = 2
+            Me.lblConfirmPassword.TabIndex = 9
             Me.lblConfirmPassword.Text = "Confirm Password:"
             '
             'txtConfirmPassword
@@ -159,7 +159,7 @@ Namespace Views
             Me.txtConfirmPassword.Location = New System.Drawing.Point(0, 85)
             Me.txtConfirmPassword.Name = "txtConfirmPassword"
             Me.txtConfirmPassword.Size = New System.Drawing.Size(284, 29)
-            Me.txtConfirmPassword.TabIndex = 3
+            Me.txtConfirmPassword.TabIndex = 10
             Me.txtConfirmPassword.UseSystemPasswordChar = True
             '
             'btnChangePassword
@@ -173,8 +173,8 @@ Namespace Views
             Me.btnChangePassword.Tag = "Accent"
             Me.btnChangePassword.Name = "btnChangePassword"
             Me.btnChangePassword.Size = New System.Drawing.Size(284, 40)
-            Me.btnChangePassword.TabIndex = 4
-            Me.btnChangePassword.Text = "CHANGE PASSWORD"
+            Me.btnChangePassword.TabIndex = 11
+            Me.btnChangePassword.Text = "&SET PASSWORD AND CONTINUE"
             Me.btnChangePassword.UseVisualStyleBackColor = False
             '
             'LoginView

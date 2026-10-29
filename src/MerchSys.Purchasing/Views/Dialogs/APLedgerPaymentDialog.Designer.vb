@@ -72,7 +72,7 @@ Namespace Views.Dialogs
             Me.btnOK.Name = "btnOK"
             Me.btnOK.Size = New System.Drawing.Size(75, 25)
             Me.btnOK.TabIndex = 4
-            Me.btnOK.Text = "Confirm"
+            Me.btnOK.Text = "&Confirm Payment"
             Me.btnOK.UseVisualStyleBackColor = True
             '
             'btnCancel
@@ -82,7 +82,7 @@ Namespace Views.Dialogs
             Me.btnCancel.Name = "btnCancel"
             Me.btnCancel.Size = New System.Drawing.Size(75, 25)
             Me.btnCancel.TabIndex = 5
-            Me.btnCancel.Text = "Cancel"
+            Me.btnCancel.Text = "&Cancel"
             Me.btnCancel.UseVisualStyleBackColor = True
             '
             'APLedgerPaymentDialog

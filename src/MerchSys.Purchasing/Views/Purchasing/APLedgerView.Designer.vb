@@ -167,7 +167,7 @@ Namespace Views.Purchasing
             Me.btnRecordPayment.Name = "btnRecordPayment"
             Me.btnRecordPayment.Size = New System.Drawing.Size(130, 30)
             Me.btnRecordPayment.TabIndex = 6
-            Me.btnRecordPayment.Text = "Record Payment"
+            Me.btnRecordPayment.Text = "&Record Payment"
             Me.btnRecordPayment.UseVisualStyleBackColor = False
             '
             'dgvLedger

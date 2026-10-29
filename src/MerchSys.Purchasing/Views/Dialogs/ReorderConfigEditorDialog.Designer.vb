@@ -114,7 +114,7 @@ Namespace Views.Dialogs
             Me.btnSave.Name = "btnSave"
             Me.btnSave.Size = New System.Drawing.Size(75, 23)
             Me.btnSave.TabIndex = 8
-            Me.btnSave.Text = "Save"
+            Me.btnSave.Text = "&Save"
             Me.btnSave.UseVisualStyleBackColor = True
             '
             'btnCancel
@@ -123,13 +123,15 @@ Namespace Views.Dialogs
             Me.btnCancel.Name = "btnCancel"
             Me.btnCancel.Size = New System.Drawing.Size(75, 23)
             Me.btnCancel.TabIndex = 9
-            Me.btnCancel.Text = "Cancel"
+            Me.btnCancel.Text = "&Cancel"
             Me.btnCancel.UseVisualStyleBackColor = True
             '
             'ReorderConfigEditorDialog
             '
+            Me.AcceptButton = Me.btnSave
             Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+            Me.CancelButton = Me.btnCancel
             Me.ClientSize = New System.Drawing.Size(284, 191)
             Me.Controls.Add(Me.btnCancel)
             Me.Controls.Add(Me.btnSave)

@@ -48,7 +48,7 @@ Namespace Views.Dialogs
             Me.btnSave.Name = "btnSave"
             Me.btnSave.Size = New System.Drawing.Size(75, 23)
             Me.btnSave.TabIndex = 2
-            Me.btnSave.Text = "Save"
+            Me.btnSave.Text = "&Save Category"
             Me.btnSave.UseVisualStyleBackColor = True
             '
             'btnCancel
@@ -57,11 +57,12 @@ Namespace Views.Dialogs
             Me.btnCancel.Name = "btnCancel"
             Me.btnCancel.Size = New System.Drawing.Size(75, 23)
             Me.btnCancel.TabIndex = 3
-            Me.btnCancel.Text = "Cancel"
+            Me.btnCancel.Text = "&Cancel"
             Me.btnCancel.UseVisualStyleBackColor = True
             '
             'CategoryEditDialog
             '
+            Me.AcceptButton = Me.btnSave
             Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
             Me.ClientSize = New System.Drawing.Size(310, 100)

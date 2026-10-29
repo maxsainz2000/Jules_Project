@@ -13,6 +13,7 @@ Namespace Views
             InitializeComponent()
             btnTogglePassword.Image = Services.Theming.IconHelper.GetIcon(Services.Theming.AppIcon.Eye, Drawing.Color.White, 16)
             btnTogglePassword.ImageAlign = Drawing.ContentAlignment.MiddleCenter
+            Me.AcceptButton = btnLogin
         End Sub
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
@@ -81,6 +82,7 @@ Namespace Views
             txtUsername.Enabled = False
             txtPassword.Enabled = False
             btnTogglePassword.Enabled = False
+            Me.AcceptButton = btnChangePassword
         End Sub
 
         Public Sub EnableControls(enabled As Boolean) Implements ILoginView.EnableControls
@@ -114,6 +116,11 @@ Namespace Views
         End Sub
 
         ' In order for Enter key to work
+        Protected Overrides Sub OnLoad(e As EventArgs)
+            MyBase.OnLoad(e)
+            txtUsername.Select()
+        End Sub
+
         Protected Overrides Function ProcessCmdKey(ByRef msg As Message, keyData As Keys) As Boolean
             If keyData = Keys.Enter Then
                 If pnlFirstLogin.Visible Then

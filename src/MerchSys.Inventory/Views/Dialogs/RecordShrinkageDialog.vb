@@ -38,6 +38,11 @@ Namespace Views.Dialogs
             UpdateBatchDropdown()
         End Sub
 
+        Protected Overrides Sub OnLoad(e As EventArgs)
+            MyBase.OnLoad(e)
+            cmbProduct.Select()
+        End Sub
+
         Private Sub UpdateBatchDropdown()
             If cmbProduct.SelectedItem Is Nothing Then
                 cmbBatch.DataSource = Nothing

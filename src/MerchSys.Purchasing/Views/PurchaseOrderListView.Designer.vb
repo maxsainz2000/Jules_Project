@@ -100,7 +100,7 @@ Namespace Views
             Me.btnNew.Size = New System.Drawing.Size(75, 23)
             Me.btnNew.TabIndex = 4
             Me.btnNew.Tag = "FilterBarItem"
-            Me.btnNew.Text = "New PO"
+            Me.btnNew.Text = "&New PO"
             Me.btnNew.UseVisualStyleBackColor = True
             '
             'btnEdit

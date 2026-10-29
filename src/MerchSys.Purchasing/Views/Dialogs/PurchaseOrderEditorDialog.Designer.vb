@@ -172,7 +172,7 @@ Namespace Views.Dialogs
             Me.btnSaveDraft.Name = "btnSaveDraft"
             Me.btnSaveDraft.Size = New System.Drawing.Size(75, 23)
             Me.btnSaveDraft.TabIndex = 11
-            Me.btnSaveDraft.Text = "Save Draft"
+            Me.btnSaveDraft.Text = "&Save Draft"
             Me.btnSaveDraft.UseVisualStyleBackColor = True
             '
             'btnSubmit
@@ -193,11 +193,12 @@ Namespace Views.Dialogs
             Me.btnCancel.Name = "btnCancel"
             Me.btnCancel.Size = New System.Drawing.Size(75, 23)
             Me.btnCancel.TabIndex = 13
-            Me.btnCancel.Text = "Cancel"
+            Me.btnCancel.Text = "&Cancel"
             Me.btnCancel.UseVisualStyleBackColor = True
             '
             'PurchaseOrderEditorDialog
             '
+            Me.AcceptButton = Me.btnSaveDraft
             Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
             Me.ClientSize = New System.Drawing.Size(800, 450)

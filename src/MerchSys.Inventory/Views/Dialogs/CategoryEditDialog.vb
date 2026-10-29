@@ -32,6 +32,11 @@ Namespace Views.Dialogs
             End If
         End Sub
 
+        Protected Overrides Sub OnLoad(e As EventArgs)
+            MyBase.OnLoad(e)
+            txtName.Select()
+        End Sub
+
         Private Sub btnSave_Click(sender As Object, e As EventArgs) Handles btnSave.Click
             If String.IsNullOrWhiteSpace(txtName.Text) Then
                 MessageBox.Show("Name is required.")

@@ -85,15 +85,17 @@ Namespace Views.Dialogs
             Me.btnOk.Location = New System.Drawing.Point(194, 180)
             Me.btnOk.Name = "btnOk"
             Me.btnOk.Size = New System.Drawing.Size(75, 25)
-            Me.btnOk.Text = "OK"
+            Me.btnOk.Text = "&Confirm"
 
             'btnCancel
             Me.btnCancel.Location = New System.Drawing.Point(275, 180)
             Me.btnCancel.Name = "btnCancel"
             Me.btnCancel.Size = New System.Drawing.Size(75, 25)
-            Me.btnCancel.Text = "Cancel"
+            Me.btnCancel.Text = "&Cancel"
 
             'RecordShrinkageDialog
+            Me.AcceptButton = Me.btnOk
+            Me.CancelButton = Me.btnCancel
             Me.ClientSize = New System.Drawing.Size(370, 220)
             Me.Controls.Add(Me.lblProduct)
             Me.Controls.Add(Me.cmbProduct)

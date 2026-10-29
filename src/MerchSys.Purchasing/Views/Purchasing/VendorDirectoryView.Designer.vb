@@ -87,7 +87,7 @@ Namespace Views
         Me.btnAdd.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
         Me.btnAdd.Name = "btnAdd"
         Me.btnAdd.Size = New System.Drawing.Size(33, 22)
-        Me.btnAdd.Text = "Add"
+        Me.btnAdd.Text = "&Add Vendor"
         '
         'btnEdit
         '
@@ -338,7 +338,7 @@ Namespace Views
         Me.btnSave.Name = "btnSave"
         Me.btnSave.Size = New System.Drawing.Size(75, 23)
         Me.btnSave.TabIndex = 16
-        Me.btnSave.Text = "Save"
+        Me.btnSave.Text = "&Save"
         Me.btnSave.UseVisualStyleBackColor = True
         '
         'btnCancel
@@ -347,7 +347,7 @@ Namespace Views
         Me.btnCancel.Name = "btnCancel"
         Me.btnCancel.Size = New System.Drawing.Size(75, 23)
         Me.btnCancel.TabIndex = 17
-        Me.btnCancel.Text = "Cancel"
+        Me.btnCancel.Text = "&Cancel"
         Me.btnCancel.UseVisualStyleBackColor = True
         '
         'VendorDirectoryView

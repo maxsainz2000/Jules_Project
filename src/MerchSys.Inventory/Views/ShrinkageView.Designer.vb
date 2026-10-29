@@ -68,7 +68,7 @@ Namespace Views
             Me.btnRecord.Location = New System.Drawing.Point(650, 15)
             Me.btnRecord.Name = "btnRecord"
             Me.btnRecord.Size = New System.Drawing.Size(130, 30)
-            Me.btnRecord.Text = "Record Shrinkage"
+            Me.btnRecord.Text = "&Record Shrinkage"
 
             'pnlFilter
             Me.pnlFilter.Controls.Add(Me.chkDateFilter)
@@ -136,7 +136,7 @@ Namespace Views
             Me.btnFilter.Name = "btnFilter"
             Me.btnFilter.Tag = "FilterBarItem"
             Me.btnFilter.Size = New System.Drawing.Size(75, 25)
-            Me.btnFilter.Text = "Apply"
+            Me.btnFilter.Text = "&Refresh"
 
             'dgvHistory
             Me.dgvHistory.AllowUserToAddRows = False

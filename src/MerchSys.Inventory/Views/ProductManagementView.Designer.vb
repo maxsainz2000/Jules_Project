@@ -96,7 +96,7 @@ Namespace Views
             Me.btnAddProduct.Name = "btnAddProduct"
             Me.btnAddProduct.Tag = "FilterBarItem"
             Me.btnAddProduct.Size = New System.Drawing.Size(33, 22)
-            Me.btnAddProduct.Text = "Add"
+            Me.btnAddProduct.Text = "&Add Product"
             '
             ' btnEditProduct
             '
@@ -104,7 +104,7 @@ Namespace Views
             Me.btnEditProduct.Name = "btnEditProduct"
             Me.btnEditProduct.Tag = "FilterBarItem"
             Me.btnEditProduct.Size = New System.Drawing.Size(31, 22)
-            Me.btnEditProduct.Text = "Edit"
+            Me.btnEditProduct.Text = "&Edit"
             '
             ' btnDeleteProduct
             '
@@ -120,7 +120,7 @@ Namespace Views
             Me.btnPriceHistory.Name = "btnPriceHistory"
             Me.btnPriceHistory.Tag = "FilterBarItem"
             Me.btnPriceHistory.Size = New System.Drawing.Size(78, 22)
-            Me.btnPriceHistory.Text = "Price History"
+            Me.btnPriceHistory.Text = "&Price History"
             '
             ' tabCategories
             '
@@ -163,7 +163,7 @@ Namespace Views
             Me.btnAddCategory.Name = "btnAddCategory"
             Me.btnAddCategory.Tag = "FilterBarItem"
             Me.btnAddCategory.Size = New System.Drawing.Size(33, 22)
-            Me.btnAddCategory.Text = "Add"
+            Me.btnAddCategory.Text = "Add &Category"
             '
             ' btnEditCategory
             '

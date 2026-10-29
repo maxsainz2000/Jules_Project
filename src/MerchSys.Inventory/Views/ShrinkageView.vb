@@ -22,6 +22,22 @@ Namespace Views
             Dock = DockStyle.Fill
             cmbReason.Items.AddRange(New String() {"All", "Damage", "Theft", "Expired", "Loss"})
             cmbReason.SelectedIndex = 0
+
+            pnlSummary.TabIndex = 0
+            lblTotalItems.TabIndex = 0
+            lblTotalValue.TabIndex = 1
+            btnRecord.TabIndex = 2
+
+            pnlFilter.TabIndex = 1
+            chkDateFilter.TabIndex = 0
+            dtpStart.TabIndex = 1
+            lblTo.TabIndex = 2
+            dtpEnd.TabIndex = 3
+            lblReason.TabIndex = 4
+            cmbReason.TabIndex = 5
+            btnFilter.TabIndex = 6
+
+            dgvHistory.TabIndex = 2
         End Sub
 
         Private Sub ShrinkageView_Load(sender As Object, e As EventArgs) Handles MyBase.Load

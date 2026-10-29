@@ -69,6 +69,7 @@ Namespace Views
             End Get
             Set(value As Boolean)
                 PanelEditor.Visible = value
+                If value Then txtName.Select()
             End Set
         End Property
 
@@ -171,5 +172,18 @@ Namespace Views
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
         Public Property OnSelectionChanged As Func(Of Integer?, Task) Implements IVendorDirectoryView.OnSelectionChanged
 
+
+        Protected Overrides Function ProcessCmdKey(ByRef msg As Message, keyData As Keys) As Boolean
+            If PanelEditor.Visible Then
+                If keyData = Keys.Escape Then
+                    btnCancel.PerformClick()
+                    Return True
+                ElseIf keyData = Keys.Enter Then
+                    btnSave.PerformClick()
+                    Return True
+                End If
+            End If
+            Return MyBase.ProcessCmdKey(msg, keyData)
+        End Function
     End Class
 End Namespace
