@@ -20,9 +20,16 @@ Namespace Presenters
 
         Public Property NavigationGroups As New List(Of NavigationGroup)
 
+        Public ReadOnly Property AllNavigableItems As IReadOnlyList(Of NavigationItem)
+            Get
+                Return NavigationGroups.SelectMany(Function(g) g.Items).ToList().AsReadOnly()
+            End Get
+        End Property
+
         Private _currentViewScope As IServiceScope
         Private _currentViewInstance As UserControl
         Private _disposed As Boolean
+        Private _palettePresenter As CommandPalettePresenter
 
         Public Sub New(view As IMainWindowView,
                        sessionService As LoginSessionService,
@@ -76,6 +83,9 @@ Namespace Presenters
         End Sub
 
         Private Sub OnViewLoad(sender As Object, e As EventArgs)
+            _palettePresenter = _serviceProvider.GetRequiredService(Of CommandPalettePresenter)()
+            _palettePresenter.View = _view.PaletteView
+
             RefreshNavigation()
         End Sub
 

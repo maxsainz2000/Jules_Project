@@ -79,8 +79,7 @@ Namespace Views.Accounting
         Public Sub OnNavigateToVatReturnRequested(sender As Object, e As EventArgs)
             Dim shell = Application.OpenForms.OfType(Of MainWindow)().FirstOrDefault()
             If shell IsNot Nothing AndAlso shell.Presenter IsNot Nothing Then
-                Dim targetItem = shell.Presenter.NavigationGroups.
-                    SelectMany(Function(g) g.Items).
+                Dim targetItem = shell.Presenter.AllNavigableItems.
                     FirstOrDefault(Function(i) i.Name = "VAT Returns")
                 If targetItem IsNot Nothing Then
                     shell.Presenter.NavigateTo(targetItem)

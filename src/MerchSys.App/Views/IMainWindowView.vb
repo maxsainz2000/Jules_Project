@@ -23,5 +23,6 @@ Namespace Views
         Event NavigationRequested As EventHandler(Of NavigationItem)
         Event Load As EventHandler
         Event LogoutRequested As EventHandler
+        ReadOnly Property PaletteView As ICommandPaletteView
     End Interface
 End Namespace

@@ -90,6 +90,9 @@ Friend Module Program
                                   services.AddScoped(Of IMainWindowView)(Function(sp) sp.GetRequiredService(Of MainWindow)())
                                   services.AddScoped(Of MainWindowPresenter)()
 
+                                  services.AddTransient(Of ICommandPaletteView, Controls.CommandPalette)()
+                                  services.AddTransient(Of Presenters.CommandPalettePresenter)()
+
                                   services.AddScoped(Of IOwnerDashboardView, OwnerDashboardView)()
                                   services.AddScoped(Of OwnerDashboardPresenter)()
 

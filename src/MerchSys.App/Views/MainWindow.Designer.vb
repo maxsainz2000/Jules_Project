@@ -23,6 +23,8 @@ Partial Class MainWindow
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
+        Me.commandPalette = New MerchSys.App.Controls.CommandPalette()
+        Me.btnOpenPalette = New System.Windows.Forms.Button()
         Me.pnlSidebar = New System.Windows.Forms.Panel()
         Me.pnlContent = New System.Windows.Forms.Panel()
         Me.pnlLeft = New System.Windows.Forms.Panel()
@@ -48,6 +50,7 @@ Partial Class MainWindow
         '
         Me.pnlHeader.BackColor = System.Drawing.Color.FromArgb(CType(CType(30, Byte), Integer), CType(CType(44, Byte), Integer), CType(CType(58, Byte), Integer))
         Me.pnlHeader.Controls.Add(Me.lblUserIdentity)
+        Me.pnlHeader.Controls.Add(Me.btnOpenPalette)
         Me.pnlHeader.Controls.Add(Me.btnToggleThemeShell)
         Me.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top
         Me.pnlHeader.Location = New System.Drawing.Point(0, 0)
@@ -67,6 +70,19 @@ Partial Class MainWindow
         Me.lblUserIdentity.TabIndex = 0
         Me.lblUserIdentity.Text = "Not signed in"
         Me.lblUserIdentity.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        ' btnOpenPalette
+        '
+        Me.btnOpenPalette.Dock = System.Windows.Forms.DockStyle.Right
+        Me.btnOpenPalette.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.btnOpenPalette.FlatAppearance.BorderSize = 0
+        Me.btnOpenPalette.ForeColor = System.Drawing.Color.White
+        Me.btnOpenPalette.Location = New System.Drawing.Point(80, 0)
+        Me.btnOpenPalette.Name = "btnOpenPalette"
+        Me.btnOpenPalette.Size = New System.Drawing.Size(40, 48)
+        Me.btnOpenPalette.TabIndex = 2
+        Me.btnOpenPalette.Text = "🔍"
+        Me.btnOpenPalette.UseVisualStyleBackColor = True
         '
         ' btnToggleThemeShell
         '
@@ -114,6 +130,10 @@ Partial Class MainWindow
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(800, 450)
+        Me.commandPalette.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.commandPalette.Visible = False
+
+        Me.Controls.Add(Me.commandPalette)
         Me.Controls.Add(Me.pnlContent)
         Me.Controls.Add(Me.pnlLeft)
         Me.Name = "MainWindow"
@@ -131,6 +151,8 @@ Partial Class MainWindow
     Friend WithEvents lblUserIdentity As System.Windows.Forms.Label
     Friend WithEvents pnlStatusHost As System.Windows.Forms.Panel
     Friend WithEvents btnToggleThemeShell As System.Windows.Forms.Button
+    Friend WithEvents btnOpenPalette As System.Windows.Forms.Button
+    Friend WithEvents commandPalette As MerchSys.App.Controls.CommandPalette
 
 End Class
 End Namespace
