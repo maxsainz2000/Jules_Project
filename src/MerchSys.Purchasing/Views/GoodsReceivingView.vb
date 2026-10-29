@@ -27,6 +27,7 @@ Namespace Views
             If Not DesignMode AndAlso _presenter IsNot Nothing Then
                 Await _presenter.InitializeAsync()
             End If
+            cmbPurchaseOrders.Select()
         End Sub
 
         <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
@@ -218,6 +219,15 @@ Namespace Views
         Private Sub dgvLines_DataBindingComplete(sender As Object, e As DataGridViewBindingCompleteEventArgs) Handles dgvLines.DataBindingComplete
             UpdateRowStyling()
         End Sub
+
+        Protected Overrides Function ProcessCmdKey(ByRef msg As Message, keyData As Keys) As Boolean
+            If keyData = Keys.Enter Then
+                btnConfirmReceipt.PerformClick()
+                Return True
+            End If
+            Return MyBase.ProcessCmdKey(msg, keyData)
+        End Function
+
     End Class
 
 End Namespace

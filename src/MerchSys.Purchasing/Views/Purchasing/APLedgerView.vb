@@ -116,6 +116,11 @@ Namespace Views.Purchasing
             End If
         End Sub
 
+        Protected Overrides Sub OnLoad(e As EventArgs)
+            MyBase.OnLoad(e)
+            cboVendors.Select()
+        End Sub
+
         <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
         Public Property Vendors As IEnumerable(Of VendorSelectorItem) Implements IAPLedgerView.Vendors
             Get
@@ -214,5 +219,14 @@ Namespace Views.Purchasing
                 Return 0
             End Get
         End Property
+
+        Protected Overrides Function ProcessCmdKey(ByRef msg As Message, keyData As Keys) As Boolean
+            If keyData = Keys.Enter Then
+                btnRecordPayment.PerformClick()
+                Return True
+            End If
+            Return MyBase.ProcessCmdKey(msg, keyData)
+        End Function
+
     End Class
 End Namespace

@@ -54,7 +54,7 @@ Namespace Views
             Me.txtUsername.Name = "txtUsername"
             Me.txtUsername.PlaceholderText = "Username"
             Me.txtUsername.Size = New System.Drawing.Size(284, 29)
-            Me.txtUsername.TabIndex = 1
+            Me.txtUsername.TabIndex = 0
             '
             'txtPassword
             '
@@ -66,7 +66,7 @@ Namespace Views
             Me.txtPassword.Name = "txtPassword"
             Me.txtPassword.PlaceholderText = "Password"
             Me.txtPassword.Size = New System.Drawing.Size(248, 29)
-            Me.txtPassword.TabIndex = 2
+            Me.txtPassword.TabIndex = 1
             Me.txtPassword.UseSystemPasswordChar = True
             '
             'btnTogglePassword
@@ -77,7 +77,7 @@ Namespace Views
             Me.btnTogglePassword.Location = New System.Drawing.Point(312, 150)
             Me.btnTogglePassword.Name = "btnTogglePassword"
             Me.btnTogglePassword.Size = New System.Drawing.Size(30, 29)
-            Me.btnTogglePassword.TabIndex = 3
+            Me.btnTogglePassword.TabIndex = 2
             Me.btnTogglePassword.Text = ""
             Me.btnTogglePassword.UseVisualStyleBackColor = False
             '
@@ -92,8 +92,8 @@ Namespace Views
             Me.btnLogin.Tag = "Accent"
             Me.btnLogin.Name = "btnLogin"
             Me.btnLogin.Size = New System.Drawing.Size(284, 40)
-            Me.btnLogin.TabIndex = 4
-            Me.btnLogin.Text = "LOG IN"
+            Me.btnLogin.TabIndex = 3
+            Me.btnLogin.Text = "&LOG IN"
             Me.btnLogin.UseVisualStyleBackColor = False
             '
             'lblError
@@ -115,7 +115,7 @@ Namespace Views
             Me.pnlFirstLogin.Location = New System.Drawing.Point(58, 300)
             Me.pnlFirstLogin.Name = "pnlFirstLogin"
             Me.pnlFirstLogin.Size = New System.Drawing.Size(284, 180)
-            Me.pnlFirstLogin.TabIndex = 6
+            Me.pnlFirstLogin.TabIndex = 4
             Me.pnlFirstLogin.Visible = False
             '
             'lblNewPassword
@@ -137,7 +137,7 @@ Namespace Views
             Me.txtNewPassword.Location = New System.Drawing.Point(0, 25)
             Me.txtNewPassword.Name = "txtNewPassword"
             Me.txtNewPassword.Size = New System.Drawing.Size(284, 29)
-            Me.txtNewPassword.TabIndex = 1
+            Me.txtNewPassword.TabIndex = 0
             Me.txtNewPassword.UseSystemPasswordChar = True
             '
             'lblConfirmPassword
@@ -159,7 +159,7 @@ Namespace Views
             Me.txtConfirmPassword.Location = New System.Drawing.Point(0, 85)
             Me.txtConfirmPassword.Name = "txtConfirmPassword"
             Me.txtConfirmPassword.Size = New System.Drawing.Size(284, 29)
-            Me.txtConfirmPassword.TabIndex = 3
+            Me.txtConfirmPassword.TabIndex = 1
             Me.txtConfirmPassword.UseSystemPasswordChar = True
             '
             'btnChangePassword
@@ -173,12 +173,13 @@ Namespace Views
             Me.btnChangePassword.Tag = "Accent"
             Me.btnChangePassword.Name = "btnChangePassword"
             Me.btnChangePassword.Size = New System.Drawing.Size(284, 40)
-            Me.btnChangePassword.TabIndex = 4
-            Me.btnChangePassword.Text = "CHANGE PASSWORD"
+            Me.btnChangePassword.TabIndex = 2
+            Me.btnChangePassword.Text = "CHANGE &PASSWORD"
             Me.btnChangePassword.UseVisualStyleBackColor = False
             '
             'LoginView
             '
+            Me.AcceptButton = Me.btnLogin
             Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
             Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(30, Byte), Integer), CType(CType(30, Byte), Integer), CType(CType(30, Byte), Integer))

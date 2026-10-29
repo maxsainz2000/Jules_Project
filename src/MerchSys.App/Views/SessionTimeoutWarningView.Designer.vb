@@ -63,8 +63,8 @@ Namespace Views
             Me.btnStaySignedIn.Tag = "Accent"
             Me.btnStaySignedIn.Name = "btnStaySignedIn"
             Me.btnStaySignedIn.Size = New System.Drawing.Size(140, 40)
-            Me.btnStaySignedIn.TabIndex = 2
-            Me.btnStaySignedIn.Text = "Stay Signed In"
+            Me.btnStaySignedIn.TabIndex = 0
+            Me.btnStaySignedIn.Text = "&Stay Signed In"
             Me.btnStaySignedIn.UseVisualStyleBackColor = False
             '
             'btnSignOut
@@ -75,12 +75,14 @@ Namespace Views
             Me.btnSignOut.Location = New System.Drawing.Point(210, 160)
             Me.btnSignOut.Name = "btnSignOut"
             Me.btnSignOut.Size = New System.Drawing.Size(140, 40)
-            Me.btnSignOut.TabIndex = 3
-            Me.btnSignOut.Text = "Sign Out Now"
+            Me.btnSignOut.TabIndex = 1
+            Me.btnSignOut.Text = "Sign &Out Now"
             Me.btnSignOut.UseVisualStyleBackColor = False
             '
             'SessionTimeoutWarningView
             '
+            Me.AcceptButton = Me.btnStaySignedIn
+            Me.CancelButton = Me.btnSignOut
             Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
             Me.ClientSize = New System.Drawing.Size(400, 230)

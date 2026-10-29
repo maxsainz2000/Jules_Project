@@ -88,7 +88,7 @@ Namespace Views.Dialogs
             Me.txtNotes.Multiline = True
             Me.txtNotes.Name = "txtNotes"
             Me.txtNotes.Size = New System.Drawing.Size(760, 60)
-            Me.txtNotes.TabIndex = 3
+            Me.txtNotes.TabIndex = 2
             Me.txtNotes.PlaceholderText = "Notes..."
             '
             'dgvLines
@@ -98,7 +98,7 @@ Namespace Views.Dialogs
             Me.dgvLines.Location = New System.Drawing.Point(12, 160)
             Me.dgvLines.Name = "dgvLines"
             Me.dgvLines.Size = New System.Drawing.Size(760, 200)
-            Me.dgvLines.TabIndex = 4
+            Me.dgvLines.TabIndex = 3
             Me.dgvLines.AllowUserToAddRows = False
             Me.dgvLines.AllowUserToDeleteRows = False
             Me.dgvLines.ReadOnly = True
@@ -110,14 +110,14 @@ Namespace Views.Dialogs
             Me.cmbProduct.Location = New System.Drawing.Point(12, 130)
             Me.cmbProduct.Name = "cmbProduct"
             Me.cmbProduct.Size = New System.Drawing.Size(150, 21)
-            Me.cmbProduct.TabIndex = 5
+            Me.cmbProduct.TabIndex = 4
             '
             'txtQuantity
             '
             Me.txtQuantity.Location = New System.Drawing.Point(170, 130)
             Me.txtQuantity.Name = "txtQuantity"
             Me.txtQuantity.Size = New System.Drawing.Size(50, 20)
-            Me.txtQuantity.TabIndex = 60
+            Me.txtQuantity.TabIndex = 5
             Me.txtQuantity.PlaceholderText = "Qty"
             '
             'txtUnitCost
@@ -142,7 +142,7 @@ Namespace Views.Dialogs
             Me.btnAddLine.Name = "btnAddLine"
             Me.btnAddLine.Size = New System.Drawing.Size(75, 23)
             Me.btnAddLine.TabIndex = 8
-            Me.btnAddLine.Text = "Add Line"
+            Me.btnAddLine.Text = "&Add Line"
             Me.btnAddLine.UseVisualStyleBackColor = True
             '
             'btnRemoveLine
@@ -151,7 +151,7 @@ Namespace Views.Dialogs
             Me.btnRemoveLine.Name = "btnRemoveLine"
             Me.btnRemoveLine.Size = New System.Drawing.Size(90, 23)
             Me.btnRemoveLine.TabIndex = 9
-            Me.btnRemoveLine.Text = "Remove Line"
+            Me.btnRemoveLine.Text = "&Remove Line"
             Me.btnRemoveLine.UseVisualStyleBackColor = True
             '
             'lblTotal
@@ -171,8 +171,8 @@ Namespace Views.Dialogs
             Me.btnSaveDraft.Location = New System.Drawing.Point(535, 415)
             Me.btnSaveDraft.Name = "btnSaveDraft"
             Me.btnSaveDraft.Size = New System.Drawing.Size(75, 23)
-            Me.btnSaveDraft.TabIndex = 11
-            Me.btnSaveDraft.Text = "Save Draft"
+            Me.btnSaveDraft.TabIndex = 10
+            Me.btnSaveDraft.Text = "&Save Draft"
             Me.btnSaveDraft.UseVisualStyleBackColor = True
             '
             'btnSubmit
@@ -181,8 +181,8 @@ Namespace Views.Dialogs
             Me.btnSubmit.Location = New System.Drawing.Point(616, 415)
             Me.btnSubmit.Name = "btnSubmit"
             Me.btnSubmit.Size = New System.Drawing.Size(75, 23)
-            Me.btnSubmit.TabIndex = 12
-            Me.btnSubmit.Text = "Submit"
+            Me.btnSubmit.TabIndex = 11
+            Me.btnSubmit.Text = "S&ubmit"
             Me.btnSubmit.UseVisualStyleBackColor = True
             '
             'btnCancel
@@ -192,12 +192,14 @@ Namespace Views.Dialogs
             Me.btnCancel.Location = New System.Drawing.Point(697, 415)
             Me.btnCancel.Name = "btnCancel"
             Me.btnCancel.Size = New System.Drawing.Size(75, 23)
-            Me.btnCancel.TabIndex = 13
-            Me.btnCancel.Text = "Cancel"
+            Me.btnCancel.TabIndex = 12
+            Me.btnCancel.Text = "&Cancel"
             Me.btnCancel.UseVisualStyleBackColor = True
             '
             'PurchaseOrderEditorDialog
             '
+            Me.AcceptButton = Me.btnSubmit
+            Me.CancelButton = Me.btnCancel
             Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
             Me.ClientSize = New System.Drawing.Size(800, 450)

@@ -60,6 +60,7 @@ Namespace Views
             If Not DesignMode AndAlso OnSearch IsNot Nothing Then
                 Await OnSearch.Invoke(String.Empty)
             End If
+            txtSearch.Focus()
         End Sub
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
@@ -127,6 +128,18 @@ Namespace Views
                 numLeadTime.Value = value
             End Set
         End Property
+
+        Protected Overrides Function ProcessCmdKey(ByRef msg As Message, keyData As Keys) As Boolean
+            If keyData = Keys.Escape Then
+                txtSearch.Text = String.Empty
+                If OnSearch IsNot Nothing Then
+                    OnSearch.Invoke(String.Empty)
+                End If
+                Return True
+            End If
+            Return MyBase.ProcessCmdKey(msg, keyData)
+        End Function
+
 
         Public Sub BindVendors(items As IEnumerable) Implements IVendorDirectoryView.BindVendors
             VendorGrid.DataSource = items

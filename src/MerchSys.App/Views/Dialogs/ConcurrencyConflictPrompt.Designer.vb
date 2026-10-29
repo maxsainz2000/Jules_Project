@@ -39,9 +39,9 @@ Namespace Views.Dialogs
             Me.btnRefresh.Location = New System.Drawing.Point(100, 80)
             Me.btnRefresh.Name = "btnRefresh"
             Me.btnRefresh.Size = New System.Drawing.Size(90, 30)
-            Me.btnRefresh.TabIndex = 1
+            Me.btnRefresh.TabIndex = 0
             Me.btnRefresh.Tag = "Accent"
-            Me.btnRefresh.Text = "Refresh"
+            Me.btnRefresh.Text = "&Refresh"
             Me.btnRefresh.UseVisualStyleBackColor = True
             '
             'btnCancel
@@ -50,8 +50,8 @@ Namespace Views.Dialogs
             Me.btnCancel.Location = New System.Drawing.Point(210, 80)
             Me.btnCancel.Name = "btnCancel"
             Me.btnCancel.Size = New System.Drawing.Size(90, 30)
-            Me.btnCancel.TabIndex = 2
-            Me.btnCancel.Text = "Cancel"
+            Me.btnCancel.TabIndex = 1
+            Me.btnCancel.Text = "&Cancel"
             Me.btnCancel.UseVisualStyleBackColor = True
             '
             'ConcurrencyConflictPrompt

@@ -53,7 +53,7 @@ Namespace Views.Dialogs
             Me.txtName.Location = New System.Drawing.Point(120, 17)
             Me.txtName.Name = "txtName"
             Me.txtName.Size = New System.Drawing.Size(200, 23)
-            Me.txtName.TabIndex = 1
+            Me.txtName.TabIndex = 0
             '
             'lblCategory
             '
@@ -71,7 +71,7 @@ Namespace Views.Dialogs
             Me.cboCategory.Location = New System.Drawing.Point(120, 47)
             Me.cboCategory.Name = "cboCategory"
             Me.cboCategory.Size = New System.Drawing.Size(200, 23)
-            Me.cboCategory.TabIndex = 3
+            Me.cboCategory.TabIndex = 1
             '
             'lblSKU
             '
@@ -87,7 +87,7 @@ Namespace Views.Dialogs
             Me.txtSKU.Location = New System.Drawing.Point(120, 77)
             Me.txtSKU.Name = "txtSKU"
             Me.txtSKU.Size = New System.Drawing.Size(200, 23)
-            Me.txtSKU.TabIndex = 5
+            Me.txtSKU.TabIndex = 2
             '
             'lblRetailPrice
             '
@@ -105,7 +105,7 @@ Namespace Views.Dialogs
             Me.nudRetailPrice.Maximum = New Decimal(New Integer() {1000000, 0, 0, 0})
             Me.nudRetailPrice.Name = "nudRetailPrice"
             Me.nudRetailPrice.Size = New System.Drawing.Size(200, 23)
-            Me.nudRetailPrice.TabIndex = 7
+            Me.nudRetailPrice.TabIndex = 3
             '
             'lblUnit
             '
@@ -121,7 +121,7 @@ Namespace Views.Dialogs
             Me.txtUnit.Location = New System.Drawing.Point(120, 137)
             Me.txtUnit.Name = "txtUnit"
             Me.txtUnit.Size = New System.Drawing.Size(200, 23)
-            Me.txtUnit.TabIndex = 9
+            Me.txtUnit.TabIndex = 4
             '
             'chkHasExpiry
             '
@@ -129,7 +129,7 @@ Namespace Views.Dialogs
             Me.chkHasExpiry.Location = New System.Drawing.Point(120, 170)
             Me.chkHasExpiry.Name = "chkHasExpiry"
             Me.chkHasExpiry.Size = New System.Drawing.Size(82, 19)
-            Me.chkHasExpiry.TabIndex = 10
+            Me.chkHasExpiry.TabIndex = 5
             Me.chkHasExpiry.Text = "Has Expiry"
             Me.chkHasExpiry.UseVisualStyleBackColor = True
             '
@@ -148,15 +148,15 @@ Namespace Views.Dialogs
             Me.nudMinThreshold.Maximum = New Decimal(New Integer() {100000, 0, 0, 0})
             Me.nudMinThreshold.Name = "nudMinThreshold"
             Me.nudMinThreshold.Size = New System.Drawing.Size(200, 23)
-            Me.nudMinThreshold.TabIndex = 12
+            Me.nudMinThreshold.TabIndex = 6
             '
             'btnSave
             '
             Me.btnSave.Location = New System.Drawing.Point(164, 240)
             Me.btnSave.Name = "btnSave"
             Me.btnSave.Size = New System.Drawing.Size(75, 23)
-            Me.btnSave.TabIndex = 13
-            Me.btnSave.Text = "Save"
+            Me.btnSave.TabIndex = 7
+            Me.btnSave.Text = "&Save"
             Me.btnSave.UseVisualStyleBackColor = True
             '
             'btnCancel
@@ -164,12 +164,14 @@ Namespace Views.Dialogs
             Me.btnCancel.Location = New System.Drawing.Point(245, 240)
             Me.btnCancel.Name = "btnCancel"
             Me.btnCancel.Size = New System.Drawing.Size(75, 23)
-            Me.btnCancel.TabIndex = 14
-            Me.btnCancel.Text = "Cancel"
+            Me.btnCancel.TabIndex = 8
+            Me.btnCancel.Text = "&Cancel"
             Me.btnCancel.UseVisualStyleBackColor = True
             '
             'ProductEditDialog
             '
+            Me.AcceptButton = Me.btnSave
+            Me.CancelButton = Me.btnCancel
             Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
             Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
             Me.ClientSize = New System.Drawing.Size(350, 280)

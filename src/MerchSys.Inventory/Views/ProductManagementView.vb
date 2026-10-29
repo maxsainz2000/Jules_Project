@@ -42,6 +42,7 @@ Namespace Views
             AddHandler btnDeleteCategory.Click, AddressOf btnDeleteCategory_Click
         End Sub
 
+
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
         Public Property Products As IReadOnlyList(Of ProductManagementRowItem) Implements IProductManagementView.Products
             Get
@@ -62,6 +63,8 @@ Namespace Views
             dgvProducts.DataSource = Nothing
             dgvProducts.DataSource = _products
         End Sub
+
+
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
         Public Property Categories As IReadOnlyList(Of CategoryManagementItem) Implements IProductManagementView.Categories
@@ -181,6 +184,19 @@ Namespace Views
                 End If
             End If
         End Sub
+
+        Protected Overrides Function ProcessCmdKey(ByRef msg As Message, keyData As Keys) As Boolean
+            If keyData = Keys.Enter Then
+                If tabControl.SelectedTab Is tabProducts Then
+                    btnAddProduct.PerformClick()
+                Else
+                    btnAddCategory.PerformClick()
+                End If
+                Return True
+            End If
+            Return MyBase.ProcessCmdKey(msg, keyData)
+        End Function
+
 
         Private Function GetSelectedCategory() As CategoryManagementItem
             If dgvCategories.SelectedRows.Count > 0 Then

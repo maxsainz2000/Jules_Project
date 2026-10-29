@@ -9,7 +9,6 @@
     <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.7" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
@@ -17,20 +16,17 @@
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
   </ItemGroup>
-
-  <!-- Declared explicitly even though MerchSys.App already brings both in transitively. The tests
-       use these types directly: MySqlConnection / MySqlConnectionStringBuilder to create and drop
-       the throwaway integration database, and UseMySQL to build real DbContexts. Depending on the
-       transitive path means any future prune of these references from MerchSys.App silently breaks
-       the test project's compilation. -->
   <ItemGroup>
     <PackageReference Include="MySql.EntityFrameworkCore" Version="10.0.7" />
     <PackageReference Include="MySqlConnector" Version="2.5.0" />
   </ItemGroup>
 
-  <ItemGroup>
+    <ItemGroup>
     <ProjectReference Include="..\..\src\MerchSys.SharedKernel\MerchSys.SharedKernel.vbproj" />
+    <ProjectReference Include="..\..\src\MerchSys.Inventory\MerchSys.Inventory.vbproj" />
+    <ProjectReference Include="..\..\src\MerchSys.Purchasing\MerchSys.Purchasing.vbproj" />
+    <ProjectReference Include="..\..\src\MerchSys.POS\MerchSys.POS.vbproj" />
+    <ProjectReference Include="..\..\src\MerchSys.Accounting\MerchSys.Accounting.vbproj" />
     <ProjectReference Include="..\..\src\MerchSys.App\MerchSys.App.vbproj" />
   </ItemGroup>
-
 </Project>
