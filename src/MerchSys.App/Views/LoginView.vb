@@ -14,6 +14,11 @@ Namespace Views
             btnTogglePassword.Image = Services.Theming.IconHelper.GetIcon(Services.Theming.AppIcon.Eye, Drawing.Color.White, 16)
             btnTogglePassword.ImageAlign = Drawing.ContentAlignment.MiddleCenter
         End Sub
+        Protected Overrides Sub OnLoad(e As EventArgs)
+            MyBase.OnLoad(e)
+            txtUsername.Select()
+        End Sub
+
 
         <DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)>
         Public Property Username As String Implements ILoginView.Username
@@ -78,6 +83,8 @@ Namespace Views
         Public Sub ShowFirstLoginPanel() Implements ILoginView.ShowFirstLoginPanel
             pnlFirstLogin.Visible = True
             btnLogin.Enabled = False
+            Me.AcceptButton = btnChangePassword
+            txtNewPassword.Select()
             txtUsername.Enabled = False
             txtPassword.Enabled = False
             btnTogglePassword.Enabled = False

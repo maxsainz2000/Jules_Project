@@ -54,6 +54,7 @@ Namespace Views
             If Not DesignMode AndAlso OnLoadPage IsNot Nothing Then
                 Await OnLoadPage.Invoke()
             End If
+            txtSearch.Select()
         End Sub
 
         Private Async Function TriggerSearch() As Task
@@ -116,5 +117,14 @@ Namespace Views
         Public Function ConfirmAction(message As String, title As String) As Boolean Implements IPurchaseOrderListView.ConfirmAction
             Return MessageBox.Show(message, title, MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes
         End Function
+
+        Protected Overrides Function ProcessCmdKey(ByRef msg As Message, keyData As Keys) As Boolean
+            If keyData = Keys.Enter Then
+                btnSearch.PerformClick()
+                Return True
+            End If
+            Return MyBase.ProcessCmdKey(msg, keyData)
+        End Function
+
     End Class
 End Namespace

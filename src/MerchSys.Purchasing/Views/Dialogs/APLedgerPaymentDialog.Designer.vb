@@ -63,7 +63,7 @@ Namespace Views.Dialogs
             Me.txtPaymentAmount.Location = New System.Drawing.Point(140, 82)
             Me.txtPaymentAmount.Name = "txtPaymentAmount"
             Me.txtPaymentAmount.Size = New System.Drawing.Size(120, 23)
-            Me.txtPaymentAmount.TabIndex = 3
+            Me.txtPaymentAmount.TabIndex = 0
             Me.txtPaymentAmount.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
             '
             'btnOK
@@ -71,8 +71,8 @@ Namespace Views.Dialogs
             Me.btnOK.Location = New System.Drawing.Point(100, 130)
             Me.btnOK.Name = "btnOK"
             Me.btnOK.Size = New System.Drawing.Size(75, 25)
-            Me.btnOK.TabIndex = 4
-            Me.btnOK.Text = "Confirm"
+            Me.btnOK.TabIndex = 1
+            Me.btnOK.Text = "&Confirm"
             Me.btnOK.UseVisualStyleBackColor = True
             '
             'btnCancel
@@ -81,8 +81,8 @@ Namespace Views.Dialogs
             Me.btnCancel.Location = New System.Drawing.Point(185, 130)
             Me.btnCancel.Name = "btnCancel"
             Me.btnCancel.Size = New System.Drawing.Size(75, 25)
-            Me.btnCancel.TabIndex = 5
-            Me.btnCancel.Text = "Cancel"
+            Me.btnCancel.TabIndex = 2
+            Me.btnCancel.Text = "&Cancel"
             Me.btnCancel.UseVisualStyleBackColor = True
             '
             'APLedgerPaymentDialog

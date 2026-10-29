@@ -26,6 +26,7 @@ Namespace Views
 
         Private Sub ShrinkageView_Load(sender As Object, e As EventArgs) Handles MyBase.Load
             RaiseEvent LoadView(Me, EventArgs.Empty)
+            cmbReason.Select()
         End Sub
 
         <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
@@ -122,6 +123,15 @@ Namespace Views
                 End If
             End Using
         End Sub
+
+        Protected Overrides Function ProcessCmdKey(ByRef msg As Message, keyData As Keys) As Boolean
+            If keyData = Keys.Enter Then
+                btnRecord.PerformClick()
+                Return True
+            End If
+            Return MyBase.ProcessCmdKey(msg, keyData)
+        End Function
+
 
     End Class
 

@@ -41,6 +41,7 @@ Namespace Views.Dialogs
             Me.cmbProduct.DropDownStyle = ComboBoxStyle.DropDownList
             Me.cmbProduct.Location = New System.Drawing.Point(100, 17)
             Me.cmbProduct.Name = "cmbProduct"
+            Me.cmbProduct.TabIndex = 0
             Me.cmbProduct.Size = New System.Drawing.Size(250, 23)
 
             'lblBatch
@@ -54,6 +55,7 @@ Namespace Views.Dialogs
             Me.cmbBatch.DropDownStyle = ComboBoxStyle.DropDownList
             Me.cmbBatch.Location = New System.Drawing.Point(100, 57)
             Me.cmbBatch.Name = "cmbBatch"
+            Me.cmbBatch.TabIndex = 1
             Me.cmbBatch.Size = New System.Drawing.Size(250, 23)
 
             'lblQuantity
@@ -67,6 +69,7 @@ Namespace Views.Dialogs
             Me.numQuantity.Location = New System.Drawing.Point(100, 98)
             Me.numQuantity.Maximum = New Decimal(New Integer() {100000, 0, 0, 0})
             Me.numQuantity.Name = "numQuantity"
+            Me.numQuantity.TabIndex = 2
             Me.numQuantity.Size = New System.Drawing.Size(100, 23)
 
             'lblReason
@@ -79,21 +82,26 @@ Namespace Views.Dialogs
             'txtReason
             Me.txtReason.Location = New System.Drawing.Point(100, 137)
             Me.txtReason.Name = "txtReason"
+            Me.txtReason.TabIndex = 3
             Me.txtReason.Size = New System.Drawing.Size(250, 23)
 
             'btnOk
             Me.btnOk.Location = New System.Drawing.Point(194, 180)
             Me.btnOk.Name = "btnOk"
+            Me.btnOk.TabIndex = 4
             Me.btnOk.Size = New System.Drawing.Size(75, 25)
-            Me.btnOk.Text = "OK"
+            Me.btnOk.Text = "&OK"
 
             'btnCancel
             Me.btnCancel.Location = New System.Drawing.Point(275, 180)
             Me.btnCancel.Name = "btnCancel"
+            Me.btnCancel.TabIndex = 5
             Me.btnCancel.Size = New System.Drawing.Size(75, 25)
-            Me.btnCancel.Text = "Cancel"
+            Me.btnCancel.Text = "&Cancel"
 
             'RecordShrinkageDialog
+            Me.AcceptButton = Me.btnOk
+            Me.CancelButton = Me.btnCancel
             Me.ClientSize = New System.Drawing.Size(370, 220)
             Me.Controls.Add(Me.lblProduct)
             Me.Controls.Add(Me.cmbProduct)
