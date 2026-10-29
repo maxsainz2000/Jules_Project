@@ -90,6 +90,9 @@ Friend Module Program
                                   services.AddScoped(Of IMainWindowView)(Function(sp) sp.GetRequiredService(Of MainWindow)())
                                   services.AddScoped(Of MainWindowPresenter)()
 
+                                  services.AddScoped(Of MerchSys.App.Views.ICommandPaletteView)(Function(sp) sp.GetRequiredService(Of MainWindow)().CommandPalette)
+                                  services.AddScoped(Of MerchSys.App.Presenters.CommandPalettePresenter)()
+
                                   services.AddScoped(Of IOwnerDashboardView, OwnerDashboardView)()
                                   services.AddScoped(Of OwnerDashboardPresenter)()
 
@@ -217,6 +220,7 @@ Friend Module Program
                 Dim mainWindow = sessionScope.ServiceProvider.GetRequiredService(Of MainWindow)()
                 _mainWindowForm = mainWindow
                 sessionScope.ServiceProvider.GetRequiredService(Of MainWindowPresenter)()
+                sessionScope.ServiceProvider.GetRequiredService(Of MerchSys.App.Presenters.CommandPalettePresenter)()
 
                 ' Apply theme to the main window at startup
                 Dim themeService = sessionScope.ServiceProvider.GetRequiredService(Of MerchSys.App.Services.Theming.IThemeService)()

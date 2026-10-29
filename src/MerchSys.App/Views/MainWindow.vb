@@ -42,7 +42,10 @@ Namespace Views
         End Sub
 
         Protected Overrides Function ProcessCmdKey(ByRef msg As Message, keyData As Keys) As Boolean
-            If keyData = (Keys.Control Or Keys.D1) Then
+            If keyData = (Keys.Control Or Keys.K) Then
+                CommandPalette.ShowPalette()
+                Return True
+            ElseIf keyData = (Keys.Control Or Keys.D1) Then
                 RaiseEvent ModuleSelected(Me, AppModule.Purchasing)
                 Return True
             ElseIf keyData = (Keys.Control Or Keys.D2) Then
@@ -238,6 +241,10 @@ Namespace Views
 
         Private Sub btnToggleThemeShell_Click(sender As Object, e As EventArgs) Handles btnToggleThemeShell.Click
             RaiseEvent ThemeToggleRequested(Me, EventArgs.Empty)
+        End Sub
+
+        Private Sub btnSearchPalette_Click(sender As Object, e As EventArgs) Handles btnSearchPalette.Click
+            CommandPalette.ShowPalette()
         End Sub
     End Class
 End Namespace

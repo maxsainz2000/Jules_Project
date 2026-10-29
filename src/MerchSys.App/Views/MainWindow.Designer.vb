@@ -30,6 +30,8 @@ Partial Class MainWindow
         Me.lblUserIdentity = New System.Windows.Forms.Label()
         Me.pnlStatusHost = New System.Windows.Forms.Panel()
         Me.btnToggleThemeShell = New System.Windows.Forms.Button()
+        Me.btnSearchPalette = New System.Windows.Forms.Button()
+        Me.CommandPalette = New MerchSys.App.Controls.CommandPalette()
         Me.pnlLeft.SuspendLayout()
         Me.pnlHeader.SuspendLayout()
         Me.SuspendLayout()
@@ -48,6 +50,7 @@ Partial Class MainWindow
         '
         Me.pnlHeader.BackColor = System.Drawing.Color.FromArgb(CType(CType(30, Byte), Integer), CType(CType(44, Byte), Integer), CType(CType(58, Byte), Integer))
         Me.pnlHeader.Controls.Add(Me.lblUserIdentity)
+        Me.pnlHeader.Controls.Add(Me.btnSearchPalette)
         Me.pnlHeader.Controls.Add(Me.btnToggleThemeShell)
         Me.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top
         Me.pnlHeader.Location = New System.Drawing.Point(0, 0)
@@ -80,6 +83,28 @@ Partial Class MainWindow
         Me.btnToggleThemeShell.TabIndex = 1
         Me.btnToggleThemeShell.Text = ""
         Me.btnToggleThemeShell.UseVisualStyleBackColor = True
+        '
+        ' btnSearchPalette
+        '
+        Me.btnSearchPalette.Dock = System.Windows.Forms.DockStyle.Right
+        Me.btnSearchPalette.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.btnSearchPalette.FlatAppearance.BorderSize = 0
+        Me.btnSearchPalette.ForeColor = System.Drawing.Color.White
+        Me.btnSearchPalette.Location = New System.Drawing.Point(40, 0)
+        Me.btnSearchPalette.Name = "btnSearchPalette"
+        Me.btnSearchPalette.Size = New System.Drawing.Size(80, 48)
+        Me.btnSearchPalette.TabIndex = 2
+        Me.btnSearchPalette.Text = "Search (Ctrl+K)"
+        Me.btnSearchPalette.UseVisualStyleBackColor = True
+        '
+        ' CommandPalette
+        '
+        Me.CommandPalette.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.CommandPalette.Location = New System.Drawing.Point(0, 0)
+        Me.CommandPalette.Name = "CommandPalette"
+        Me.CommandPalette.Size = New System.Drawing.Size(800, 600)
+        Me.CommandPalette.TabIndex = 0
+        Me.CommandPalette.Visible = False
         '
         ' pnlStatusHost
         '
@@ -114,6 +139,7 @@ Partial Class MainWindow
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(800, 450)
+        Me.Controls.Add(Me.CommandPalette)
         Me.Controls.Add(Me.pnlContent)
         Me.Controls.Add(Me.pnlLeft)
         Me.Name = "MainWindow"
@@ -131,6 +157,8 @@ Partial Class MainWindow
     Friend WithEvents lblUserIdentity As System.Windows.Forms.Label
     Friend WithEvents pnlStatusHost As System.Windows.Forms.Panel
     Friend WithEvents btnToggleThemeShell As System.Windows.Forms.Button
+    Friend WithEvents btnSearchPalette As System.Windows.Forms.Button
+    Friend WithEvents CommandPalette As MerchSys.App.Controls.CommandPalette
 
 End Class
 End Namespace
