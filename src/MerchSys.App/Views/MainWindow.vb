@@ -14,6 +14,13 @@ Namespace Views
         Public Event NavigationRequested As EventHandler(Of NavigationItem) Implements IMainWindowView.NavigationRequested
 
         <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
+        Public ReadOnly Property PaletteView As ICommandPaletteView Implements IMainWindowView.PaletteView
+            Get
+                Return commandPalette
+            End Get
+        End Property
+
+        <System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)>
         Public Property Presenter As MainWindowPresenter
 
         Private _renderedItems As List(Of NavigationItem)
@@ -42,7 +49,10 @@ Namespace Views
         End Sub
 
         Protected Overrides Function ProcessCmdKey(ByRef msg As Message, keyData As Keys) As Boolean
-            If keyData = (Keys.Control Or Keys.D1) Then
+            If keyData = (Keys.Control Or Keys.K) Then
+                commandPalette.ShowPalette()
+                Return True
+            ElseIf keyData = (Keys.Control Or Keys.D1) Then
                 RaiseEvent ModuleSelected(Me, AppModule.Purchasing)
                 Return True
             ElseIf keyData = (Keys.Control Or Keys.D2) Then
@@ -239,5 +249,10 @@ Namespace Views
         Private Sub btnToggleThemeShell_Click(sender As Object, e As EventArgs) Handles btnToggleThemeShell.Click
             RaiseEvent ThemeToggleRequested(Me, EventArgs.Empty)
         End Sub
+
+        Private Sub btnSearch_Click(sender As Object, e As EventArgs) Handles btnSearch.Click
+            commandPalette.ShowPalette()
+        End Sub
+
     End Class
 End Namespace

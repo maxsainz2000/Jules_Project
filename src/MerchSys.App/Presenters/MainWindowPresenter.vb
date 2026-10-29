@@ -76,6 +76,13 @@ Namespace Presenters
         End Sub
 
         Private Sub OnViewLoad(sender As Object, e As EventArgs)
+            If _serviceProvider IsNot Nothing Then
+                Dim palettePresenter = _serviceProvider.GetService(Of CommandPalettePresenter)()
+                If palettePresenter IsNot Nothing Then
+                    palettePresenter.View = _view.PaletteView
+                End If
+            End If
+
             RefreshNavigation()
         End Sub
 
@@ -182,6 +189,12 @@ Namespace Presenters
             If target Is Nothing Then target = allItems.FirstOrDefault()
             If target IsNot Nothing Then NavigateTo(target)
         End Sub
+
+        Public ReadOnly Property AllNavigableItems As IReadOnlyList(Of NavigationItem)
+            Get
+                Return NavigationGroups.SelectMany(Function(g) g.Items).ToList().AsReadOnly()
+            End Get
+        End Property
 
         Public Sub NavigateTo(item As NavigationItem)
             If item Is Nothing Then Return

@@ -30,6 +30,8 @@ Partial Class MainWindow
         Me.lblUserIdentity = New System.Windows.Forms.Label()
         Me.pnlStatusHost = New System.Windows.Forms.Panel()
         Me.btnToggleThemeShell = New System.Windows.Forms.Button()
+        Me.btnSearch = New System.Windows.Forms.Button()
+        Me.commandPalette = New MerchSys.App.Controls.CommandPalette()
         Me.pnlLeft.SuspendLayout()
         Me.pnlHeader.SuspendLayout()
         Me.SuspendLayout()
@@ -49,6 +51,7 @@ Partial Class MainWindow
         Me.pnlHeader.BackColor = System.Drawing.Color.FromArgb(CType(CType(30, Byte), Integer), CType(CType(44, Byte), Integer), CType(CType(58, Byte), Integer))
         Me.pnlHeader.Controls.Add(Me.lblUserIdentity)
         Me.pnlHeader.Controls.Add(Me.btnToggleThemeShell)
+        Me.pnlHeader.Controls.Add(Me.btnSearch)
         Me.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top
         Me.pnlHeader.Location = New System.Drawing.Point(0, 0)
         Me.pnlHeader.Name = "pnlHeader"
@@ -90,6 +93,24 @@ Partial Class MainWindow
         Me.pnlStatusHost.Size = New System.Drawing.Size(200, 48)
         Me.pnlStatusHost.TabIndex = 4
         '
+        '
+        ' btnSearch
+        '
+        Me.btnSearch.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnSearch.FlatAppearance.BorderSize = 0
+        Me.btnSearch.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.btnSearch.Location = New System.Drawing.Point(120, 12)
+        Me.btnSearch.Name = "btnSearch"
+        Me.btnSearch.Size = New System.Drawing.Size(32, 32)
+        Me.btnSearch.TabIndex = 2
+        Me.btnSearch.Text = "S"
+        Me.btnSearch.UseVisualStyleBackColor = True
+        '
+        ' commandPalette
+        '
+        Me.commandPalette.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.commandPalette.Visible = False
+        '
         ' pnlLeft
         '
         Me.pnlLeft.Controls.Add(Me.pnlSidebar)
@@ -114,6 +135,7 @@ Partial Class MainWindow
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(800, 450)
+        Me.Controls.Add(Me.commandPalette)
         Me.Controls.Add(Me.pnlContent)
         Me.Controls.Add(Me.pnlLeft)
         Me.Name = "MainWindow"
@@ -131,6 +153,8 @@ Partial Class MainWindow
     Friend WithEvents lblUserIdentity As System.Windows.Forms.Label
     Friend WithEvents pnlStatusHost As System.Windows.Forms.Panel
     Friend WithEvents btnToggleThemeShell As System.Windows.Forms.Button
+    Friend WithEvents btnSearch As System.Windows.Forms.Button
+    Friend WithEvents commandPalette As MerchSys.App.Controls.CommandPalette
 
 End Class
 End Namespace
