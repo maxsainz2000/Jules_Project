@@ -1,12 +1,10 @@
-Imports System.Windows.Forms
-Imports System.Collections.ObjectModel
-Imports MerchSys.App.Services
-Imports MerchSys.SharedKernel.Enums
 Imports Microsoft.Extensions.DependencyInjection
 Imports MerchSys.App.Views
 Imports MerchSys.App.Models
-Imports MerchSys.App.Views.Shell.Modules
+Imports MerchSys.SharedKernel.Enums
+Imports MerchSys.App.Services
 Imports MerchSys.App.Services.Theming
+Imports System.Windows.Forms
 
 Namespace Presenters
     Public Class MainWindowPresenter
@@ -17,12 +15,17 @@ Namespace Presenters
         Private ReadOnly _serviceProvider As IServiceProvider
         Private ReadOnly _connectionStatusPresenter As ConnectionStatusPresenter
         Private ReadOnly _themeService As IThemeService
-
-        Public Property NavigationGroups As New List(Of NavigationGroup)
-
         Private _currentViewScope As IServiceScope
         Private _currentViewInstance As UserControl
         Private _disposed As Boolean
+
+        Public ReadOnly Property NavigationGroups As New List(Of NavigationGroup)()
+
+        Public ReadOnly Property AllNavigableItems As IReadOnlyList(Of NavigationItem)
+            Get
+                Return NavigationGroups.SelectMany(Function(g) g.Items).ToList()
+            End Get
+        End Property
 
         Public Sub New(view As IMainWindowView,
                        sessionService As LoginSessionService,
@@ -77,6 +80,8 @@ Namespace Presenters
 
         Private Sub OnViewLoad(sender As Object, e As EventArgs)
             RefreshNavigation()
+
+            Dim commandPalettePresenter = _serviceProvider?.GetService(Of CommandPalettePresenter)()
         End Sub
 
         Private Sub RefreshNavigation()
@@ -149,7 +154,7 @@ Namespace Presenters
 #If DEBUG Then
             If isManager Then
                 Dim devGroup As New NavigationGroup With {.GroupName = "Developer Tools"}
-                devGroup.Items.Add(Item("Developer Tools", "Developer Tools", AddressOf ViewFactory(Of DeveloperToolsPanel)))
+                devGroup.Items.Add(Item("Developer Tools", "Developer Tools", AddressOf ViewFactory(Of Views.Shell.Modules.DeveloperToolsPanel)))
                 NavigationGroups.Add(devGroup)
             End If
 #End If
@@ -184,7 +189,7 @@ Namespace Presenters
         End Sub
 
         Public Sub NavigateTo(item As NavigationItem)
-            If item Is Nothing Then Return
+            If item Is Nothing OrElse item.ViewFactory Is Nothing Then Return
 
             DisposeCurrentViewScope()
             _currentViewScope = _serviceProvider.CreateScope()
